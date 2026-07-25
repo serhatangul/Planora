@@ -1,0 +1,2646 @@
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import '../models/payment_item.dart';
+import '../models/expense_item.dart';
+import '../models/income_item.dart';
+import '../theme/app_theme.dart';
+import '../utils/date_utils_planora.dart';
+import '../utils/money_formatter.dart';
+
+enum PlanoraAlertType {
+  late,
+  upcoming,
+  today,
+  budget,
+  info,
+}
+
+class PlanoraAlert {
+  const PlanoraAlert({
+    required this.id,
+    required this.title,
+    required this.message,
+    required this.type,
+    this.paymentId,
+    this.day,
+  });
+
+  final String id;
+  final String title;
+  final String message;
+  final PlanoraAlertType type;
+  final String? paymentId;
+  final int? day;
+}
+
+
+class SmartLimitAlert {
+  const SmartLimitAlert({
+    required this.category,
+    required this.title,
+    required this.message,
+    required this.used,
+    required this.limit,
+    required this.ratio,
+    required this.isExceeded,
+    required this.color,
+  });
+
+  final String category;
+  final String title;
+  final String message;
+  final double used;
+  final double limit;
+  final double ratio;
+  final bool isExceeded;
+  final Color color;
+}
+
+class PlanoraController extends ChangeNotifier {
+  PlanoraController();
+
+  static const String _paymentsStorageKey = 'planora_payments_v1';
+  static const String _expensesStorageKey = 'planora_expenses_v1';
+  static const String _extraIncomeStorageKey = 'planora_extra_income_v1';
+  static const String _settingsStorageKey = 'planora_settings_v1';
+  static const String _categoriesStorageKey = 'planora_categories_v1';
+  static const String _categoryLimitsStorageKey = 'planora_category_limits_v1';
+  static const String _paymentStatusesStorageKey = 'planora_payment_statuses_v1';
+  static const MethodChannel _storageChannel = MethodChannel('planora/storage');
+
+  double monthlyIncome = 45000;
+  double savingTarget = 10000;
+  double currentSaving = 5000;
+  int salaryDay = 1;
+  String currencySymbol = '₺';
+  bool hideAmounts = false;
+  bool preferDarkMode = false;
+  String appLanguageCode = 'tr';
+  bool notifyUpcomingPayments = true;
+  bool notifyLatePayments = true;
+  bool notifyCategoryLimits = true;
+  bool notifyDailySafeLimit = true;
+  bool notifySalaryDay = true;
+  bool hasCompletedOnboarding = false;
+
+  DateTime selectedMonth = PlanoraDateUtils.monthOnly(DateTime.now());
+
+  bool _isLoaded = false;
+  bool get isLoaded => _isLoaded;
+
+  final List<PaymentItem> _payments = [];
+  final List<ExpenseItem> _expenses = [];
+  final List<IncomeItem> _extraIncomes = [];
+  final List<String> _categories = [];
+  final Map<String, double> _categoryLimits = {};
+  final Map<String, Map<String, PaymentStatus>> _paymentStatusByMonth = {};
+
+  Future<void> load() async {
+    await _loadSettings();
+    MoneyFormatter.setCurrencySymbol(currencySymbol);
+    MoneyFormatter.setHideAmounts(hideAmounts);
+    await _loadCategories();
+    await _loadCategoryLimits();
+    await _loadPayments();
+    await _loadExpenses();
+    await _loadExtraIncomes();
+    await _loadPaymentStatuses();
+
+    _isLoaded = true;
+    notifyListeners();
+  }
+
+
+  String monthKey([DateTime? month]) {
+    final target = month ?? selectedMonth;
+    return '${target.year}-${target.month.toString().padLeft(2, '0')}';
+  }
+
+  PaymentStatus statusForPayment(
+    PaymentItem payment, {
+    DateTime? month,
+  }) {
+    final key = monthKey(month);
+    return _paymentStatusByMonth[payment.id]?[key] ?? payment.status;
+  }
+
+  bool isPaymentPaid(PaymentItem payment, {DateTime? month}) {
+    return statusForPayment(payment, month: month) == PaymentStatus.paid;
+  }
+
+  bool isPaymentVisibleInSelectedMonth(PaymentItem payment) {
+    if (payment.isMonthly) return true;
+
+    final paymentMonthKey = payment.monthKey;
+    if (paymentMonthKey == null || paymentMonthKey.isEmpty) {
+      // Eski kayıtlarda monthKey yoksa tek seferlik ödemeyi mevcut ayda göster.
+      return true;
+    }
+
+    return paymentMonthKey == monthKey();
+  }
+
+
+  DateTime _safeMonthFromSettings({
+    required int? year,
+    required int? month,
+  }) {
+    final now = DateTime.now();
+
+    final safeYear = year == null || year < 2000 || year > 2100 ? now.year : year;
+    final safeMonth = month == null || month < 1 || month > 12 ? now.month : month;
+
+    return PlanoraDateUtils.monthOnly(DateTime(safeYear, safeMonth, 1));
+  }
+
+
+  Future<void> _loadSettings() async {
+    final rawSettings = await _getStringWithRetry(_settingsStorageKey);
+    if (rawSettings == null || rawSettings.isEmpty) {
+      await _saveSettings();
+      return;
+    }
+
+    try {
+      final json = jsonDecode(rawSettings) as Map<String, dynamic>;
+
+      monthlyIncome = (json['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
+      savingTarget = (json['savingTarget'] as num?)?.toDouble() ?? savingTarget;
+      currentSaving = (json['currentSaving'] as num?)?.toDouble() ?? currentSaving;
+      salaryDay = ((json['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
+      currencySymbol = json['currencySymbol'] as String? ?? currencySymbol;
+      hideAmounts = json['hideAmounts'] as bool? ?? hideAmounts;
+      preferDarkMode = json['preferDarkMode'] as bool? ?? preferDarkMode;
+      appLanguageCode = json['appLanguageCode'] as String? ?? appLanguageCode;
+      notifyUpcomingPayments = json['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
+      notifyLatePayments = json['notifyLatePayments'] as bool? ?? notifyLatePayments;
+      notifyCategoryLimits = json['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
+      notifyDailySafeLimit = json['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
+      notifySalaryDay = json['notifySalaryDay'] as bool? ?? notifySalaryDay;
+      MoneyFormatter.setCurrencySymbol(currencySymbol);
+      MoneyFormatter.setHideAmounts(hideAmounts);
+      hasCompletedOnboarding = json['hasCompletedOnboarding'] as bool? ?? false;
+
+      final selectedYear = (json['selectedYear'] as num?)?.toInt();
+      final selectedMonthNumber = (json['selectedMonth'] as num?)?.toInt();
+
+      if (selectedYear != null && selectedMonthNumber != null) {
+        selectedMonth = DateTime(selectedYear, selectedMonthNumber);
+      }
+    } catch (_) {
+      await _saveSettings();
+    }
+  }
+
+  Future<void> _loadCategories() async {
+    final rawCategories = await _getStringWithRetry(_categoriesStorageKey);
+
+    if (rawCategories == null || rawCategories.isEmpty) {
+      _categories
+        ..clear()
+        ..addAll(_defaultCategories);
+      await _saveCategories();
+      await _saveCategoryLimits();
+    await _savePaymentStatuses();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawCategories) as List<dynamic>;
+      _categories
+        ..clear()
+        ..addAll(
+          decoded
+              .whereType<String>()
+              .map((category) => category.trim())
+              .where((category) => category.isNotEmpty),
+        );
+
+      if (_categories.isEmpty) {
+        _categories.addAll(_defaultCategories);
+        await _saveCategories();
+      }
+    } catch (_) {
+      _categories
+        ..clear()
+        ..addAll(_defaultCategories);
+      await _saveCategories();
+    }
+  }
+
+
+  Future<void> _loadCategoryLimits() async {
+    final rawLimits = await _getStringWithRetry(_categoryLimitsStorageKey);
+
+    if (rawLimits == null || rawLimits.isEmpty) {
+      _categoryLimits
+        ..clear()
+        ..addEntries(
+          _categories.map(
+            (category) => MapEntry(category, _defaultLimitForCategory(category)),
+          ),
+        );
+      await _saveCategoryLimits();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawLimits) as Map<String, dynamic>;
+
+      _categoryLimits
+        ..clear()
+        ..addAll(
+          decoded.map(
+            (key, value) => MapEntry(key, (value as num?)?.toDouble() ?? _defaultLimitForCategory(key)),
+          ),
+        );
+
+      for (final category in _categories) {
+        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+      }
+
+      await _saveCategoryLimits();
+    } catch (_) {
+      _categoryLimits
+        ..clear()
+        ..addEntries(
+          _categories.map(
+            (category) => MapEntry(category, _defaultLimitForCategory(category)),
+          ),
+        );
+      await _saveCategoryLimits();
+    }
+  }
+
+  Future<void> _loadPayments() async {
+    final rawPayments = await _getStringWithRetry(_paymentsStorageKey);
+
+    if (rawPayments == null || rawPayments.isEmpty) {
+      _payments.clear();
+      await _savePayments();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawPayments) as List<dynamic>;
+
+      _payments
+        ..clear()
+        ..addAll(
+          decoded
+              .whereType<Map<String, dynamic>>()
+              .map(PaymentItem.fromJson)
+              .where((payment) => payment.title.trim().isNotEmpty),
+        );
+
+      await _syncCategoriesFromPayments();
+    } catch (_) {
+      _payments.clear();
+      await _savePayments();
+    }
+  }
+
+
+  Future<void> _loadExpenses() async {
+    final rawExpenses = await _getStringWithRetry(_expensesStorageKey);
+
+    if (rawExpenses == null || rawExpenses.isEmpty) {
+      _expenses.clear();
+
+    _extraIncomes.clear();
+      await _saveExpenses();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawExpenses) as List<dynamic>;
+
+      _expenses
+        ..clear()
+        ..addAll(
+          decoded
+              .whereType<Map<String, dynamic>>()
+              .map(ExpenseItem.fromJson)
+              .where((expense) => expense.title.trim().isNotEmpty)
+              .where((expense) => expense.monthKey.trim().isNotEmpty),
+        );
+
+      await _syncCategoriesFromExpenses();
+    } catch (_) {
+      _expenses.clear();
+
+    _extraIncomes.clear();
+      await _saveExpenses();
+    }
+  }
+
+
+  Future<void> _loadExtraIncomes() async {
+    final rawIncome = await _getStringWithRetry(_extraIncomeStorageKey);
+
+    if (rawIncome == null || rawIncome.isEmpty) {
+      _extraIncomes.clear();
+      await _saveExtraIncomes();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawIncome) as List<dynamic>;
+
+      _extraIncomes
+        ..clear()
+        ..addAll(
+          decoded
+              .whereType<Map<String, dynamic>>()
+              .map(IncomeItem.fromJson)
+              .where((income) => income.title.trim().isNotEmpty)
+              .where((income) => income.monthKey.trim().isNotEmpty),
+        );
+    } catch (_) {
+      _extraIncomes.clear();
+      await _saveExtraIncomes();
+    }
+  }
+
+  Future<void> _syncCategoriesFromExpenses() async {
+    var changed = false;
+
+    for (final expense in _expenses) {
+      final category = expense.category.trim();
+      if (category.isNotEmpty && !_categories.contains(category)) {
+        _categories.add(category);
+        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+  }
+
+  Future<void> _syncCategoriesFromPayments() async {
+    var changed = false;
+
+    for (final payment in _payments) {
+      final category = payment.category.trim();
+      if (category.isNotEmpty && !_categories.contains(category)) {
+        _categories.add(category);
+        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        changed = true;
+      }
+    }
+
+    if (changed) {
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+  }
+
+
+  Future<void> _loadPaymentStatuses() async {
+    final rawStatuses = await _getStringWithRetry(_paymentStatusesStorageKey);
+
+    if (rawStatuses == null || rawStatuses.isEmpty) {
+      _paymentStatusByMonth.clear();
+      await _savePaymentStatuses();
+      return;
+    }
+
+    try {
+      final decoded = jsonDecode(rawStatuses) as Map<String, dynamic>;
+
+      _paymentStatusByMonth
+        ..clear()
+        ..addAll(
+          decoded.map((paymentId, value) {
+            final monthMap = <String, PaymentStatus>{};
+
+            if (value is Map<String, dynamic>) {
+              for (final entry in value.entries) {
+                monthMap[entry.key] = PaymentStatus.values.firstWhere(
+                  (status) => status.name == entry.value,
+                  orElse: () => PaymentStatus.waiting,
+                );
+              }
+            }
+
+            return MapEntry(paymentId, monthMap);
+          }),
+        );
+
+      _paymentStatusByMonth.removeWhere(
+        (paymentId, _) => !_payments.any((payment) => payment.id == paymentId),
+      );
+
+      await _savePaymentStatuses();
+    } catch (_) {
+      _paymentStatusByMonth.clear();
+      await _savePaymentStatuses();
+    }
+  }
+
+  Future<String?> _getStringWithRetry(String key) async {
+    for (int attempt = 0; attempt < 12; attempt++) {
+      try {
+        final value = await _storageChannel.invokeMethod<String>(
+          'getString',
+          {'key': key},
+        );
+        return value;
+      } catch (_) {
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+      }
+    }
+
+    return null;
+  }
+
+  Future<bool> _setStringWithRetry(String key, String value) async {
+    for (int attempt = 0; attempt < 12; attempt++) {
+      try {
+        await _storageChannel.invokeMethod<void>(
+          'setString',
+          {
+            'key': key,
+            'value': value,
+          },
+        );
+        return true;
+      } catch (_) {
+        await Future<void>.delayed(const Duration(milliseconds: 180));
+      }
+    }
+
+    return false;
+  }
+
+  Future<void> _savePayments() async {
+    final encoded = jsonEncode(_payments.map((payment) => payment.toJson()).toList());
+    await _setStringWithRetry(_paymentsStorageKey, encoded);
+  }
+
+  Future<void> _saveExpenses() async {
+    final encoded = jsonEncode(_expenses.map((expense) => expense.toJson()).toList());
+    await _setStringWithRetry(_expensesStorageKey, encoded);
+  }
+
+  Future<void> _saveExtraIncomes() async {
+    final encoded = jsonEncode(_extraIncomes.map((income) => income.toJson()).toList());
+    await _setStringWithRetry(_extraIncomeStorageKey, encoded);
+  }
+
+  Future<void> _saveSettings() async {
+    final encoded = jsonEncode({
+      'monthlyIncome': monthlyIncome,
+      'savingTarget': savingTarget,
+      'currentSaving': currentSaving,
+      'salaryDay': salaryDay,
+      'currencySymbol': currencySymbol,
+      'hideAmounts': hideAmounts,
+      'preferDarkMode': preferDarkMode,
+      'appLanguageCode': appLanguageCode,
+      'notifyUpcomingPayments': notifyUpcomingPayments,
+      'notifyLatePayments': notifyLatePayments,
+      'notifyCategoryLimits': notifyCategoryLimits,
+      'notifyDailySafeLimit': notifyDailySafeLimit,
+      'notifySalaryDay': notifySalaryDay,
+      'hasCompletedOnboarding': hasCompletedOnboarding,
+      'selectedYear': selectedMonth.year,
+      'selectedMonth': selectedMonth.month,
+    });
+
+    await _setStringWithRetry(_settingsStorageKey, encoded);
+  }
+
+  Future<void> _saveCategories() async {
+    final encoded = jsonEncode(_categories);
+    await _setStringWithRetry(_categoriesStorageKey, encoded);
+  }
+
+  Future<void> _saveCategoryLimits() async {
+    final encoded = jsonEncode(_categoryLimits);
+    await _setStringWithRetry(_categoryLimitsStorageKey, encoded);
+  }
+
+  Future<void> _savePaymentStatuses() async {
+    final serializable = _paymentStatusByMonth.map(
+      (paymentId, monthMap) => MapEntry(
+        paymentId,
+        monthMap.map(
+          (month, status) => MapEntry(month, status.name),
+        ),
+      ),
+    );
+
+    final encoded = jsonEncode(serializable);
+    await _setStringWithRetry(_paymentStatusesStorageKey, encoded);
+  }
+
+  List<String> get categories {
+    return List.unmodifiable(_categories);
+  }
+
+  String categoryLabel(String category) {
+    final canonical = _canonicalDefaultCategory(category.trim());
+    if (canonical == null) return category;
+
+    final labels = _defaultCategoryLabels[canonical];
+    if (labels == null) return category;
+
+    return labels[appLanguageCode] ?? labels['tr'] ?? category;
+  }
+
+  String categorySearchText(String category) {
+    final canonical = category.trim();
+    return '${canonical.toLowerCase()} ${categoryLabel(canonical).toLowerCase()}';
+  }
+
+  String defaultPaymentTitleLabel(String title) {
+    final cleanTitle = title.trim();
+    final labels = _defaultPaymentTitleLabels[cleanTitle];
+    if (labels == null) return title;
+
+    return labels[appLanguageCode] ?? labels['tr'] ?? title;
+  }
+
+  String paymentTitleSearchText(String title) {
+    final cleanTitle = title.trim();
+    return '${cleanTitle.toLowerCase()} ${defaultPaymentTitleLabel(cleanTitle).toLowerCase()}';
+  }
+
+  String? _canonicalDefaultCategory(String category) {
+    if (_defaultCategories.contains(category)) {
+      return category;
+    }
+
+    for (final entry in _defaultCategoryLabels.entries) {
+      if (entry.value.values.any((label) => label.toLowerCase() == category.toLowerCase())) {
+        return entry.key;
+      }
+    }
+
+    return null;
+  }
+
+  double categoryLimit(String category) {
+    return _categoryLimits[category] ?? _defaultLimitForCategory(category);
+  }
+
+  Future<void> updateCategoryLimit({
+    required String category,
+    required double limit,
+  }) async {
+    if (!_categories.contains(category)) return;
+
+    _categoryLimits[category] = limit < 0 ? 0 : limit;
+    await _saveCategoryLimits();
+    notifyListeners();
+  }
+
+  bool isDefaultCategory(String category) {
+    return _canonicalDefaultCategory(category) != null;
+  }
+
+  bool isCategoryInUse(String category) {
+    return _payments.any((payment) => payment.category == category) ||
+        _expenses.any((expense) => expense.category == category);
+  }
+
+  Future<bool> addCategory(String rawName) async {
+    final name = rawName.trim();
+    if (name.isEmpty) return false;
+    if (_categories.any((category) => category.toLowerCase() == name.toLowerCase())) {
+      return false;
+    }
+
+    _categories.add(name);
+    _categoryLimits[name] = _defaultLimitForCategory(name);
+    await _saveCategories();
+    await _saveCategoryLimits();
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> renameCategory({
+    required String oldName,
+    required String newName,
+  }) async {
+    final cleanNewName = newName.trim();
+
+    if (oldName.trim().isEmpty || cleanNewName.isEmpty) {
+      return false;
+    }
+
+    if (oldName == cleanNewName) {
+      return true;
+    }
+
+    if (_categories.any((category) => category.toLowerCase() == cleanNewName.toLowerCase())) {
+      return false;
+    }
+
+    final categoryIndex = _categories.indexOf(oldName);
+    if (categoryIndex == -1) return false;
+
+    _categories[categoryIndex] = cleanNewName;
+
+    final oldLimit = _categoryLimits.remove(oldName);
+    _categoryLimits[cleanNewName] = oldLimit ?? _defaultLimitForCategory(cleanNewName);
+
+    for (int i = 0; i < _payments.length; i++) {
+      final payment = _payments[i];
+      if (payment.category == oldName) {
+        _payments[i] = payment.copyWith(
+          category: cleanNewName,
+          color: _colorForCategory(cleanNewName),
+        );
+      }
+    }
+
+    for (int i = 0; i < _expenses.length; i++) {
+      final expense = _expenses[i];
+      if (expense.category == oldName) {
+        _expenses[i] = expense.copyWith(
+          category: cleanNewName,
+          color: _colorForCategory(cleanNewName),
+        );
+      }
+    }
+
+    await _saveCategories();
+    await _saveCategoryLimits();
+    await _savePayments();
+    await _saveExpenses();
+    notifyListeners();
+    return true;
+  }
+
+  Future<bool> deleteCategory(String category) async {
+    if (isDefaultCategory(category)) {
+      return false;
+    }
+
+    if (isCategoryInUse(category)) {
+      return false;
+    }
+
+    _categories.remove(category);
+    _categoryLimits.remove(category);
+    await _saveCategories();
+    await _saveCategoryLimits();
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> updateFinancialSettings({
+    required double newMonthlyIncome,
+    required double newSavingTarget,
+    required double newCurrentSaving,
+    required int newSalaryDay,
+  }) async {
+    monthlyIncome = newMonthlyIncome <= 0 ? monthlyIncome : newMonthlyIncome;
+    savingTarget = newSavingTarget < 0 ? 0 : newSavingTarget;
+    currentSaving = newCurrentSaving < 0 ? 0 : newCurrentSaving;
+    salaryDay = newSalaryDay.clamp(1, 31);
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  String formatMoney(num value) {
+    MoneyFormatter.setCurrencySymbol(currencySymbol);
+    return MoneyFormatter.format(value, symbol: currencySymbol);
+  }
+
+  Future<void> updateHideAmounts(bool value) async {
+    hideAmounts = value;
+    MoneyFormatter.setHideAmounts(value);
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> updateLanguagePreference(String code) async {
+    appLanguageCode = code;
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> updateThemePreference(bool value) async {
+    preferDarkMode = value;
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> updateNotificationPreferences({
+    bool? upcomingPayments,
+    bool? latePayments,
+    bool? categoryLimits,
+    bool? dailySafeLimit,
+    bool? salaryDay,
+  }) async {
+    notifyUpcomingPayments = upcomingPayments ?? notifyUpcomingPayments;
+    notifyLatePayments = latePayments ?? notifyLatePayments;
+    notifyCategoryLimits = categoryLimits ?? notifyCategoryLimits;
+    notifyDailySafeLimit = dailySafeLimit ?? notifyDailySafeLimit;
+    notifySalaryDay = salaryDay ?? notifySalaryDay;
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> resetNotificationPreferences() async {
+    notifyUpcomingPayments = true;
+    notifyLatePayments = true;
+    notifyCategoryLimits = true;
+    notifyDailySafeLimit = true;
+    notifySalaryDay = true;
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  int get activeNotificationPreferenceCount {
+    var count = 0;
+
+    if (notifyUpcomingPayments) count++;
+    if (notifyLatePayments) count++;
+    if (notifyCategoryLimits) count++;
+    if (notifyDailySafeLimit) count++;
+    if (notifySalaryDay) count++;
+
+    return count;
+  }
+
+  Future<void> updateCurrencySymbol(String symbol) async {
+    final cleanSymbol = symbol.trim().isEmpty ? '₺' : symbol.trim();
+
+    currencySymbol = cleanSymbol;
+    MoneyFormatter.setCurrencySymbol(cleanSymbol);
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> completeOnboarding({
+    required double newMonthlyIncome,
+    required double newSavingTarget,
+    required double newCurrentSaving,
+    required int newSalaryDay,
+    String? newAppLanguageCode,
+    String? newCurrencySymbol,
+  }) async {
+    final cleanLanguage = newAppLanguageCode == 'en' || newAppLanguageCode == 'ru' || newAppLanguageCode == 'tr'
+        ? newAppLanguageCode!
+        : appLanguageCode;
+    final cleanCurrency = newCurrencySymbol == null || newCurrencySymbol.trim().isEmpty
+        ? currencySymbol
+        : newCurrencySymbol.trim();
+
+    appLanguageCode = cleanLanguage;
+    currencySymbol = cleanCurrency;
+    MoneyFormatter.setCurrencySymbol(cleanCurrency);
+
+    monthlyIncome = newMonthlyIncome <= 0 ? monthlyIncome : newMonthlyIncome;
+    savingTarget = newSavingTarget < 0 ? 0 : newSavingTarget;
+    currentSaving = newCurrentSaving < 0 ? 0 : newCurrentSaving;
+    salaryDay = newSalaryDay.clamp(1, 31);
+    hasCompletedOnboarding = true;
+
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> markOnboardingCompleted() async {
+    hasCompletedOnboarding = true;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> resetOnboarding() async {
+    hasCompletedOnboarding = false;
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> changeSelectedMonth(int monthDelta) async {
+    selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + monthDelta);
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> goToCurrentMonth() async {
+    selectedMonth = PlanoraDateUtils.monthOnly(DateTime.now());
+    await _saveSettings();
+    notifyListeners();
+  }
+
+  Future<void> resetToDefaults() async {
+    monthlyIncome = 0;
+    savingTarget = 0;
+    currentSaving = 0;
+    salaryDay = 1;
+    hasCompletedOnboarding = false;
+    selectedMonth = PlanoraDateUtils.monthOnly(DateTime.now());
+
+    _payments.clear();
+    _expenses.clear();
+    _extraIncomes.clear();
+
+    _categories
+      ..clear()
+      ..addAll(_defaultCategories);
+
+    _paymentStatusByMonth.clear();
+
+    _categoryLimits
+      ..clear()
+      ..addEntries(
+        _defaultCategories.map(
+          (category) => MapEntry(category, _defaultLimitForCategory(category)),
+        ),
+      );
+
+    await _saveSettings();
+    await _savePayments();
+    await _saveExpenses();
+    await _saveExtraIncomes();
+    await _saveCategories();
+    await _saveCategoryLimits();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+
+
+  List<IncomeItem> get extraIncomes {
+    final sorted = [..._extraIncomes];
+    sorted.sort((a, b) {
+      final monthCompare = b.monthKey.compareTo(a.monthKey);
+      if (monthCompare != 0) return monthCompare;
+      return b.day.compareTo(a.day);
+    });
+    return List.unmodifiable(sorted);
+  }
+
+  List<IncomeItem> get extraIncomesForSelectedMonth {
+    final key = monthKey();
+    final sorted = _extraIncomes
+        .where((income) => income.monthKey == key)
+        .toList();
+
+    sorted.sort((a, b) => b.day.compareTo(a.day));
+    return List.unmodifiable(sorted);
+  }
+
+  double get extraIncomeTotal {
+    return extraIncomesForSelectedMonth.fold<double>(
+      0,
+      (sum, income) => sum + income.amount,
+    );
+  }
+
+  int get extraIncomeCount {
+    return extraIncomesForSelectedMonth.length;
+  }
+
+  double get totalMonthlyIncome {
+    return monthlyIncome + extraIncomeTotal;
+  }
+
+  List<ExpenseItem> get expenses {
+    final sorted = [..._expenses];
+    sorted.sort((a, b) {
+      final monthCompare = b.monthKey.compareTo(a.monthKey);
+      if (monthCompare != 0) return monthCompare;
+      return b.day.compareTo(a.day);
+    });
+    return List.unmodifiable(sorted);
+  }
+
+  List<ExpenseItem> get expensesForSelectedMonth {
+    final key = monthKey();
+    final sorted = _expenses
+        .where((expense) => expense.monthKey == key)
+        .toList();
+
+    sorted.sort((a, b) => b.day.compareTo(a.day));
+    return List.unmodifiable(sorted);
+  }
+
+  double get expensesTotal {
+    return expensesForSelectedMonth.fold<double>(
+      0,
+      (sum, expense) => sum + expense.amount,
+    );
+  }
+
+  int get expenseCount {
+    return expensesForSelectedMonth.length;
+  }
+
+  double expensesTotalForCategory(String category) {
+    return expensesForSelectedMonth
+        .where((expense) => expense.category == category)
+        .fold<double>(0, (sum, expense) => sum + expense.amount);
+  }
+
+  List<PaymentItem> get payments {
+    final sorted = [..._payments];
+    sorted.sort((a, b) => a.dueDay.compareTo(b.dueDay));
+    return List.unmodifiable(sorted);
+  }
+
+  List<PaymentItem> get paymentsForSelectedMonth {
+    final days = PlanoraDateUtils.daysInMonth(selectedMonth);
+
+    return payments
+        .where((payment) => payment.dueDay <= days)
+        .where(isPaymentVisibleInSelectedMonth)
+        .toList();
+  }
+
+  List<PaymentItem> get latePayments {
+    return paymentsForSelectedMonth.where(isPaymentLate).toList();
+  }
+
+  List<PaymentItem> get todayPayments {
+    final now = DateTime.now();
+
+    if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+      return [];
+    }
+
+    return paymentsForSelectedMonth
+        .where((payment) => !isPaymentPaid(payment))
+        .where((payment) => payment.dueDay == now.day)
+        .toList();
+  }
+
+  List<PaymentItem> upcomingPaymentsWithin({int days = 3}) {
+    final now = DateTime.now();
+
+    if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+      return [];
+    }
+
+    final endDay = (now.day + days).clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth));
+
+    return paymentsForSelectedMonth
+        .where((payment) => !isPaymentPaid(payment))
+        .where((payment) => payment.dueDay > now.day && payment.dueDay <= endDay)
+        .toList();
+  }
+
+  List<PlanoraAlert> get smartAlerts {
+    final alerts = <PlanoraAlert>[];
+    final lang = appLanguageCode;
+
+    for (final payment in latePayments) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'late_${payment.id}',
+          title: _alertTitleText(lang, 'late', payment.title),
+          message: _alertMessageText(lang, 'late', day: payment.dueDay),
+          type: PlanoraAlertType.late,
+          paymentId: payment.id,
+          day: payment.dueDay,
+        ),
+      );
+    }
+
+    for (final payment in todayPayments) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'today_${payment.id}',
+          title: _alertTitleText(lang, 'today', payment.title),
+          message: _alertMessageText(lang, 'today'),
+          type: PlanoraAlertType.today,
+          paymentId: payment.id,
+          day: payment.dueDay,
+        ),
+      );
+    }
+
+    for (final payment in upcomingPaymentsWithin(days: 3)) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'upcoming_${payment.id}',
+          title: _alertTitleText(lang, 'upcoming', payment.title),
+          message: _alertMessageText(lang, 'upcoming', day: payment.dueDay),
+          type: PlanoraAlertType.upcoming,
+          paymentId: payment.id,
+          day: payment.dueDay,
+        ),
+      );
+    }
+
+    if (remainingAfterPlan < 0) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'budget_negative',
+          title: _alertTitleText(lang, 'budgetNegative', ''),
+          message: _alertMessageText(lang, 'budgetNegative'),
+          type: PlanoraAlertType.budget,
+        ),
+      );
+    } else if (freeBalance < dailySafeLimit * 3 && paymentsForSelectedMonth.isNotEmpty) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'budget_low_free_balance',
+          title: _alertTitleText(lang, 'lowFreeBalance', ''),
+          message: _alertMessageText(lang, 'lowFreeBalance'),
+          type: PlanoraAlertType.budget,
+        ),
+      );
+    }
+
+    for (final category in categorySummary) {
+      if (category.limit <= 0) continue;
+
+      if (category.used >= category.limit) {
+        alerts.add(
+          PlanoraAlert(
+            id: 'category_limit_exceeded_${category.title}',
+            title: _categoryAlertTitleText(lang, 'exceeded', categoryLabel(category.title)),
+            message: _categoryAlertMessageText(lang, 'exceeded', category.used.round(), category.limit.round()),
+            type: PlanoraAlertType.budget,
+          ),
+        );
+      } else if (category.ratio >= 0.85) {
+        alerts.add(
+          PlanoraAlert(
+            id: 'category_limit_near_${category.title}',
+            title: _categoryAlertTitleText(lang, 'near', categoryLabel(category.title)),
+            message: _categoryAlertMessageText(lang, 'near', (category.ratio * 100).round(), category.limit.round()),
+            type: PlanoraAlertType.budget,
+          ),
+        );
+      }
+    }
+
+    if (alerts.isEmpty) {
+      alerts.add(
+        PlanoraAlert(
+          id: 'all_clear',
+          title: _alertTitleText(lang, 'allClear', ''),
+          message: _alertMessageText(lang, 'allClear'),
+          type: PlanoraAlertType.info,
+        ),
+      );
+    }
+
+    return alerts;
+  }
+
+  int get activeAlertCount {
+    return smartAlerts.where((alert) => alert.type != PlanoraAlertType.info).length;
+  }
+
+
+  List<PaymentItem> get paidPaymentsForSelectedMonth {
+    return paymentsForSelectedMonth.where(isPaymentPaid).toList();
+  }
+
+  List<PaymentItem> get waitingPaymentsForSelectedMonth {
+    return paymentsForSelectedMonth
+        .where((payment) => !isPaymentPaid(payment))
+        .where((payment) => !isPaymentLate(payment))
+        .toList();
+  }
+
+  double get paidPaymentsTotal {
+    return paidPaymentsForSelectedMonth.fold<double>(
+      0,
+      (sum, payment) => sum + payment.amount,
+    );
+  }
+
+  double get waitingPaymentsTotal {
+    return waitingPaymentsForSelectedMonth.fold<double>(
+      0,
+      (sum, payment) => sum + payment.amount,
+    );
+  }
+
+  double get latePaymentsTotal {
+    return latePayments.fold<double>(
+      0,
+      (sum, payment) => sum + payment.amount,
+    );
+  }
+
+  int get paidPaymentCount {
+    return paidPaymentsForSelectedMonth.length;
+  }
+
+  int get waitingPaymentCount {
+    return waitingPaymentsForSelectedMonth.length;
+  }
+
+  int get latePaymentCount {
+    return latePayments.length;
+  }
+
+  double get paidProgressRatio {
+    if (plannedPayments <= 0) return 0;
+    return (paidPaymentsTotal / plannedPayments).clamp(0.0, 1.0);
+  }
+
+
+  PaymentItem? paymentById(String id) {
+    try {
+      return _payments.firstWhere((payment) => payment.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  double get plannedPayments {
+    return paymentsForSelectedMonth.fold<double>(0, (sum, item) => sum + item.amount);
+  }
+
+  double get remainingAfterPlan {
+    return totalMonthlyIncome - plannedPayments;
+  }
+
+  double get freeBalance {
+    final remaining = remainingAfterPlan - currentSaving - expensesTotal;
+    return remaining < 0 ? 0 : remaining;
+  }
+
+  int get daysUntilNextSalary {
+    final now = DateTime.now();
+
+    if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+      return PlanoraDateUtils.daysInMonth(selectedMonth);
+    }
+
+    final selectedMonthDays = PlanoraDateUtils.daysInMonth(selectedMonth);
+    final safeSalaryDay = salaryDay.clamp(1, selectedMonthDays);
+
+    if (now.day < safeSalaryDay) {
+      return (safeSalaryDay - now.day).clamp(1, selectedMonthDays);
+    }
+
+    final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 1);
+    final nextMonthDays = PlanoraDateUtils.daysInMonth(nextMonth);
+    final nextSalaryDay = salaryDay.clamp(1, nextMonthDays);
+
+    final nextSalaryDate = DateTime(nextMonth.year, nextMonth.month, nextSalaryDay);
+    return nextSalaryDate.difference(DateTime(now.year, now.month, now.day)).inDays.clamp(1, 62);
+  }
+
+  DateTime get nextSalaryDate {
+    final now = DateTime.now();
+
+    if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+      final days = PlanoraDateUtils.daysInMonth(selectedMonth);
+      return DateTime(selectedMonth.year, selectedMonth.month, salaryDay.clamp(1, days));
+    }
+
+    final selectedMonthDays = PlanoraDateUtils.daysInMonth(selectedMonth);
+    final safeSalaryDay = salaryDay.clamp(1, selectedMonthDays);
+
+    if (now.day < safeSalaryDay) {
+      return DateTime(selectedMonth.year, selectedMonth.month, safeSalaryDay);
+    }
+
+    final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 1);
+    final nextMonthDays = PlanoraDateUtils.daysInMonth(nextMonth);
+    return DateTime(nextMonth.year, nextMonth.month, salaryDay.clamp(1, nextMonthDays));
+  }
+
+  double get dailySafeLimit {
+    return freeBalance / daysUntilNextSalary;
+  }
+
+  PaymentItem? get nextPayment {
+    if (_payments.isEmpty) return null;
+
+    final now = DateTime.now();
+
+    final candidates = paymentsForSelectedMonth
+        .where((payment) => !isPaymentPaid(payment))
+        .where((payment) {
+          if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+            return true;
+          }
+
+          return payment.dueDay >= now.day;
+        })
+        .toList();
+
+    if (candidates.isEmpty) {
+      final waiting = paymentsForSelectedMonth
+          .where((payment) => !isPaymentPaid(payment))
+          .toList();
+
+      if (waiting.isNotEmpty) return waiting.first;
+      if (paymentsForSelectedMonth.isNotEmpty) return paymentsForSelectedMonth.first;
+      return null;
+    }
+
+    return candidates.first;
+  }
+
+  bool isPaymentLate(PaymentItem payment) {
+    final now = DateTime.now();
+    if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+      return false;
+    }
+
+    return !isPaymentPaid(payment) && payment.dueDay < now.day;
+  }
+
+  DateTime dateForPayment(PaymentItem payment) {
+    return PlanoraDateUtils.safeDateForPayment(selectedMonth, payment.dueDay);
+  }
+
+  Future<void> addPayment({
+    required String title,
+    required String category,
+    required double amount,
+    required int dueDay,
+    required bool isMonthly,
+  }) async {
+    final cleanCategory = category.trim().isEmpty ? 'Diğer' : category.trim();
+
+    if (!_categories.contains(cleanCategory)) {
+      _categories.add(cleanCategory);
+      _categoryLimits[cleanCategory] = _defaultLimitForCategory(cleanCategory);
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+
+    final payment = PaymentItem(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title.trim(),
+      category: cleanCategory,
+      amount: amount,
+      dueDay: dueDay.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      status: PaymentStatus.waiting,
+      color: _colorForCategory(cleanCategory),
+      isMonthly: isMonthly,
+      monthKey: isMonthly ? null : monthKey(),
+    );
+
+    _payments.add(payment);
+    _paymentStatusByMonth[payment.id] = {monthKey(): PaymentStatus.waiting};
+    await _savePayments();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> updatePayment({
+    required String id,
+    required String title,
+    required String category,
+    required double amount,
+    required int dueDay,
+    required bool isMonthly,
+  }) async {
+    final index = _payments.indexWhere((payment) => payment.id == id);
+    if (index == -1) return;
+
+    final cleanCategory = category.trim().isEmpty ? 'Diğer' : category.trim();
+
+    if (!_categories.contains(cleanCategory)) {
+      _categories.add(cleanCategory);
+      _categoryLimits[cleanCategory] = _defaultLimitForCategory(cleanCategory);
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+
+    final current = _payments[index];
+
+    _payments[index] = current.copyWith(
+      title: title.trim(),
+      category: cleanCategory,
+      amount: amount,
+      dueDay: dueDay.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      color: _colorForCategory(cleanCategory),
+      isMonthly: isMonthly,
+      monthKey: isMonthly ? null : current.monthKey ?? monthKey(),
+    );
+
+    await _savePayments();
+    notifyListeners();
+  }
+
+  Future<void> removePayment(String id) async {
+    _payments.removeWhere((payment) => payment.id == id);
+    _paymentStatusByMonth.remove(id);
+    await _savePayments();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> togglePaymentPaid(String id) async {
+    final payment = paymentById(id);
+    if (payment == null) return;
+
+    final key = monthKey();
+    final currentStatus = statusForPayment(payment);
+    final nextStatus = currentStatus == PaymentStatus.paid
+        ? PaymentStatus.waiting
+        : PaymentStatus.paid;
+
+    _paymentStatusByMonth.putIfAbsent(id, () => {});
+    _paymentStatusByMonth[id]![key] = nextStatus;
+
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+
+
+  int get budgetHealthScore {
+    var score = 100;
+
+    final income = totalMonthlyIncome <= 0 ? 1 : totalMonthlyIncome;
+
+    final plannedRatio = plannedPayments / income;
+    if (plannedRatio > 0.85) {
+      score -= 18;
+    } else if (plannedRatio > 0.70) {
+      score -= 10;
+    }
+
+    final expensesRatio = expensesTotal / income;
+    if (expensesRatio > 0.25) {
+      score -= 16;
+    } else if (expensesRatio > 0.15) {
+      score -= 8;
+    }
+
+    if (latePaymentCount >= 3) {
+      score -= 20;
+    } else if (latePaymentCount >= 1) {
+      score -= 10;
+    }
+
+    final exceededCategoryCount = categorySummary
+        .where((category) => category.limit > 0 && category.used > category.limit)
+        .length;
+
+    final nearCategoryCount = categorySummary
+        .where((category) => category.limit > 0)
+        .where((category) => category.used <= category.limit)
+        .where((category) => category.used / category.limit >= 0.85)
+        .length;
+
+    score -= exceededCategoryCount * 10;
+    score -= nearCategoryCount * 5;
+
+    if (dailySafeLimit < 100) {
+      score -= 10;
+    }
+
+    if (notifyDailySafeLimit && freeBalance <= 0) {
+      score -= 18;
+    }
+
+    if (paidProgressRatio >= 0.75 && latePaymentCount == 0) {
+      score += 6;
+    }
+
+    if (currentSaving > 0 && savingTarget > 0) {
+      score += 4;
+    }
+
+    return score.clamp(0, 100);
+  }
+
+  String get budgetHealthLabel {
+    return _budgetHealthLabelText(appLanguageCode, budgetHealthScore);
+  }
+
+  String get budgetHealthMessage {
+    return _budgetHealthMessageText(appLanguageCode, budgetHealthScore);
+  }
+
+  String _budgetHealthLabelText(String code, int score) {
+    if (score >= 80) {
+      switch (code) {
+        case 'en':
+          return 'Healthy';
+        case 'ru':
+          return 'Здоровый';
+        case 'tr':
+        default:
+          return 'Sağlıklı';
+      }
+    }
+
+    if (score >= 60) {
+      switch (code) {
+        case 'en':
+          return 'Careful';
+        case 'ru':
+          return 'Внимание';
+        case 'tr':
+        default:
+          return 'Dikkatli';
+      }
+    }
+
+    if (score >= 40) {
+      switch (code) {
+        case 'en':
+          return 'Risky';
+        case 'ru':
+          return 'Риск';
+        case 'tr':
+        default:
+          return 'Riskli';
+      }
+    }
+
+    switch (code) {
+      case 'en':
+        return 'Critical';
+      case 'ru':
+        return 'Критично';
+      case 'tr':
+      default:
+        return 'Kritik';
+    }
+  }
+
+  String _budgetHealthMessageText(String code, int score) {
+    if (score >= 80) {
+      switch (code) {
+        case 'en':
+          return 'Your budget looks balanced this month. Payments and spending limits are under control.';
+        case 'ru':
+          return 'Ваш бюджет в этом месяце выглядит сбалансированным. Платежи и лимиты расходов под контролем.';
+        case 'tr':
+        default:
+          return 'Bu ay bütçen dengeli görünüyor. Ödemeler ve harcama limitleri kontrol altında.';
+      }
+    }
+
+    if (score >= 60) {
+      switch (code) {
+        case 'en':
+          return 'Your budget is generally good, but some areas need attention.';
+        case 'ru':
+          return 'В целом бюджет в порядке, но некоторые области требуют внимания.';
+        case 'tr':
+        default:
+          return 'Bütçen genel olarak iyi ama bazı alanlarda dikkatli olman gerekiyor.';
+      }
+    }
+
+    if (score >= 40) {
+      switch (code) {
+        case 'en':
+          return 'Risk is starting to appear in your budget this month. Reducing waiting payments and expenses would help.';
+        case 'ru':
+          return 'В бюджете этого месяца начинает появляться риск. Лучше сократить ожидающие платежи и расходы.';
+        case 'tr':
+        default:
+          return 'Bu ay bütçende risk oluşmaya başladı. Bekleyen ödemeleri ve harcamaları azaltman iyi olur.';
+      }
+    }
+
+    switch (code) {
+      case 'en':
+        return 'Your budget is at a critical level this month. Late payments, exceeded limits, or free balance are under serious pressure.';
+      case 'ru':
+        return 'Бюджет в этом месяце на критическом уровне. Просрочки, превышение лимитов или свободный баланс находятся под серьёзным давлением.';
+      case 'tr':
+      default:
+        return 'Bu ay bütçen kritik seviyede. Geciken ödemeler, limit aşımları veya serbest bakiye ciddi şekilde zorlanıyor.';
+    }
+  }
+
+
+  Color get budgetHealthColor {
+    final score = budgetHealthScore;
+
+    if (score >= 80) return AppColors.brandGreen;
+    if (score >= 60) return AppColors.warning;
+    if (score >= 40) return const Color(0xFFFF7A1A);
+    return AppColors.danger;
+  }
+
+
+
+
+  Future<void> clearSelectedMonthExpenses() async {
+    final key = monthKey();
+    _expenses.removeWhere((expense) => expense.monthKey == key);
+
+    await _saveExpenses();
+    notifyListeners();
+  }
+
+  Future<void> clearSelectedMonthExtraIncomes() async {
+    final key = monthKey();
+    _extraIncomes.removeWhere((income) => income.monthKey == key);
+
+    await _saveExtraIncomes();
+    notifyListeners();
+  }
+
+  Future<void> clearSelectedMonthPaymentStatuses() async {
+    final key = monthKey();
+
+    for (final monthMap in _paymentStatusByMonth.values) {
+      monthMap.remove(key);
+    }
+
+    _paymentStatusByMonth.removeWhere((_, monthMap) => monthMap.isEmpty);
+
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> clearSelectedMonthOneTimePayments() async {
+    final key = monthKey();
+
+    final removedIds = _payments
+        .where((payment) => !payment.isMonthly && payment.monthKey == key)
+        .map((payment) => payment.id)
+        .toSet();
+
+    _payments.removeWhere(
+      (payment) => !payment.isMonthly && payment.monthKey == key,
+    );
+
+    for (final id in removedIds) {
+      _paymentStatusByMonth.remove(id);
+    }
+
+    await _savePayments();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> clearSelectedMonthData() async {
+    final key = monthKey();
+
+    _expenses.removeWhere((expense) => expense.monthKey == key);
+    _extraIncomes.removeWhere((income) => income.monthKey == key);
+
+    final removedPaymentIds = _payments
+        .where((payment) => !payment.isMonthly && payment.monthKey == key)
+        .map((payment) => payment.id)
+        .toSet();
+
+    _payments.removeWhere(
+      (payment) => !payment.isMonthly && payment.monthKey == key,
+    );
+
+    for (final id in removedPaymentIds) {
+      _paymentStatusByMonth.remove(id);
+    }
+
+    for (final monthMap in _paymentStatusByMonth.values) {
+      monthMap.remove(key);
+    }
+
+    _paymentStatusByMonth.removeWhere((_, monthMap) => monthMap.isEmpty);
+
+    await _saveExpenses();
+    await _saveExtraIncomes();
+    await _savePayments();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> clearAllExpenses() async {
+    _expenses.clear();
+
+    await _saveExpenses();
+    notifyListeners();
+  }
+
+  Future<void> clearAllExtraIncomes() async {
+    _extraIncomes.clear();
+
+    await _saveExtraIncomes();
+    notifyListeners();
+  }
+
+  Future<void> clearAllPaymentStatuses() async {
+    _paymentStatusByMonth.clear();
+
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+  Future<void> clearAllOneTimePayments() async {
+    final removedIds = _payments
+        .where((payment) => !payment.isMonthly)
+        .map((payment) => payment.id)
+        .toSet();
+
+    _payments.removeWhere((payment) => !payment.isMonthly);
+
+    for (final id in removedIds) {
+      _paymentStatusByMonth.remove(id);
+    }
+
+    await _savePayments();
+    await _savePaymentStatuses();
+    notifyListeners();
+  }
+
+
+
+  Map<String, dynamic> diagnosticsSnapshot() {
+    return {
+      'hasCompletedOnboarding': hasCompletedOnboarding,
+      'selectedMonth': monthKey(),
+      'payments': _payments.length,
+      'expenses': _expenses.length,
+      'extraIncomes': _extraIncomes.length,
+      'categories': _categories.length,
+      'paymentStatusGroups': _paymentStatusByMonth.length,
+      'currencySymbol': currencySymbol,
+      'hideAmounts': hideAmounts,
+      'preferDarkMode': preferDarkMode,
+      'appLanguageCode': appLanguageCode,
+      'activeNotificationPreferenceCount': activeNotificationPreferenceCount,
+    };
+  }
+
+  String monthlyReportText() {
+    final buffer = StringBuffer();
+    final lang = appLanguageCode;
+
+    buffer.writeln(_reportText(lang, 'title'));
+    buffer.writeln(_reportMonthLine(lang, _controllerMonthYearLabel(lang, selectedMonth)));
+    buffer.writeln('');
+    buffer.writeln(_reportText(lang, 'generalStatus'));
+    buffer.writeln(_reportBudgetHealthLine(lang, budgetHealthLabel, budgetHealthScore));
+    buffer.writeln(_reportAmountLine(lang, 'fixedIncome', monthlyIncome.round()));
+    buffer.writeln(_reportAmountLine(lang, 'extraIncome', extraIncomeTotal.round()));
+    buffer.writeln(_reportAmountLine(lang, 'totalIncome', totalMonthlyIncome.round()));
+    buffer.writeln(_reportAmountLine(lang, 'plannedPayments', plannedPayments.round()));
+    buffer.writeln(_reportAmountLine(lang, 'variableExpenses', expensesTotal.round()));
+    buffer.writeln(_reportAmountLine(lang, 'freeBalance', freeBalance.round()));
+    buffer.writeln(_reportAmountLine(lang, 'dailySafeLimit', dailySafeLimit.round()));
+    buffer.writeln(_reportDaysUntilSalaryLine(lang, daysUntilNextSalary));
+    buffer.writeln('');
+    buffer.writeln(_reportText(lang, 'paymentStatus'));
+    buffer.writeln(_reportPaymentLine(lang, 'paid', paidPaymentsTotal.round(), paidPaymentCount));
+    buffer.writeln(_reportPaymentLine(lang, 'waiting', waitingPaymentsTotal.round(), waitingPaymentCount));
+    buffer.writeln(_reportPaymentLine(lang, 'late', latePaymentsTotal.round(), latePaymentCount));
+    buffer.writeln(_reportCompletionLine(lang, (paidProgressRatio * 100).round()));
+    buffer.writeln('');
+    buffer.writeln(_reportText(lang, 'categories'));
+
+    if (categorySummary.isEmpty) {
+      buffer.writeln(_reportText(lang, 'noCategoryData'));
+    } else {
+      for (final category in categorySummary) {
+        buffer.writeln(
+          '- ${categoryLabel(category.title)}: ${formatMoney(category.used)} / ${formatMoney(category.limit)}',
+        );
+      }
+    }
+
+    buffer.writeln('');
+    buffer.writeln(_reportText(lang, 'planoraComment'));
+    buffer.writeln(budgetHealthMessage);
+
+    if (budgetHealthTips.isNotEmpty) {
+      buffer.writeln('');
+      buffer.writeln(_reportText(lang, 'recommendations'));
+      for (final tip in budgetHealthTips) {
+        buffer.writeln('- $tip');
+      }
+    }
+
+    return buffer.toString();
+  }
+
+
+  String exportBackupJson() {
+    final data = {
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'settings': {
+        'monthlyIncome': monthlyIncome,
+        'savingTarget': savingTarget,
+        'currentSaving': currentSaving,
+        'salaryDay': salaryDay,
+        'currencySymbol': currencySymbol,
+        'hideAmounts': hideAmounts,
+      'preferDarkMode': preferDarkMode,
+      'appLanguageCode': appLanguageCode,
+        'notifyUpcomingPayments': notifyUpcomingPayments,
+        'notifyLatePayments': notifyLatePayments,
+        'notifyCategoryLimits': notifyCategoryLimits,
+        'notifyDailySafeLimit': notifyDailySafeLimit,
+        'notifySalaryDay': notifySalaryDay,
+        'hasCompletedOnboarding': hasCompletedOnboarding,
+        'selectedMonth': selectedMonth.toIso8601String(),
+      },
+      'payments': _payments.map((payment) => payment.toJson()).toList(),
+      'paymentStatuses': _paymentStatusByMonth.map(
+        (paymentId, monthMap) => MapEntry(
+          paymentId,
+          monthMap.map(
+            (month, status) => MapEntry(month, status.name),
+          ),
+        ),
+      ),
+      'expenses': _expenses.map((expense) => expense.toJson()).toList(),
+      'extraIncomes': _extraIncomes.map((income) => income.toJson()).toList(),
+      'categories': _categories,
+      'categoryLimits': _categoryLimits,
+    };
+
+    const encoder = JsonEncoder.withIndent('  ');
+    return encoder.convert(data);
+  }
+
+  Future<bool> importBackupJson(String rawJson) async {
+    try {
+      final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
+
+      final settings = decoded['settings'] as Map<String, dynamic>? ?? {};
+
+      monthlyIncome = (settings['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
+      savingTarget = (settings['savingTarget'] as num?)?.toDouble() ?? savingTarget;
+      currentSaving = (settings['currentSaving'] as num?)?.toDouble() ?? currentSaving;
+      salaryDay = ((settings['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
+      currencySymbol = settings['currencySymbol'] as String? ?? currencySymbol;
+      hideAmounts = settings['hideAmounts'] as bool? ?? hideAmounts;
+      preferDarkMode = settings['preferDarkMode'] as bool? ?? preferDarkMode;
+      appLanguageCode = settings['appLanguageCode'] as String? ?? appLanguageCode;
+      notifyUpcomingPayments = settings['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
+      notifyLatePayments = settings['notifyLatePayments'] as bool? ?? notifyLatePayments;
+      notifyCategoryLimits = settings['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
+      notifyDailySafeLimit = settings['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
+      notifySalaryDay = settings['notifySalaryDay'] as bool? ?? notifySalaryDay;
+      MoneyFormatter.setCurrencySymbol(currencySymbol);
+      MoneyFormatter.setHideAmounts(hideAmounts);
+      hasCompletedOnboarding = settings['hasCompletedOnboarding'] as bool? ?? hasCompletedOnboarding;
+
+      final selectedMonthRaw = settings['selectedMonth'] as String?;
+      if (selectedMonthRaw != null && selectedMonthRaw.isNotEmpty) {
+        selectedMonth = PlanoraDateUtils.monthOnly(DateTime.tryParse(selectedMonthRaw) ?? selectedMonth);
+      }
+
+      final decodedCategories = decoded['categories'];
+      _categories
+        ..clear()
+        ..addAll(_defaultCategories);
+
+      if (decodedCategories is List) {
+        for (final item in decodedCategories) {
+          final category = item.toString().trim();
+          if (category.isNotEmpty && !_categories.contains(category)) {
+            _categories.add(category);
+          }
+        }
+      }
+
+      final decodedLimits = decoded['categoryLimits'];
+      _categoryLimits.clear();
+
+      if (decodedLimits is Map<String, dynamic>) {
+        for (final entry in decodedLimits.entries) {
+          final category = entry.key.trim();
+          final limit = (entry.value as num?)?.toDouble() ?? _defaultLimitForCategory(category);
+
+          if (category.isNotEmpty) {
+            _categoryLimits[category] = limit;
+          }
+        }
+      }
+
+      for (final category in _categories) {
+        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+      }
+
+      final decodedPayments = decoded['payments'];
+      _payments.clear();
+
+      if (decodedPayments is List) {
+        _payments.addAll(
+          decodedPayments
+              .whereType<Map<String, dynamic>>()
+              .map(PaymentItem.fromJson)
+              .where((payment) => payment.title.trim().isNotEmpty),
+        );
+      }
+
+      final decodedExpenses = decoded['expenses'];
+      _expenses.clear();
+
+    _extraIncomes.clear();
+
+      if (decodedExpenses is List) {
+        _expenses.addAll(
+          decodedExpenses
+              .whereType<Map<String, dynamic>>()
+              .map(ExpenseItem.fromJson)
+              .where((expense) => expense.title.trim().isNotEmpty)
+              .where((expense) => expense.monthKey.trim().isNotEmpty),
+        );
+      }
+
+      final decodedExtraIncomes = decoded['extraIncomes'];
+      _extraIncomes.clear();
+
+      if (decodedExtraIncomes is List) {
+        _extraIncomes.addAll(
+          decodedExtraIncomes
+              .whereType<Map<String, dynamic>>()
+              .map(IncomeItem.fromJson)
+              .where((income) => income.title.trim().isNotEmpty)
+              .where((income) => income.monthKey.trim().isNotEmpty),
+        );
+      }
+
+      final decodedStatuses = decoded['paymentStatuses'];
+      _paymentStatusByMonth.clear();
+
+      if (decodedStatuses is Map<String, dynamic>) {
+        for (final entry in decodedStatuses.entries) {
+          final paymentId = entry.key;
+          final value = entry.value;
+
+          if (value is Map<String, dynamic>) {
+            final monthMap = <String, PaymentStatus>{};
+
+            for (final statusEntry in value.entries) {
+              monthMap[statusEntry.key] = PaymentStatus.values.firstWhere(
+                (status) => status.name == statusEntry.value,
+                orElse: () => PaymentStatus.waiting,
+              );
+            }
+
+            _paymentStatusByMonth[paymentId] = monthMap;
+          }
+        }
+      }
+
+      await _syncCategoriesFromPayments();
+      await _syncCategoriesFromExpenses();
+
+      _paymentStatusByMonth.removeWhere(
+        (paymentId, _) => !_payments.any((payment) => payment.id == paymentId),
+      );
+
+      await _saveSettings();
+      await _savePayments();
+      await _savePaymentStatuses();
+      await _saveExpenses();
+      await _saveExtraIncomes();
+      await _saveCategories();
+      await _saveCategoryLimits();
+
+      notifyListeners();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+
+  List<String> get budgetHealthTips {
+    final tips = <String>[];
+    final lang = appLanguageCode;
+
+    if (notifyLatePayments && latePaymentCount > 0) {
+      tips.add(_budgetTipText(lang, 'latePayments', count: latePaymentCount));
+    }
+
+    if (notifyDailySafeLimit && freeBalance <= 0) {
+      tips.add(_budgetTipText(lang, 'noFreeBalance'));
+    }
+
+    final exceededCategories = categorySummary
+        .where((category) => category.limit > 0 && category.used > category.limit)
+        .toList();
+
+    if (notifyCategoryLimits && exceededCategories.isNotEmpty) {
+      tips.add(_budgetTipText(lang, 'categoryExceeded', category: categoryLabel(exceededCategories.first.title)));
+    }
+
+    final nearCategories = categorySummary
+        .where((category) => category.limit > 0)
+        .where((category) => category.used <= category.limit)
+        .where((category) => category.used / category.limit >= 0.85)
+        .toList();
+
+    if (nearCategories.isNotEmpty) {
+      tips.add(_budgetTipText(lang, 'categoryNear', category: categoryLabel(nearCategories.first.title)));
+    }
+
+    if (expensesTotal > totalMonthlyIncome * 0.15) {
+      tips.add(_budgetTipText(lang, 'expensesHigh'));
+    }
+
+    if (dailySafeLimit < 100) {
+      tips.add(_budgetTipText(lang, 'dailySafeLow'));
+    }
+
+    if (tips.isEmpty) {
+      tips.add(_budgetTipText(lang, 'goodPlan'));
+      tips.add(_budgetTipText(lang, 'checkLimits'));
+    }
+
+    return tips.take(3).toList();
+  }
+
+  List<SmartLimitAlert> get smartLimitAlerts {
+    if (!notifyCategoryLimits) return [];
+
+    final alerts = categorySummary
+        .where((category) => category.limit > 0)
+        .where((category) => category.used / category.limit >= 0.80)
+        .map((category) {
+          final ratio = category.used / category.limit;
+          final isExceeded = ratio >= 1.0;
+          final categoryName = categoryLabel(category.title);
+
+          return SmartLimitAlert(
+            category: categoryName,
+            title: _smartLimitTitleText(appLanguageCode, categoryName, isExceeded),
+            message: _smartLimitMessageText(
+              appLanguageCode,
+              categoryName,
+              category.used,
+              category.limit,
+              isExceeded,
+            ),
+            used: category.used,
+            limit: category.limit,
+            ratio: ratio,
+            isExceeded: isExceeded,
+            color: isExceeded ? AppColors.danger : AppColors.warning,
+          );
+        })
+        .toList();
+
+    alerts.sort((a, b) {
+      if (a.isExceeded != b.isExceeded) {
+        return a.isExceeded ? -1 : 1;
+      }
+      return b.ratio.compareTo(a.ratio);
+    });
+
+    return alerts.take(3).toList();
+  }
+
+  int get smartLimitAlertCount => smartLimitAlerts.length;
+
+  String _smartLimitTitleText(String code, String category, bool isExceeded) {
+    switch (code) {
+      case 'en':
+        return isExceeded ? '$category limit exceeded' : '$category limit is close';
+      case 'ru':
+        return isExceeded ? 'Лимит $category превышен' : 'Лимит $category почти достигнут';
+      case 'tr':
+      default:
+        return isExceeded ? '$category limiti aşıldı' : '$category limiti yaklaşıyor';
+    }
+  }
+
+  String _smartLimitMessageText(
+    String code,
+    String category,
+    double used,
+    double limit,
+    bool isExceeded,
+  ) {
+    final usedText = MoneyFormatter.format(used);
+    final limitText = MoneyFormatter.format(limit);
+    final percent = limit <= 0 ? 0 : ((used / limit) * 100).round();
+
+    switch (code) {
+      case 'en':
+        return isExceeded
+            ? '$usedText used out of $limitText. Review your spending in this category.'
+            : '$usedText used out of $limitText. You have reached $percent% of this category limit.';
+      case 'ru':
+        return isExceeded
+            ? 'Использовано $usedText из $limitText. Проверьте расходы в этой категории.'
+            : 'Использовано $usedText из $limitText. Достигнуто $percent% лимита категории.';
+      case 'tr':
+      default:
+        return isExceeded
+            ? '$limitText limitin $usedText kadarı kullanıldı. Bu kategorideki harcamaları kontrol etmeniz önerilir.'
+            : '$limitText limitin $usedText kadarı kullanıldı. Bu kategori limitinin %$percent seviyesine ulaştınız.';
+    }
+  }
+
+
+
+
+  String _alertTitleText(String code, String key, String name) {
+    switch (code) {
+      case 'en':
+        if (key == 'late') return '$name is late';
+        if (key == 'today') return '$name is due today';
+        if (key == 'upcoming') return '$name is coming up';
+        if (key == 'budgetNegative') return 'Planned payments exceed your income';
+        if (key == 'lowFreeBalance') return 'Your free balance is low';
+        if (key == 'allClear') return 'Everything is under control';
+        return name;
+      case 'ru':
+        if (key == 'late') return '$name просрочен';
+        if (key == 'today') return '$name нужно оплатить сегодня';
+        if (key == 'upcoming') return '$name приближается';
+        if (key == 'budgetNegative') return 'Плановые платежи превышают доход';
+        if (key == 'lowFreeBalance') return 'Свободный баланс низкий';
+        if (key == 'allClear') return 'Всё под контролем';
+        return name;
+      case 'tr':
+      default:
+        if (key == 'late') return '$name gecikti';
+        if (key == 'today') return '$name bugün ödenmeli';
+        if (key == 'upcoming') return '$name yaklaşıyor';
+        if (key == 'budgetNegative') return 'Planlanan ödemeler gelirini aşıyor';
+        if (key == 'lowFreeBalance') return 'Serbest bakiyen düşük';
+        if (key == 'allClear') return 'Her şey kontrol altında';
+        return name;
+    }
+  }
+
+  String _alertMessageText(String code, String key, {int? day}) {
+    switch (code) {
+      case 'en':
+        if (key == 'late') return 'The payment due on day $day is still waiting.';
+        if (key == 'today') return 'Today is the due date. Mark it if you have paid.';
+        if (key == 'upcoming') return 'It appears in your payment plan for day $day.';
+        if (key == 'budgetNegative') return 'This month’s payment plan is higher than your monthly income. Review your income or payment plan.';
+        if (key == 'lowFreeBalance') return 'It may be better to spend more carefully until the end of the month.';
+        if (key == 'allClear') return 'There are no late or upcoming critical payments for this month.';
+        return '';
+      case 'ru':
+        if (key == 'late') return 'Платёж на $day-й день всё ещё ожидает оплаты.';
+        if (key == 'today') return 'Сегодня срок оплаты. Отметьте платёж, если он уже оплачен.';
+        if (key == 'upcoming') return 'Он указан в плане платежей на $day-й день.';
+        if (key == 'budgetNegative') return 'План платежей на этот месяц выше месячного дохода. Проверьте доход или план платежей.';
+        if (key == 'lowFreeBalance') return 'До конца месяца лучше тратить более осторожно.';
+        if (key == 'allClear') return 'В этом месяце нет просроченных или приближающихся критических платежей.';
+        return '';
+      case 'tr':
+      default:
+        if (key == 'late') return '$day. gün ödenmesi gereken ödeme hâlâ bekliyor.';
+        if (key == 'today') return 'Bugün son ödeme günü. Ödediysen durumunu işaretleyebilirsin.';
+        if (key == 'upcoming') return '$day. gün için ödeme planında görünüyor.';
+        if (key == 'budgetNegative') return 'Bu ayki ödeme planı aylık gelirinden yüksek. Gelir veya ödeme planını kontrol et.';
+        if (key == 'lowFreeBalance') return 'Ay sonuna kadar daha kontrollü harcama yapmak iyi olabilir.';
+        if (key == 'allClear') return 'Bu ay için geciken veya yaklaşan kritik ödeme görünmüyor.';
+        return '';
+    }
+  }
+
+  String _categoryAlertTitleText(String code, String key, String category) {
+    switch (code) {
+      case 'en':
+        return key == 'exceeded' ? '$category limit exceeded' : '$category is near its limit';
+      case 'ru':
+        return key == 'exceeded' ? 'Лимит $category превышен' : '$category приближается к лимиту';
+      case 'tr':
+      default:
+        return key == 'exceeded' ? '$category limiti aşıldı' : '$category limitine yaklaşıldı';
+    }
+  }
+
+  String _categoryAlertMessageText(String code, String key, int primaryValue, int limit) {
+    switch (code) {
+      case 'en':
+        if (key == 'exceeded') return 'Payment and expense total in this category reached ${formatMoney(primaryValue)}. Limit is ${formatMoney(limit)}.';
+        return 'This category reached about $primaryValue% of its limit.';
+      case 'ru':
+        if (key == 'exceeded') return 'Сумма платежей и расходов в этой категории достигла ${formatMoney(primaryValue)}. Лимит: ${formatMoney(limit)}.';
+        return 'Эта категория достигла примерно $primaryValue% лимита.';
+      case 'tr':
+      default:
+        if (key == 'exceeded') return 'Bu kategoride ödeme ve harcama toplamı ${formatMoney(primaryValue)} oldu. Limit ${formatMoney(limit)}.';
+        return 'Bu kategoride limitin yaklaşık %$primaryValue seviyesine ulaşıldı.';
+    }
+  }
+
+  String _budgetTipText(String code, String key, {int? count, String? category}) {
+    switch (code) {
+      case 'en':
+        if (key == 'latePayments') return '$count late payments. Close the late payments first.';
+        if (key == 'noFreeBalance') return 'Free balance has reached zero. Review the plan before adding new expenses this month.';
+        if (key == 'categoryExceeded') return '$category exceeded its limit.';
+        if (key == 'categoryNear') return '$category is approaching its limit.';
+        if (key == 'expensesHigh') return 'Variable expenses increased this month. Review groceries, food, and transport spending.';
+        if (key == 'dailySafeLow') return 'The daily safe limit is low. Reduce spending until the next salary.';
+        if (key == 'goodPlan') return 'Your budget looks good this month. Keep the plan.';
+        if (key == 'checkLimits') return 'You can maintain balance by checking category limits regularly.';
+        return '';
+      case 'ru':
+        if (key == 'latePayments') return '$count просроченных платежей. Сначала закройте просрочки.';
+        if (key == 'noFreeBalance') return 'Свободный баланс достиг нуля. Проверьте план перед добавлением новых расходов.';
+        if (key == 'categoryExceeded') return '$category превысила лимит.';
+        if (key == 'categoryNear') return '$category приближается к лимиту.';
+        if (key == 'expensesHigh') return 'Переменные расходы выросли в этом месяце. Проверьте траты на продукты, еду и транспорт.';
+        if (key == 'dailySafeLow') return 'Дневной безопасный лимит низкий. Сократите расходы до следующей зарплаты.';
+        if (key == 'goodPlan') return 'В этом месяце бюджет выглядит хорошо. Продолжайте придерживаться плана.';
+        if (key == 'checkLimits') return 'Регулярная проверка лимитов категорий поможет сохранить баланс.';
+        return '';
+      case 'tr':
+      default:
+        if (key == 'latePayments') return '$count geciken ödeme var. Önce geciken ödemeleri kapat.';
+        if (key == 'noFreeBalance') return 'Serbest bakiye sıfıra indi. Bu ay yeni harcama eklemeden önce planı kontrol et.';
+        if (key == 'categoryExceeded') return '$category kategorisi limitini aştı.';
+        if (key == 'categoryNear') return '$category kategorisi limite yaklaştı.';
+        if (key == 'expensesHigh') return 'Değişken harcamalar bu ay yükseldi. Market, yemek ve ulaşım giderlerini kontrol et.';
+        if (key == 'dailySafeLow') return 'Günlük güvenli limit düşük. Bir sonraki maaşa kadar harcamaları azalt.';
+        if (key == 'goodPlan') return 'Bu ay bütçen iyi görünüyor. Planı korumaya devam et.';
+        if (key == 'checkLimits') return 'Kategori limitlerini düzenli kontrol ederek dengeyi sürdürebilirsin.';
+        return '';
+    }
+  }
+
+  String _reportText(String code, String key) {
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
+
+    const values = {
+      'title': {'tr': 'PLANORA AYLIK RAPOR', 'en': 'PLANORA MONTHLY REPORT', 'ru': 'МЕСЯЧНЫЙ ОТЧЁТ PLANORA'},
+      'generalStatus': {'tr': 'GENEL DURUM', 'en': 'GENERAL STATUS', 'ru': 'ОБЩЕЕ СОСТОЯНИЕ'},
+      'paymentStatus': {'tr': 'ÖDEME DURUMU', 'en': 'PAYMENT STATUS', 'ru': 'СТАТУС ПЛАТЕЖЕЙ'},
+      'categories': {'tr': 'KATEGORİLER', 'en': 'CATEGORIES', 'ru': 'КАТЕГОРИИ'},
+      'noCategoryData': {'tr': 'Kategori verisi yok.', 'en': 'No category data.', 'ru': 'Нет данных по категориям.'},
+      'planoraComment': {'tr': 'PLANORA YORUMU', 'en': 'PLANORA COMMENT', 'ru': 'КОММЕНТАРИЙ PLANORA'},
+      'recommendations': {'tr': 'ÖNERİLER', 'en': 'RECOMMENDATIONS', 'ru': 'РЕКОМЕНДАЦИИ'},
+    };
+
+    return values[key]?[language] ?? values[key]?['tr'] ?? key;
+  }
+
+
+  String _controllerMonthYearLabel(String code, DateTime month) {
+    final months = {
+      'tr': [
+        'Ocak',
+        'Şubat',
+        'Mart',
+        'Nisan',
+        'Mayıs',
+        'Haziran',
+        'Temmuz',
+        'Ağustos',
+        'Eylül',
+        'Ekim',
+        'Kasım',
+        'Aralık',
+      ],
+      'en': [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
+      ],
+      'ru': [
+        'Январь',
+        'Февраль',
+        'Март',
+        'Апрель',
+        'Май',
+        'Июнь',
+        'Июль',
+        'Август',
+        'Сентябрь',
+        'Октябрь',
+        'Ноябрь',
+        'Декабрь',
+      ],
+    };
+
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
+    return '${months[language]![month.month - 1]} ${month.year}';
+  }
+
+  String _reportMonthLine(String code, String month) {
+    switch (code) {
+      case 'en':
+        return 'Month: $month';
+      case 'ru':
+        return 'Месяц: $month';
+      case 'tr':
+      default:
+        return 'Ay: $month';
+    }
+  }
+
+  String _reportBudgetHealthLine(String code, String label, int score) {
+    switch (code) {
+      case 'en':
+        return 'Budget health: $label ($score/100)';
+      case 'ru':
+        return 'Состояние бюджета: $label ($score/100)';
+      case 'tr':
+      default:
+        return 'Bütçe sağlığı: $label ($score/100)';
+    }
+  }
+
+  String _reportAmountLine(String code, String key, int amount) {
+    final labels = {
+      'fixedIncome': {'tr': 'Sabit aylık gelir', 'en': 'Fixed monthly income', 'ru': 'Основной месячный доход'},
+      'extraIncome': {'tr': 'Ek gelirler', 'en': 'Extra income', 'ru': 'Дополнительные доходы'},
+      'totalIncome': {'tr': 'Toplam gelir', 'en': 'Total income', 'ru': 'Общий доход'},
+      'plannedPayments': {'tr': 'Planlanan ödemeler', 'en': 'Planned payments', 'ru': 'Плановые платежи'},
+      'variableExpenses': {'tr': 'Değişken harcamalar', 'en': 'Variable expenses', 'ru': 'Переменные расходы'},
+      'freeBalance': {'tr': 'Serbest bakiye', 'en': 'Free balance', 'ru': 'Свободный баланс'},
+      'dailySafeLimit': {'tr': 'Günlük güvenli limit', 'en': 'Daily safe limit', 'ru': 'Дневной безопасный лимит'},
+    };
+
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
+    final label = labels[key]?[language] ?? labels[key]?['tr'] ?? key;
+    return '$label: ${formatMoney(amount)}';
+  }
+
+  String _reportDaysUntilSalaryLine(String code, int days) {
+    switch (code) {
+      case 'en':
+        return 'Days until next salary: $days';
+      case 'ru':
+        return 'Дней до следующей зарплаты: $days';
+      case 'tr':
+      default:
+        return 'Bir sonraki maaşa kalan gün: $days';
+    }
+  }
+
+  String _reportPaymentLine(String code, String key, int amount, int count) {
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
+
+    const labels = {
+      'paid': {'tr': 'Ödendi', 'en': 'Paid', 'ru': 'Оплачено'},
+      'waiting': {'tr': 'Bekliyor', 'en': 'Waiting', 'ru': 'Ожидает'},
+      'late': {'tr': 'Gecikti', 'en': 'Late', 'ru': 'Просрочено'},
+    };
+
+    final label = labels[key]?[language] ?? labels[key]?['tr'] ?? key;
+
+    switch (language) {
+      case 'en':
+        return '$label: ${formatMoney(amount)} / $count payments';
+      case 'ru':
+        return '$label: ${formatMoney(amount)} / $count платежей';
+      case 'tr':
+      default:
+        return '$label: ${formatMoney(amount)} / $count ödeme';
+    }
+  }
+
+  String _reportCompletionLine(String code, int percent) {
+    switch (code) {
+      case 'en':
+        return 'Completion: $percent%';
+      case 'ru':
+        return 'Выполнение: $percent%';
+      case 'tr':
+      default:
+        return 'Tamamlanma: $percent%';
+    }
+  }
+
+  IncomeItem? extraIncomeById(String id) {
+    try {
+      return _extraIncomes.firstWhere((income) => income.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> addExtraIncome({
+    required String title,
+    required double amount,
+    required int day,
+  }) async {
+    final income = IncomeItem(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title.trim().isEmpty ? 'Ek gelir' : title.trim(),
+      amount: amount < 0 ? 0 : amount,
+      day: day.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      monthKey: monthKey(),
+      color: AppColors.brandGreen,
+    );
+
+    _extraIncomes.add(income);
+    await _saveExtraIncomes();
+    notifyListeners();
+  }
+
+  Future<void> updateExtraIncome({
+    required String id,
+    required String title,
+    required double amount,
+    required int day,
+  }) async {
+    final index = _extraIncomes.indexWhere((income) => income.id == id);
+    if (index == -1) return;
+
+    final current = _extraIncomes[index];
+
+    _extraIncomes[index] = current.copyWith(
+      title: title.trim().isEmpty ? 'Ek gelir' : title.trim(),
+      amount: amount < 0 ? 0 : amount,
+      day: day.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+    );
+
+    await _saveExtraIncomes();
+    notifyListeners();
+  }
+
+  Future<void> removeExtraIncome(String id) async {
+    _extraIncomes.removeWhere((income) => income.id == id);
+    await _saveExtraIncomes();
+    notifyListeners();
+  }
+
+
+  ExpenseItem? expenseById(String id) {
+    try {
+      return _expenses.firstWhere((expense) => expense.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> addExpense({
+    required String title,
+    required String category,
+    required double amount,
+    required int day,
+  }) async {
+    final cleanCategory = category.trim().isEmpty ? 'Diğer' : category.trim();
+
+    if (!_categories.contains(cleanCategory)) {
+      _categories.add(cleanCategory);
+      _categoryLimits[cleanCategory] = _defaultLimitForCategory(cleanCategory);
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+
+    final expense = ExpenseItem(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      title: title.trim().isEmpty ? 'Harcama' : title.trim(),
+      category: cleanCategory,
+      amount: amount < 0 ? 0 : amount,
+      day: day.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      monthKey: monthKey(),
+      color: _colorForCategory(cleanCategory),
+    );
+
+    _expenses.add(expense);
+    await _saveExpenses();
+    notifyListeners();
+  }
+
+  Future<void> updateExpense({
+    required String id,
+    required String title,
+    required String category,
+    required double amount,
+    required int day,
+  }) async {
+    final index = _expenses.indexWhere((expense) => expense.id == id);
+    if (index == -1) return;
+
+    final cleanCategory = category.trim().isEmpty ? 'Diğer' : category.trim();
+
+    if (!_categories.contains(cleanCategory)) {
+      _categories.add(cleanCategory);
+      _categoryLimits[cleanCategory] = _defaultLimitForCategory(cleanCategory);
+      await _saveCategories();
+      await _saveCategoryLimits();
+    }
+
+    final current = _expenses[index];
+
+    _expenses[index] = current.copyWith(
+      title: title.trim().isEmpty ? 'Harcama' : title.trim(),
+      category: cleanCategory,
+      amount: amount < 0 ? 0 : amount,
+      day: day.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      color: _colorForCategory(cleanCategory),
+    );
+
+    await _saveExpenses();
+    notifyListeners();
+  }
+
+
+  Future<void> removeExpense(String id) async {
+    _expenses.removeWhere((expense) => expense.id == id);
+    await _saveExpenses();
+    notifyListeners();
+  }
+
+  List<BudgetCategory> get categorySummary {
+    final Map<String, double> totals = {};
+
+    for (final payment in paymentsForSelectedMonth) {
+      totals[payment.category] = (totals[payment.category] ?? 0) + payment.amount;
+    }
+
+    for (final expense in expensesForSelectedMonth) {
+      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+    }
+
+    final categories = totals.entries.map((entry) {
+      final limit = categoryLimit(entry.key);
+      return BudgetCategory(
+        title: entry.key,
+        limit: limit,
+        used: entry.value,
+        color: _colorForCategory(entry.key),
+      );
+    }).toList();
+
+    categories.sort((a, b) => b.used.compareTo(a.used));
+    return categories;
+  }
+
+  double _defaultLimitForCategory(String category) {
+    switch (category) {
+      case 'Kira':
+        return 18000;
+      case 'Fatura':
+        return 4000;
+      case 'Kredi':
+        return 10000;
+      case 'Taksit':
+        return 8000;
+      case 'Abonelik':
+        return 2500;
+      case 'Market':
+        return 9000;
+      case 'Ulaşım':
+        return 3500;
+      case 'Birikim':
+        return 10000;
+      default:
+        return 6000;
+    }
+  }
+
+  Color colorForCategory(String category) {
+    return _colorForCategory(category);
+  }
+
+  Color _colorForCategory(String category) {
+    switch (category) {
+      case 'Kira':
+        return AppColors.danger;
+      case 'Fatura':
+        return AppColors.brandBlue;
+      case 'Kredi':
+        return AppColors.warning;
+      case 'Taksit':
+        return const Color(0xFF8B5CF6);
+      case 'Abonelik':
+        return const Color(0xFFFF8A00);
+      case 'Market':
+        return AppColors.brandGreen;
+      case 'Ulaşım':
+        return const Color(0xFF14B8A6);
+      case 'Birikim':
+        return const Color(0xFF8B5CF6);
+      case 'Diğer':
+        return AppColors.textSecondary;
+      default:
+        final palette = [
+          const Color(0xFF3D7BFF),
+          const Color(0xFF20D99B),
+          const Color(0xFF8B5CF6),
+          const Color(0xFFFF8A00),
+          const Color(0xFF14B8A6),
+          const Color(0xFFEF4444),
+        ];
+
+        final index = category.codeUnits.fold<int>(0, (sum, code) => sum + code) % palette.length;
+        return palette[index];
+    }
+  }
+
+  static const Map<String, Map<String, String>> _defaultPaymentTitleLabels = {
+    'Kira': {
+      'tr': 'Kira',
+      'en': 'Rent',
+      'ru': 'Аренда',
+    },
+    'Telefon': {
+      'tr': 'Telefon',
+      'en': 'Phone',
+      'ru': 'Телефон',
+    },
+    'Internet': {
+      'tr': 'İnternet',
+      'en': 'Internet',
+      'ru': 'Интернет',
+    },
+    'İnternet': {
+      'tr': 'İnternet',
+      'en': 'Internet',
+      'ru': 'Интернет',
+    },
+    'Kredi Kartı': {
+      'tr': 'Kredi Kartı',
+      'en': 'Credit Card',
+      'ru': 'Кредитная карта',
+    },
+  };
+
+  static const Map<String, Map<String, String>> _defaultCategoryLabels = {
+    'Kira': {
+      'tr': 'Kira',
+      'en': 'Rent',
+      'ru': 'Аренда',
+    },
+    'Fatura': {
+      'tr': 'Fatura',
+      'en': 'Bills',
+      'ru': 'Счета',
+    },
+    'Kredi': {
+      'tr': 'Kredi',
+      'en': 'Credit',
+      'ru': 'Кредит',
+    },
+    'Taksit': {
+      'tr': 'Taksit',
+      'en': 'Installment',
+      'ru': 'Рассрочка',
+    },
+    'Abonelik': {
+      'tr': 'Abonelik',
+      'en': 'Subscription',
+      'ru': 'Подписка',
+    },
+    'Market': {
+      'tr': 'Market',
+      'en': 'Groceries',
+      'ru': 'Продукты',
+    },
+    'Ulaşım': {
+      'tr': 'Ulaşım',
+      'en': 'Transport',
+      'ru': 'Транспорт',
+    },
+    'Birikim': {
+      'tr': 'Birikim',
+      'en': 'Savings',
+      'ru': 'Накопления',
+    },
+    'Diğer': {
+      'tr': 'Diğer',
+      'en': 'Other',
+      'ru': 'Другое',
+    },
+  };
+
+  static const List<String> _defaultCategories = [
+    'Kira',
+    'Fatura',
+    'Kredi',
+    'Taksit',
+    'Abonelik',
+    'Market',
+    'Ulaşım',
+    'Birikim',
+    'Diğer',
+  ];
+
+}
+
+class PlanoraScope extends InheritedNotifier<PlanoraController> {
+  const PlanoraScope({
+    super.key,
+    required PlanoraController controller,
+    required super.child,
+  }) : super(notifier: controller);
+
+  static PlanoraController of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<PlanoraScope>();
+    assert(scope != null, 'PlanoraScope not found in context');
+    return scope!.notifier!;
+  }
+}
