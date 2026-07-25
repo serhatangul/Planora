@@ -71,21 +71,42 @@ class ReceiptParser {
 
   static String _detectMerchant(List<String> lines) {
     final ignored = RegExp(
-      r'(fiş|fatura|receipt|invoice|tax|vat|vergi|tarih|date|saat|time|cashier|kasa|касс|чек|hóa đơn|ngày)',
+      r'('
+      r'fiş|fatura|receipt|invoice|'
+      r'tax|vat|vergi|'
+      r'tarih|date|saat|time|'
+      r'cashier|kasa|касс|чек|hóa đơn|ngày|'
+      r'terminal|receipt\s*no|invoice\s*no|transaction|trans\s*date|'
+      r'staff|member|card|account|points|'
+      r'tel|phone|fax|mst|mã\s*số\s*thuế|'
+      r'total|amount|subtotal|quantity|qty|allowance|change|'
+      r'price|address|địa\s*chỉ'
+      r')',
       caseSensitive: false,
     );
 
-    for (final line in lines.take(8)) {
+    for (final line in lines.take(15)) {
       final letters =
           RegExp(r'[A-Za-zÀ-ỹА-Яа-яÇĞİÖŞÜçğıöşü]').allMatches(line).length;
       final digits = RegExp(r'\d').allMatches(line).length;
+
+      final looksLikeLabel = line.contains(':');
+      final looksLikeIdentifier = RegExp(
+        r'\b(no|number|id|code|terminal|receipt|invoice|transaction)\b',
+        caseSensitive: false,
+      ).hasMatch(line);
+
       if (letters >= 3 &&
-          digits < letters &&
+          digits <= 2 &&
+          !looksLikeLabel &&
+          !looksLikeIdentifier &&
           !ignored.hasMatch(line) &&
-          line.length <= 48) {
+          line.length >= 3 &&
+          line.length <= 60) {
         return _titleCase(line);
       }
     }
+
     return 'Fiş harcaması';
   }
 
@@ -106,38 +127,162 @@ class ReceiptParser {
   }
 
   static double _detectTotal(List<String> lines) {
-    final totalKeywords = RegExp(
-      r'(grand\s*total|total\s*due|amount\s*due|total|toplam|genel\s*toplam|ödenecek|итого|к\s*оплате|всего|tổng\s*cộng|thành\s*tiền|tổng\s*thanh\s*toán|phải\s*trả)',
+    final strongTotalKeywords = RegExp(
+      r'('
+      r'grand\s*total|'
+      r'total\s*amount|'
+      r'total\s*payment|'
+      r'total\s*due|'
+      r'amount\s*due|'
+      r'amount\s*payable|'
+      r'net\s*amount|'
+      r'genel\s*toplam|'
+      r'ödenecek\s*tutar|'
+      r'итого\s*к\s*оплате|'
+      r'к\s*оплате|'
+      r'tổng\s*cộng|'
+      r'thành\s*tiền|'
+      r'tổng\s*thanh\s*toán|'
+      r'phải\s*trả'
+      r')',
       caseSensitive: false,
     );
 
-    final candidates = <double>[];
-    for (final line in lines) {
-      if (!totalKeywords.hasMatch(line)) continue;
-      candidates.addAll(_amountsIn(line));
-    }
-    if (candidates.isNotEmpty) {
-      return candidates.reduce((a, b) => a > b ? a : b);
+    final genericTotalKeyword = RegExp(
+      r'^\s*(total|toplam|итого|tổng)\s*:?\s*$',
+      caseSensitive: false,
+    );
+
+    final excludedLabels = RegExp(
+      r'('
+      r'receipt\s*(no|number)|'
+      r'invoice\s*(no|number)|'
+      r'terminal\s*(no|number)|'
+      r'transaction\s*(no|number|id)|'
+      r'account\s*(no|number)|'
+      r'card\s*(no|number)|'
+      r'member\s*card|'
+      r'tax\s*(no|number|code)|'
+      r'mã\s*số\s*thuế|'
+      r'tel|phone|fax|'
+      r'staff|cashier|'
+      r'points|'
+      r'total\s*qty|'
+      r'total\s*quantity|'
+      r'subtotal|'
+      r'total\s*allowance|'
+      r'vat\s*amount|'
+      r'change\s*amount'
+      r')',
+      caseSensitive: false,
+    );
+
+    final labelledCandidates = <double>[];
+
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
+
+      if (excludedLabels.hasMatch(line)) {
+        continue;
+      }
+
+      final isStrongTotal = strongTotalKeywords.hasMatch(line);
+      final isGenericTotal = genericTotalKeyword.hasMatch(line);
+
+      if (!isStrongTotal && !isGenericTotal) {
+        continue;
+      }
+
+      labelledCandidates.addAll(
+        _amountsIn(
+          line,
+          allowPlainInteger: true,
+        ),
+      );
+
+      for (var offset = 1; offset <= 4; offset++) {
+        final nextIndex = index + offset;
+        if (nextIndex >= lines.length) break;
+
+        final nextLine = lines[nextIndex];
+
+        if (excludedLabels.hasMatch(nextLine)) {
+          continue;
+        }
+
+        final amounts = _amountsIn(
+          nextLine,
+          allowPlainInteger: false,
+        );
+
+        if (amounts.isNotEmpty) {
+          labelledCandidates.addAll(amounts);
+          break;
+        }
+      }
     }
 
-    final all = <double>[];
-    for (final line in lines) {
-      all.addAll(_amountsIn(line));
+    if (labelledCandidates.isNotEmpty) {
+      return labelledCandidates.reduce((a, b) => a > b ? a : b);
     }
-    if (all.isEmpty) {
+
+    final fallbackCandidates = <double>[];
+
+    for (final line in lines) {
+      if (excludedLabels.hasMatch(line)) {
+        continue;
+      }
+
+      fallbackCandidates.addAll(
+        _amountsIn(
+          line,
+          allowPlainInteger: false,
+        ),
+      );
+    }
+
+    if (fallbackCandidates.isEmpty) {
       return 0;
     }
-    return all.reduce((a, b) => a > b ? a : b);
+
+    return fallbackCandidates.reduce((a, b) => a > b ? a : b);
   }
 
-  static List<double> _amountsIn(String text) {
-    final matches = RegExp(
-            r'(?<!\d)(\d{1,3}(?:[.,\s]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?)(?!\d)')
-        .allMatches(text);
-    return matches
-        .map((match) => _parseLocalizedNumber(match.group(1) ?? ''))
-        .where((value) => value > 0)
-        .toList();
+  static List<double> _amountsIn(
+    String text, {
+    bool allowPlainInteger = false,
+  }) {
+    final pattern = allowPlainInteger
+        ? RegExp(
+            r'(?<![\d-])'
+            r'(\d{1,3}(?:[.,\s]\d{3})+(?:[.,]\d{1,2})?'
+            r'|\d{1,9}(?:[.,]\d{1,2})?)'
+            r'(?!\d)',
+          )
+        : RegExp(
+            r'(?<![\d-])'
+            r'(\d{1,3}(?:[.,\s]\d{3})+(?:[.,]\d{1,2})?)'
+            r'(?!\d)',
+          );
+
+    final values = <double>[];
+
+    for (final match in pattern.allMatches(text)) {
+      final rawValue = match.group(1) ?? '';
+      final digitCount = RegExp(r'\d').allMatches(rawValue).length;
+
+      if (digitCount > 12) {
+        continue;
+      }
+
+      final value = _parseLocalizedNumber(rawValue);
+
+      if (value > 0) {
+        values.add(value);
+      }
+    }
+
+    return values;
   }
 
   static double _parseLocalizedNumber(String input) {
