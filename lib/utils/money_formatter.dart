@@ -32,7 +32,13 @@ class MoneyFormatter {
       }
     }
 
-    return '${isNegative ? '-' : ''}$selectedSymbol${buffer.toString()}';
+    final formatted = buffer.toString();
+
+    if (selectedSymbol == '₫') {
+      return '${isNegative ? '-' : ''}$formatted ₫';
+    }
+
+    return '${isNegative ? '-' : ''}$selectedSymbol$formatted';
   }
 
   static double parseAmount(String value) {
@@ -45,6 +51,9 @@ class MoneyFormatter {
         .replaceAll('£', '')
         .replaceAll('₼', '')
         .replaceAll('₸', '')
+        .replaceAll('₫', '')
+        .replaceAll('VND', '')
+        .replaceAll('vnd', '')
         .replaceAll('.', '')
         .replaceAll(',', '.')
         .trim();

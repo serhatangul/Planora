@@ -16,6 +16,7 @@ class CurrencySettingsScreen extends StatelessWidget {
     {'symbol': '£', 'label': 'Sterlin'},
     {'symbol': '₼', 'label': 'Manat'},
     {'symbol': '₸', 'label': 'Tenge'},
+    {'symbol': '₫', 'label': 'Vietnam Dong (VND)'},
   ];
 
   @override
