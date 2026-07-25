@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/expense_item.dart';
+import 'receipt_scan_screen.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_utils_planora.dart';
@@ -25,7 +26,8 @@ class ExpensesScreen extends StatefulWidget {
 class _ExpensesScreenState extends State<ExpensesScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  final _dayController = TextEditingController(text: DateTime.now().day.toString());
+  final _dayController =
+      TextEditingController(text: DateTime.now().day.toString());
   final _searchController = TextEditingController();
 
   String? _selectedCategory;
@@ -105,6 +107,19 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     });
   }
 
+  Future<void> _openReceiptScanner() async {
+    final added = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const ReceiptScanScreen()),
+    );
+
+    if (!mounted || added != true) return;
+
+    final lang = PlanoraScope.of(context).appLanguageCode;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(_expensesText(lang, 'receiptAdded'))),
+    );
+  }
+
   void _startEdit(ExpenseItem expense) {
     setState(() {
       _editingExpenseId = expense.id;
@@ -148,8 +163,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       SnackBar(content: Text(_expensesQuickAddText(lang, 'success'))),
     );
   }
-
-
 
   void _cancelForm() {
     FocusScope.of(context).unfocus();
@@ -211,7 +224,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           animation: controller,
           builder: (context, _) {
             final lang = controller.appLanguageCode;
-            final selectedCategory = _selectedCategory ?? controller.categories.first;
+            final selectedCategory =
+                _selectedCategory ?? controller.categories.first;
             final filteredExpenses = _filteredExpenses(controller);
             final categoryFilters = ['Tümü', ...controller.categories];
 
@@ -235,7 +249,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _expensesMonthSubtitle(lang, _expensesMonthYearLabel(lang, controller.selectedMonth)),
+                  _expensesMonthSubtitle(lang,
+                      _expensesMonthYearLabel(lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -251,7 +266,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.shopping_bag_rounded, color: Colors.white),
+                        child: const Icon(Icons.shopping_bag_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -296,7 +312,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SectionHeader(
-                          title: _editingExpenseId == null ? _expensesText(lang, 'newExpense') : _expensesText(lang, 'editExpense'),
+                          title: _editingExpenseId == null
+                              ? _expensesText(lang, 'newExpense')
+                              : _expensesText(lang, 'editExpense'),
                           actionLabel: _expensesText(lang, 'close'),
                           onActionTap: _cancelForm,
                         ),
@@ -338,7 +356,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                                   .map(
                                     (category) => DropdownMenuItem<String>(
                                       value: category,
-                                      child: Text(controller.categoryLabel(category)),
+                                      child: Text(
+                                          controller.categoryLabel(category)),
                                     ),
                                   )
                                   .toList(),
@@ -361,7 +380,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                               onTap: _saveExpense,
                               child: Center(
                                 child: Text(
-                                  _editingExpenseId == null ? _expensesText(lang, 'addExpenseAction') : _expensesText(lang, 'save'),
+                                  _editingExpenseId == null
+                                      ? _expensesText(lang, 'addExpenseAction')
+                                      : _expensesText(lang, 'save'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -376,33 +397,72 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     ),
                   )
                 else
-                  SizedBox(
-                    height: 54,
-                    child: Material(
-                      color: AppColors.darkNavy,
-                      borderRadius: BorderRadius.circular(18),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: _startAdd,
-                        child: Center(
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.add_rounded, color: Colors.white),
-                              const SizedBox(width: 8),
-                              Text(
-                                _expensesText(lang, 'addExpense'),
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w900,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 54,
+                          child: Material(
+                            color: AppColors.darkNavy,
+                            borderRadius: BorderRadius.circular(18),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(18),
+                              onTap: _startAdd,
+                              child: Center(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.add_rounded,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Flexible(
+                                      child: Text(
+                                        _expensesText(lang, 'addExpense'),
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: SizedBox(
+                          height: 54,
+                          child: OutlinedButton.icon(
+                            onPressed: _openReceiptScanner,
+                            icon: const Icon(
+                              Icons.document_scanner_rounded,
+                            ),
+                            label: Text(
+                              _expensesText(lang, 'scanReceipt'),
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18),
+                              ),
+                              side: const BorderSide(
+                                color: AppColors.brandBlue,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 const SizedBox(height: 18),
                 TextField(
@@ -410,7 +470,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: _expensesText(lang, 'searchHint'),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                    prefixIcon: const Icon(Icons.search_rounded,
+                        color: AppColors.textSecondary),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
                         : IconButton(
@@ -422,7 +483,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 18),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
                       borderSide: const BorderSide(color: AppColors.stroke),
@@ -433,7 +495,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
-                      borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
+                      borderSide: const BorderSide(
+                          color: AppColors.brandGreen, width: 1.4),
                     ),
                   ),
                   style: const TextStyle(
@@ -451,7 +514,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           (category) => _FilterChip(
                             label: category,
                             active: _filterCategory == category,
-                            onTap: () => setState(() => _filterCategory = category),
+                            onTap: () =>
+                                setState(() => _filterCategory = category),
                           ),
                         )
                         .toList(),
@@ -465,22 +529,26 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                       _SortChip(
                         label: _expensesText(lang, 'newToOld'),
                         active: _sortMode == ExpenseSortMode.newest,
-                        onTap: () => setState(() => _sortMode = ExpenseSortMode.newest),
+                        onTap: () =>
+                            setState(() => _sortMode = ExpenseSortMode.newest),
                       ),
                       _SortChip(
                         label: _expensesText(lang, 'oldToNew'),
                         active: _sortMode == ExpenseSortMode.oldest,
-                        onTap: () => setState(() => _sortMode = ExpenseSortMode.oldest),
+                        onTap: () =>
+                            setState(() => _sortMode = ExpenseSortMode.oldest),
                       ),
                       _SortChip(
                         label: _expensesText(lang, 'amountHigh'),
                         active: _sortMode == ExpenseSortMode.highest,
-                        onTap: () => setState(() => _sortMode = ExpenseSortMode.highest),
+                        onTap: () =>
+                            setState(() => _sortMode = ExpenseSortMode.highest),
                       ),
                       _SortChip(
                         label: _expensesText(lang, 'amountLow'),
                         active: _sortMode == ExpenseSortMode.lowest,
-                        onTap: () => setState(() => _sortMode = ExpenseSortMode.lowest),
+                        onTap: () =>
+                            setState(() => _sortMode = ExpenseSortMode.lowest),
                       ),
                     ],
                   ),
@@ -502,8 +570,12 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                     description: controller.expensesForSelectedMonth.isEmpty
                         ? _expensesText(lang, 'emptyDescription')
                         : _expensesText(lang, 'filterEmptyDescription'),
-                    actionLabel: controller.expensesForSelectedMonth.isEmpty ? _expensesText(lang, 'addExpense') : null,
-                    onActionTap: controller.expensesForSelectedMonth.isEmpty ? _startAdd : null,
+                    actionLabel: controller.expensesForSelectedMonth.isEmpty
+                        ? _expensesText(lang, 'addExpense')
+                        : null,
+                    onActionTap: controller.expensesForSelectedMonth.isEmpty
+                        ? _startAdd
+                        : null,
                     color: AppColors.warning,
                   )
                 else
@@ -520,9 +592,11 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                             color: AppColors.danger,
                             borderRadius: BorderRadius.circular(24),
                           ),
-                          child: const Icon(Icons.delete_rounded, color: Colors.white),
+                          child: const Icon(Icons.delete_rounded,
+                              color: Colors.white),
                         ),
-                        onDismissed: (_) => controller.removeExpense(expense.id),
+                        onDismissed: (_) =>
+                            controller.removeExpense(expense.id),
                         child: _ExpenseCard(
                           expense: expense,
                           onTap: () => _quickAddAmountToExpense(expense),
@@ -539,11 +613,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 }
 
-
-
-
 String _expensesQuickAddText(String code, String key) {
-  final language = code == 'en' || code == 'ru' ? code : 'tr';
+  final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
 
   const values = {
     'title': {
@@ -591,7 +662,8 @@ class _ExpenseQuickAmountDialog extends StatefulWidget {
   final String currencySymbol;
 
   @override
-  State<_ExpenseQuickAmountDialog> createState() => _ExpenseQuickAmountDialogState();
+  State<_ExpenseQuickAmountDialog> createState() =>
+      _ExpenseQuickAmountDialogState();
 }
 
 class _ExpenseQuickAmountDialogState extends State<_ExpenseQuickAmountDialog> {
@@ -643,7 +715,6 @@ class _ExpenseQuickAmountDialogState extends State<_ExpenseQuickAmountDialog> {
   }
 }
 
-
 String _expensesMonthYearLabel(String code, DateTime month) {
   final months = {
     'tr': [
@@ -690,12 +761,12 @@ String _expensesMonthYearLabel(String code, DateTime month) {
     ],
   };
 
-  final language = code == 'en' || code == 'ru' ? code : 'tr';
+  final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
   return '${months[language]![month.month - 1]} ${month.year}';
 }
 
 String _expensesText(String code, String key) {
-  final language = code == 'en' || code == 'ru' ? code : 'tr';
+  final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
 
   const values = {
     'invalidAmount': {
@@ -758,6 +829,18 @@ String _expensesText(String code, String key) {
       'en': 'Add First Expense',
       'ru': 'Добавить первый расход',
     },
+    'scanReceipt': {
+      'tr': 'Fiş tara',
+      'en': 'Scan receipt',
+      'ru': 'Сканировать чек',
+      'vi': 'Quét hóa đơn',
+    },
+    'receiptAdded': {
+      'tr': 'Fiş harcaması başarıyla eklendi.',
+      'en': 'Receipt expense added successfully.',
+      'ru': 'Расход по чеку успешно добавлен.',
+      'vi': 'Đã thêm chi tiêu từ hóa đơn.',
+    },
     'searchHint': {
       'tr': 'Harcama, kategori, tutar veya gün ara',
       'en': 'Search expense, category, amount, or day',
@@ -799,14 +882,19 @@ String _expensesText(String code, String key) {
       'ru': 'Нет расходов по этому фильтру',
     },
     'emptyDescription': {
-      'tr': 'İlk harcamanızı kaydederek günlük giderlerinizi takip etmeye başlayın.',
+      'tr':
+          'İlk harcamanızı kaydederek günlük giderlerinizi takip etmeye başlayın.',
       'en': 'Record your first expense to start tracking daily spending.',
-      'ru': 'Запишите первый расход, чтобы начать отслеживать ежедневные траты.',
+      'ru':
+          'Запишите первый расход, чтобы начать отслеживать ежедневные траты.',
     },
     'filterEmptyDescription': {
-      'tr': 'Arama kelimesini, kategori filtresini veya sıralamayı değiştirerek tekrar deneyebilirsin.',
-      'en': 'Change the search term, category filter, or sorting and try again.',
-      'ru': 'Измените поиск, фильтр категории или сортировку и попробуйте снова.',
+      'tr':
+          'Arama kelimesini, kategori filtresini veya sıralamayı değiştirerek tekrar deneyebilirsin.',
+      'en':
+          'Change the search term, category filter, or sorting and try again.',
+      'ru':
+          'Измените поиск, фильтр категории или сортировку и попробуйте снова.',
     },
     'all': {
       'tr': 'Tümü',
@@ -896,10 +984,15 @@ class _ExpenseCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(expense.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(expense.title,
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 3),
                   Text(
-                    _expenseDayCategoryText(lang, expense.day, PlanoraScope.of(context).categoryLabel(expense.category)),
+                    _expenseDayCategoryText(
+                        lang,
+                        expense.day,
+                        PlanoraScope.of(context)
+                            .categoryLabel(expense.category)),
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ],
@@ -943,7 +1036,9 @@ class _FilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = PlanoraScope.of(context).appLanguageCode;
-    final displayLabel = label == 'Tümü' ? _expensesText(lang, 'all') : PlanoraScope.of(context).categoryLabel(label);
+    final displayLabel = label == 'Tümü'
+        ? _expensesText(lang, 'all')
+        : PlanoraScope.of(context).categoryLabel(label);
 
     return Padding(
       padding: const EdgeInsets.only(right: 9),
@@ -1020,7 +1115,8 @@ class _InputField extends StatelessWidget {
         prefixText: prefix,
         filled: true,
         fillColor: AppColors.softBg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: AppColors.stroke),
