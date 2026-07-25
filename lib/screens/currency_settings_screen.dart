@@ -192,28 +192,32 @@ class CurrencySettingsScreen extends StatelessWidget {
     );
   }
 String _currencyText(String code, String key) {
-  final language = code == 'en' || code == 'ru' ? code : 'tr';
+  final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
 
   const values = {
     'title': {
       'tr': 'Para birimi',
       'en': 'Currency',
       'ru': 'Валюта',
+      'vi': 'Tiền tệ',
     },
     'subtitle': {
       'tr': 'Tüm tutarlar seçtiğin para birimiyle gösterilir.',
       'en': 'All amounts are shown with the currency you choose.',
       'ru': 'Все суммы отображаются в выбранной валюте.',
+      'vi': 'Tất cả số tiền được hiển thị bằng loại tiền bạn chọn.',
     },
     'selectCurrency': {
       'tr': 'Para birimi seç',
       'en': 'Choose currency',
       'ru': 'Выберите валюту',
+      'vi': 'Chọn tiền tệ',
     },
     'note': {
       'tr': 'Bu ayar sadece gösterimi değiştirir. Mevcut tutar değerleri dönüştürülmez.',
       'en': 'This setting only changes the display. Existing amount values are not converted.',
       'ru': 'Эта настройка меняет только отображение. Существующие суммы не конвертируются.',
+      'vi': 'Cài đặt này chỉ thay đổi cách hiển thị. Các số tiền hiện có không được quy đổi.',
     },
   };
 
