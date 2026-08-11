@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-15
 
     env:
-      FLUTTER_VERSION: "3.24.5"
+      FLUTTER_VERSION: "3.44.2"
 
     steps:
       - name: Kaynak kodu klonla
