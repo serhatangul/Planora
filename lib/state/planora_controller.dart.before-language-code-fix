@@ -580,14 +580,7 @@ class PlanoraController extends ChangeNotifier {
     final labels = _defaultCategoryLabels[canonical];
     if (labels == null) return category;
 
-    final language = appLanguageCode
-        .trim()
-        .toLowerCase()
-        .replaceAll('_', '-')
-        .split('-')
-        .first;
-
-    return labels[language] ?? labels['tr'] ?? category;
+    return labels[appLanguageCode] ?? labels['tr'] ?? category;
   }
 
   String categorySearchText(String category) {
@@ -600,14 +593,7 @@ class PlanoraController extends ChangeNotifier {
     final labels = _defaultPaymentTitleLabels[cleanTitle];
     if (labels == null) return title;
 
-    final language = appLanguageCode
-        .trim()
-        .toLowerCase()
-        .replaceAll('_', '-')
-        .split('-')
-        .first;
-
-    return labels[language] ?? labels['tr'] ?? title;
+    return labels[appLanguageCode] ?? labels['tr'] ?? title;
   }
 
   String paymentTitleSearchText(String title) {

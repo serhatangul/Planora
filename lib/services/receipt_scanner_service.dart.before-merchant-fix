@@ -70,140 +70,44 @@ class ReceiptParser {
   }
 
   static String _detectMerchant(List<String> lines) {
-    if (lines.isEmpty) return 'Fiş harcaması';
-
-    final rejectedKeywords = RegExp(
+    final ignored = RegExp(
       r'('
-      r'receipt|invoice|bill|fatura|fiş|hóa\s*đơn|phiếu|'
-      r'total|subtotal|amount|payment|price|qty|quantity|change|'
-      r'tax|vat|vergi|mst|mã\s*số\s*thuế|'
-      r'date|time|tarih|saat|ngày|'
-      r'terminal|transaction|trans\s*no|trans\s*date|'
-      r'receipt\s*no|invoice\s*no|order\s*no|'
-      r'staff|cashier|employee|member|card|account|points|'
-      r'tel|telephone|phone|fax|hotline|'
-      r'address|địa\s*chỉ|'
-      r'service|customer|thank\s*you|welcome|'
-      r'same\s*day|terms|condition|policy|'
-      r'annive|anniversary|promotion|promo|campaign|'
-      r'discount|sale|offer|khuyến\s*mãi|giảm\s*giá|ưu\s*đãi|'
-      r'name|item|product|description'
+      r'fiş|fatura|receipt|invoice|'
+      r'tax|vat|vergi|'
+      r'tarih|date|saat|time|'
+      r'cashier|kasa|касс|чек|hóa đơn|ngày|'
+      r'terminal|receipt\s*no|invoice\s*no|transaction|trans\s*date|'
+      r'staff|member|card|account|points|'
+      r'tel|phone|fax|mst|mã\s*số\s*thuế|'
+      r'total|amount|subtotal|quantity|qty|allowance|change|'
+      r'price|address|địa\s*chỉ'
       r')',
       caseSensitive: false,
     );
 
-    final labelPattern = RegExp(
-      r'^\s*('
-      r'no|number|id|code|date|time|staff|cashier|'
-      r'total|subtotal|tax|vat|price|qty|quantity|'
-      r'tel|phone|address|name'
-      r')\s*[:#]',
-      caseSensitive: false,
-    );
-
-    final addressPattern = RegExp(
-      r'('
-      r'\b\d{1,5}\s+[\p{L}]|'
-      r'\bstreet\b|\broad\b|\bavenue\b|\bward\b|\bdistrict\b|'
-      r'\bquận\b|\bphường\b|\bđường\b|\b phố\b'
-      r')',
-      caseSensitive: false,
-      unicode: true,
-    );
-
-    String normalize(String value) {
-      return value
-          .replaceAll(RegExp(r'\s+'), ' ')
-          .replaceAll(RegExp(r'^[^A-Za-zÀ-ỹА-Яа-яÇĞİÖŞÜçğıöşü]+'), '')
-          .replaceAll(RegExp(r'[^A-Za-zÀ-ỹА-Яа-яÇĞİÖŞÜçğıöşü0-9&.,\- ]+$'), '')
-          .trim();
-    }
-
-    double scoreLine(String original, int index) {
-      final line = normalize(original);
-
-      if (line.length < 3 || line.length > 45) return -100;
-      if (rejectedKeywords.hasMatch(line)) return -100;
-      if (labelPattern.hasMatch(line)) return -100;
-      if (addressPattern.hasMatch(line)) return -100;
-      if (line.contains(':')) return -100;
-
-      final letters = RegExp(
-        r'[A-Za-zÀ-ỹА-Яа-яÇĞİÖŞÜçğıöşü]',
-      ).allMatches(line).length;
-
+    for (final line in lines.take(15)) {
+      final letters =
+          RegExp(r'[A-Za-zÀ-ỹА-Яа-яÇĞİÖŞÜçğıöşü]').allMatches(line).length;
       final digits = RegExp(r'\d').allMatches(line).length;
-      final words =
-          line.split(RegExp(r'\s+')).where((e) => e.isNotEmpty).toList();
 
-      if (letters < 3) return -100;
-      if (digits > 2) return -100;
-      if (words.length > 5) return -100;
-
-      final letterRatio = letters / line.length;
-      if (letterRatio < 0.55) return -100;
-
-      double score = 0;
-
-      // Fişin üst kısmındaki satırlar mağaza adı olmaya daha yatkındır.
-      score += (16 - index).clamp(0, 16) * 1.5;
-
-      // Kısa marka isimleri avantajlıdır.
-      if (words.length == 1) score += 12;
-      if (words.length == 2) score += 10;
-      if (words.length == 3) score += 6;
-
-      if (line.length >= 4 && line.length <= 25) score += 10;
-      if (line.length > 35) score -= 8;
-
-      // Tamamı büyük harf olan kısa marka satırları genellikle logodur.
-      final hasLowercase = RegExp(
-        r'[a-zà-ỹа-яçğıöşü]',
+      final looksLikeLabel = line.contains(':');
+      final looksLikeIdentifier = RegExp(
+        r'\b(no|number|id|code|terminal|receipt|invoice|transaction)\b',
+        caseSensitive: false,
       ).hasMatch(line);
 
-      final hasUppercase = RegExp(
-        r'[A-ZÀ-ỸА-ЯÇĞİÖŞÜ]',
-      ).hasMatch(line);
-
-      if (hasUppercase && !hasLowercase && line.length <= 28) {
-        score += 8;
-      }
-
-      // Normal başlık biçimi de mağaza adı için makuldür.
-      if (hasUppercase && hasLowercase && words.length <= 3) {
-        score += 5;
-      }
-
-      // Uzun tek kelime OCR kampanya/logo bozulması olabilir.
-      if (words.length == 1 && line.length > 14) {
-        score -= 12;
-      }
-
-      return score;
-    }
-
-    String? bestLine;
-    double bestScore = double.negativeInfinity;
-
-    // Ürün listesine geçmeden yalnızca fişin üst bölümünü değerlendir.
-    final candidateCount = lines.length < 18 ? lines.length : 18;
-
-    for (var index = 0; index < candidateCount; index++) {
-      final line = normalize(lines[index]);
-      final score = scoreLine(line, index);
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestLine = line;
+      if (letters >= 3 &&
+          digits <= 2 &&
+          !looksLikeLabel &&
+          !looksLikeIdentifier &&
+          !ignored.hasMatch(line) &&
+          line.length >= 3 &&
+          line.length <= 60) {
+        return _titleCase(line);
       }
     }
 
-    // Düşük güvenli sonuçları mağaza adı olarak uydurma.
-    if (bestLine == null || bestScore < 20) {
-      return 'Fiş harcaması';
-    }
-
-    return _titleCase(bestLine);
+    return 'Fiş harcaması';
   }
 
   static String _detectCurrency(String text) {
@@ -426,11 +330,106 @@ class ReceiptParser {
   }
 
   static String _detectCategory(
-    String text,
-    String merchant,
-    List<String> categories,
-  ) {
-    return _bestExistingCategory('Alışveriş', categories);
+      String text, String merchant, List<String> categories) {
+    final haystack = '$merchant $text'.toLowerCase();
+    final rules = <String, List<String>>{
+      'Market': [
+        'market',
+        'supermarket',
+        'grocery',
+        'migros',
+        'carrefour',
+        'coop',
+        'winmart',
+        'circle k',
+        'bách hóa',
+        'siêu thị',
+        'продукт'
+      ],
+      'Yeme İçme': [
+        'restaurant',
+        'cafe',
+        'coffee',
+        'starbucks',
+        'burger',
+        'pizza',
+        'food',
+        'restoran',
+        'kafe',
+        'nhà hàng',
+        'cà phê',
+        'кафе',
+        'ресторан'
+      ],
+      'Ulaşım': [
+        'shell',
+        'petrol',
+        'fuel',
+        'gas',
+        'taxi',
+        'grab',
+        'uber',
+        'metro',
+        'transport',
+        'xăng',
+        'nhiên liệu',
+        'такси',
+        'бензин'
+      ],
+      'Sağlık': [
+        'pharmacy',
+        'eczane',
+        'medical',
+        'clinic',
+        'hospital',
+        'nhà thuốc',
+        'dược',
+        'аптека'
+      ],
+      'Alışveriş': [
+        'store',
+        'shop',
+        'mall',
+        'fashion',
+        'clothing',
+        'mağaza',
+        'shopping',
+        'cửa hàng',
+        'магазин'
+      ],
+      'Eğlence': [
+        'cinema',
+        'movie',
+        'game',
+        'entertainment',
+        'netflix',
+        'spotify',
+        'rạp',
+        'giải trí',
+        'кино'
+      ],
+      'Faturalar': [
+        'electric',
+        'water',
+        'internet',
+        'phone',
+        'utility',
+        'elektrik',
+        'fatura',
+        'điện',
+        'nước',
+        'hóa đơn',
+        'интернет'
+      ],
+    };
+
+    for (final entry in rules.entries) {
+      if (entry.value.any(haystack.contains)) {
+        return _bestExistingCategory(entry.key, categories);
+      }
+    }
+
+    return _bestExistingCategory('Diğer', categories);
   }
 
   static String _bestExistingCategory(

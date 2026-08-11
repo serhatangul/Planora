@@ -108,11 +108,24 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   }
 
   Future<void> _openReceiptScanner() async {
+    final controller = PlanoraScope.of(context);
+
     final added = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => const ReceiptScanScreen()),
+      MaterialPageRoute(
+        builder: (_) => PlanoraScope(
+          controller: controller,
+          child: const ReceiptScanScreen(),
+        ),
+      ),
     );
 
     if (!mounted || added != true) return;
+
+    setState(() {
+      _filterCategory = 'Tümü';
+      _searchController.clear();
+      _sortMode = ExpenseSortMode.newest;
+    });
 
     final lang = PlanoraScope.of(context).appLanguageCode;
     ScaffoldMessenger.of(context).showSnackBar(

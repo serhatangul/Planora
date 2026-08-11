@@ -220,15 +220,6 @@ import VisionKit
       }
 
       let text = pageTexts.joined(separator: "\n")
-
-      print("""
-      
-      ========== PLANORA RAW OCR START ==========
-      \(text)
-      ========== PLANORA RAW OCR END ==========
-      
-      """)
-
       DispatchQueue.main.async {
         guard let self = self else { return }
         if text.isEmpty, let error = recognitionError {

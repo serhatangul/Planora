@@ -430,7 +430,43 @@ class ReceiptParser {
     String merchant,
     List<String> categories,
   ) {
-    return _bestExistingCategory('Alışveriş', categories);
+    const localizedShoppingNames = <String>[
+      'Alışveriş',
+      'Shopping',
+      'Покупки',
+      'Mua sắm',
+    ];
+
+    String normalize(String value) {
+      return value.trim().toLowerCase().replaceAll(RegExp(r'\s+'), ' ');
+    }
+
+    final normalizedShoppingNames =
+        localizedShoppingNames.map(normalize).toSet();
+
+    // Uygulamanın seçili dilinde mevcut olan alışveriş kategorisini bul.
+    for (final category in categories) {
+      if (normalizedShoppingNames.contains(normalize(category))) {
+        return category;
+      }
+    }
+
+    // Kategori adında ek açıklama varsa onu da destekle.
+    for (final category in categories) {
+      final normalizedCategory = normalize(category);
+
+      for (final shoppingName in normalizedShoppingNames) {
+        if (normalizedCategory.contains(shoppingName) ||
+            shoppingName.contains(normalizedCategory)) {
+          return category;
+        }
+      }
+    }
+
+    // Normal şartlarda bu noktaya gelinmez. Alışveriş kategorisi
+    // bulunamazsa geçerli olmayan Türkçe bir kategori eklemek yerine
+    // mevcut kategori listesinden güvenli bir değer kullan.
+    return categories.isNotEmpty ? categories.first : 'Shopping';
   }
 
   static String _bestExistingCategory(

@@ -356,11 +356,7 @@ class _ScanField extends StatelessWidget {
 }
 
 String _scanText(String code, String key) {
-  final normalizedCode =
-      code.trim().toLowerCase().replaceAll('_', '-').split('-').first;
-
-  final language =
-      {'tr', 'en', 'ru', 'vi'}.contains(normalizedCode) ? normalizedCode : 'tr';
+  final language = {'tr', 'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
   const values = {
     'title': {
       'tr': 'Akıllı Fiş Tarama',
@@ -458,15 +454,8 @@ String _scanText(String code, String key) {
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
 
-String _currencyWarning(
-  String code,
-  String detected,
-  String selected,
-) {
-  final language =
-      code.trim().toLowerCase().replaceAll('_', '-').split('-').first;
-
-  switch (language) {
+String _currencyWarning(String code, String detected, String selected) {
+  switch (code) {
     case 'en':
       return 'The receipt appears to use $detected, while Planora is set to $selected. The amount will not be converted.';
     case 'ru':

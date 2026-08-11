@@ -426,11 +426,106 @@ class ReceiptParser {
   }
 
   static String _detectCategory(
-    String text,
-    String merchant,
-    List<String> categories,
-  ) {
-    return _bestExistingCategory('Alışveriş', categories);
+      String text, String merchant, List<String> categories) {
+    final haystack = '$merchant $text'.toLowerCase();
+    final rules = <String, List<String>>{
+      'Market': [
+        'market',
+        'supermarket',
+        'grocery',
+        'migros',
+        'carrefour',
+        'coop',
+        'winmart',
+        'circle k',
+        'bách hóa',
+        'siêu thị',
+        'продукт'
+      ],
+      'Yeme İçme': [
+        'restaurant',
+        'cafe',
+        'coffee',
+        'starbucks',
+        'burger',
+        'pizza',
+        'food',
+        'restoran',
+        'kafe',
+        'nhà hàng',
+        'cà phê',
+        'кафе',
+        'ресторан'
+      ],
+      'Ulaşım': [
+        'shell',
+        'petrol',
+        'fuel',
+        'gas',
+        'taxi',
+        'grab',
+        'uber',
+        'metro',
+        'transport',
+        'xăng',
+        'nhiên liệu',
+        'такси',
+        'бензин'
+      ],
+      'Sağlık': [
+        'pharmacy',
+        'eczane',
+        'medical',
+        'clinic',
+        'hospital',
+        'nhà thuốc',
+        'dược',
+        'аптека'
+      ],
+      'Alışveriş': [
+        'store',
+        'shop',
+        'mall',
+        'fashion',
+        'clothing',
+        'mağaza',
+        'shopping',
+        'cửa hàng',
+        'магазин'
+      ],
+      'Eğlence': [
+        'cinema',
+        'movie',
+        'game',
+        'entertainment',
+        'netflix',
+        'spotify',
+        'rạp',
+        'giải trí',
+        'кино'
+      ],
+      'Faturalar': [
+        'electric',
+        'water',
+        'internet',
+        'phone',
+        'utility',
+        'elektrik',
+        'fatura',
+        'điện',
+        'nước',
+        'hóa đơn',
+        'интернет'
+      ],
+    };
+
+    for (final entry in rules.entries) {
+      if (entry.value.any(haystack.contains)) {
+        return _bestExistingCategory(entry.key, categories);
+      }
+    }
+
+    return _bestExistingCategory('Diğer', categories);
   }
 
   static String _bestExistingCategory(
