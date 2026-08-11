@@ -1,0 +1,13 @@
+# =============================================================================
+# Planora - iOS Ruby Bagimliliklari (Fastlane)
+# =============================================================================
+# GitHub Actions workflow'unda `bundle exec fastlane` calistirilabilmesi icin
+# gerekli gem'ler. `bundler-cache: true` ile CI'da otomatik yuklenir.
+# =============================================================================
+
+source "https://rubygems.org"
+
+gem "fastlane"
+
+# CocoaPods (Flutter iOS eklentileri Pod kullaniyorsa gereklidir)
+gem "cocoapods"
