@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Planora - iOS Export Ayarlari (App Store dagitimi).
+  "flutter build ipa" komutu bu dosyayi export-options-plist olarak kullanir.
+  TestFlight/App Store yuklemesi icin method "app-store" olmalidir.
+
+  NOT: provisioningProfiles altindaki profil adi, App Store Connect'te
+  olusturdugunuz dagitim (Distribution) provisioning profile'in ADI ile
+  eslesmelidir. Farkli bir isim kullaniyorsaniz asagidaki degeri guncelleyin.
+-->
+<plist version="1.0">
+<dict>
+    <!-- Dagitim yontemi: App Store / TestFlight -->
+    <key>method</key>
+    <string>app-store</string>
+
+    <!-- Apple Developer ekip (team) ID -->
+    <key>teamID</key>
+    <string>WCYY3ZV5AU</string>
+
+    <!-- Manuel imzalama (CI'da yuklenen sertifika + profil kullanilir) -->
+    <key>signingStyle</key>
+    <string>manual</string>
+
+    <!-- Imzalama sertifikasi turu -->
+    <key>signingCertificate</key>
+    <string>Apple Distribution</string>
+
+    <!-- Bundle ID -> Provisioning Profile eslemesi -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>com.serhatangul.planora2</key>
+        <string>Planora AppStore</string>
+    </dict>
+
+    <!-- Bitcode artik kullanilmiyor -->
+    <key>uploadBitcode</key>
+    <false/>
+
+    <!-- Sembolleri yukle (crash raporlari icin) -->
+    <key>uploadSymbols</key>
+    <true/>
+
+    <!-- App Store'a manuel yukleyecegimiz icin otomatik gonderimi kapat -->
+    <key>destination</key>
+    <string>export</string>
+</dict>
+</plist>

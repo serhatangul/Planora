@@ -1,0 +1,39 @@
+# =============================================================================
+# Planora - Fastlane Konfigurasyonu (iOS)
+# =============================================================================
+# Bu Fastfile, GitHub Actions workflow'u tarafindan cagrilir ve derlenmis
+# IPA dosyasini App Store Connect (TestFlight) uzerine yukler.
+#
+# Imzalama ve build islemi Flutter (`flutter build ipa`) tarafinda yapildigi
+# icin burada yalnizca yukleme adimi (upload_to_testflight) bulunur.
+# =============================================================================
+
+default_platform(:ios)
+
+platform :ios do
+  # ---------------------------------------------------------------------------
+  # beta: Derlenmis IPA'yi TestFlight'a yukler.
+  #       Kimlik dogrulama App Store Connect API Key (.p8) ile yapilir.
+  # ---------------------------------------------------------------------------
+  desc "IPA dosyasini TestFlight'a yukler"
+  lane :beta do
+    # App Store Connect API anahtari ile oturum ac (parolasiz, 2FA gerektirmez)
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_CONNECT_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_CONNECT_API_KEY_ISSUER_ID"],
+      key_filepath: ENV["APP_STORE_CONNECT_API_KEY_PATH"],
+      in_house: false
+    )
+
+    # Flutter'in urettigi IPA yolu (workflow env: IPA_PATH ile gelir).
+    ipa_path = ENV["IPA_PATH"] || "../build/ios/ipa/planora.ipa"
+
+    # TestFlight'a yukle
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: ipa_path,
+      skip_waiting_for_build_processing: true,
+      skip_submission: true
+    )
+  end
+end

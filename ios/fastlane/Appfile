@@ -1,0 +1,24 @@
+# =============================================================================
+# Planora - Fastlane Appfile
+# =============================================================================
+# Uygulama kimlik bilgileri. Apple hesabi ile ilgili hassas bilgiler
+# (apple_id vb.) genelde CI'da API Key ile degistirildigi icin burada
+# yalnizca bundle identifier ve team bilgisi tutulur.
+#
+# NOT: apple_id ve itc_team_id degerleri placeholder'dir. App Store Connect
+#      API Key kullanildiginda apple_id'ye ihtiyac duyulmaz; yine de yerel
+#      calistirma icin doldurabilirsiniz.
+# =============================================================================
+
+# Uygulamanin bundle identifier'i (Xcode projesindeki deger)
+app_identifier("com.serhatangul.planora2")
+
+# Apple Developer hesap e-postasi (yerel kullanim icin; CI'da API Key ile
+# calisirken gerekmez). Placeholder:
+apple_id("APPLE_ID_EMAIL_BURAYA")   # orn: developer@example.com
+
+# App Store Connect ekip (team) ID'si - placeholder
+itc_team_id("ITC_TEAM_ID_BURAYA")   # orn: 123456789
+
+# Apple Developer Portal ekip (team) ID'si (Xcode: WCYY3ZV5AU)
+team_id("WCYY3ZV5AU")
