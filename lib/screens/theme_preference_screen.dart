@@ -98,7 +98,8 @@ class ThemePreferenceScreen extends StatelessWidget {
                       Switch.adaptive(
                         value: controller.preferDarkMode,
                         activeColor: AppColors.brandGreen,
-                        onChanged: (value) => controller.updateThemePreference(value),
+                        onChanged: (value) =>
+                            controller.updateThemePreference(value),
                       ),
                     ],
                   ),
@@ -132,7 +133,8 @@ class ThemePreferenceScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -152,7 +154,6 @@ class ThemePreferenceScreen extends StatelessWidget {
   }
 }
 
-
 String _themeText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -163,9 +164,9 @@ String _themeText(String code, String key) {
       'ru': 'Тема',
     },
     'subtitle': {
-      'tr': 'Planora için görünüm tercihini hazırla. Bu adım koyu mod geçişinin güvenli temelidir.',
-      'en': 'Prepare the appearance preference for Planora. This step is the safe foundation for dark mode transition.',
-      'ru': 'Настройте предпочтение внешнего вида Planora. Этот шаг является безопасной основой для перехода к тёмному режиму.',
+      'tr': 'Planora görünümünü tercihinize göre özelleştirin.',
+      'en': 'Customize Planora appearance to match your preference.',
+      'ru': 'Настройте внешний вид Planora по своему предпочтению.',
     },
     'darkSelected': {
       'tr': 'Koyu mod tercihi seçildi',
@@ -178,14 +179,15 @@ String _themeText(String code, String key) {
       'ru': 'Выбрана светлая тема',
     },
     'darkSubtitle': {
-      'tr': 'Bir sonraki adımda uygulama ekranları koyu moda bağlanacak.',
-      'en': 'In the next step, app screens will be connected to dark mode.',
-      'ru': 'На следующем этапе экраны приложения будут подключены к тёмному режиму.',
+      'tr': 'Düşük ışıkta daha rahat kullanım için koyu görünüm.',
+      'en': 'A darker appearance for more comfortable use in low light.',
+      'ru':
+          'Тёмное оформление для более комфортного использования при слабом освещении.',
     },
     'lightSubtitle': {
-      'tr': 'Şu an uygulama açık modda çalışmaya devam eder.',
-      'en': 'For now, the app continues to work in light mode.',
-      'ru': 'Сейчас приложение продолжает работать в светлом режиме.',
+      'tr': 'Aydınlık ve sade Planora görünümü.',
+      'en': 'A bright and clean Planora appearance.',
+      'ru': 'Светлое и чистое оформление Planora.',
     },
     'light': {
       'tr': 'Açık',
@@ -193,9 +195,9 @@ String _themeText(String code, String key) {
       'ru': 'Светлая',
     },
     'currentView': {
-      'tr': 'Mevcut görünüm',
-      'en': 'Current appearance',
-      'ru': 'Текущий вид',
+      'tr': 'Açık görünüm',
+      'en': 'Light appearance',
+      'ru': 'Светлое оформление',
     },
     'dark': {
       'tr': 'Koyu',
@@ -203,14 +205,17 @@ String _themeText(String code, String key) {
       'ru': 'Тёмная',
     },
     'preparationPreference': {
-      'tr': 'Hazırlık tercihi',
-      'en': 'Preparation preference',
-      'ru': 'Подготовительная настройка',
+      'tr': 'Koyu görünüm',
+      'en': 'Dark appearance',
+      'ru': 'Тёмное оформление',
     },
     'note': {
-      'tr': 'Bu patch sadece tema tercihini kaydeder. Uygulamanın tamamı henüz koyu moda geçmez. Böylece önce build ve storage güvenliğini test etmiş oluruz.',
-      'en': 'This patch only saves the theme preference. The entire app does not switch to dark mode yet. This lets us test build and storage safety first.',
-      'ru': 'Этот патч только сохраняет выбор темы. Всё приложение пока не переходит в тёмный режим. Так мы сначала проверяем безопасность сборки и хранения данных.',
+      'tr':
+          'Tema tercihiniz uygulamanın tamamına uygulanır ve otomatik olarak kaydedilir.',
+      'en':
+          'Your theme preference is applied throughout the app and saved automatically.',
+      'ru':
+          'Выбранная тема применяется ко всему приложению и сохраняется автоматически.',
     },
   };
 
