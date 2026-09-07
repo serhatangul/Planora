@@ -12,7 +12,7 @@ class HelpGuideScreen extends StatelessWidget {
     final lang = PlanoraScope.of(context).appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -51,7 +51,8 @@ class HelpGuideScreen extends StatelessWidget {
                       color: Colors.white.withOpacity(0.10),
                       borderRadius: BorderRadius.circular(22),
                     ),
-                    child: const Icon(Icons.auto_stories_rounded, color: Colors.white),
+                    child: const Icon(Icons.auto_stories_rounded,
+                        color: Colors.white),
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -152,7 +153,7 @@ class HelpGuideScreen extends StatelessWidget {
             ),
             const SizedBox(height: 18),
             PremiumCard(
-              color: const Color(0xFFF9FBFF),
+              color: AppThemeColors.card(context),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -174,47 +175,196 @@ class HelpGuideScreen extends StatelessWidget {
   }
 }
 
-
 String _helpText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
   const values = {
-    'title': {'tr': 'Kullanım rehberi', 'en': 'User guide', 'ru': 'Руководство'},
-    'subtitle': {'tr': 'Planora’yı daha verimli kullanmak için temel akış ve ekran açıklamaları.', 'en': 'Basic flow and screen explanations to use Planora more efficiently.', 'ru': 'Основной порядок работы и описание экранов для более удобного использования Planora.'},
-    'heroText': {'tr': 'Önce gelirini belirle, sonra aylık ödemelerini gir, ardından harcama ve ek gelirleri ay boyunca takip et.', 'en': 'First set your income, then add monthly payments, then track expenses and extra income during the month.', 'ru': 'Сначала укажите доход, затем добавьте ежемесячные платежи, после этого отслеживайте расходы и доп. доходы в течение месяца.'},
-    'startOrder': {'tr': 'Başlangıç sırası', 'en': 'Getting started', 'ru': 'Порядок начала'},
-    'screensPurpose': {'tr': 'Ekranlar ne işe yarar?', 'en': 'What are the screens for?', 'ru': 'Для чего нужны экраны?'},
+    'title': {
+      'tr': 'Kullanım rehberi',
+      'en': 'User guide',
+      'ru': 'Руководство'
+    },
+    'subtitle': {
+      'tr':
+          'Planora’yı daha verimli kullanmak için temel akış ve ekran açıklamaları.',
+      'en':
+          'Basic flow and screen explanations to use Planora more efficiently.',
+      'ru':
+          'Основной порядок работы и описание экранов для более удобного использования Planora.'
+    },
+    'heroText': {
+      'tr':
+          'Önce gelirini belirle, sonra aylık ödemelerini gir, ardından harcama ve ek gelirleri ay boyunca takip et.',
+      'en':
+          'First set your income, then add monthly payments, then track expenses and extra income during the month.',
+      'ru':
+          'Сначала укажите доход, затем добавьте ежемесячные платежи, после этого отслеживайте расходы и доп. доходы в течение месяца.'
+    },
+    'startOrder': {
+      'tr': 'Başlangıç sırası',
+      'en': 'Getting started',
+      'ru': 'Порядок начала'
+    },
+    'screensPurpose': {
+      'tr': 'Ekranlar ne işe yarar?',
+      'en': 'What are the screens for?',
+      'ru': 'Для чего нужны экраны?'
+    },
     'tips': {'tr': 'İpuçları', 'en': 'Tips', 'ru': 'Советы'},
-
-    'step1Title': {'tr': 'Aylık geliri ayarla', 'en': 'Set monthly income', 'ru': 'Укажите месячный доход'},
-    'step1Description': {'tr': 'Profil > Aylık gelir bölümünden sabit aylık gelirini ve maaş gününü gir.', 'en': 'Enter your fixed monthly income and salary day from Profile > Monthly income.', 'ru': 'Введите стабильный месячный доход и день зарплаты в Профиль > Месячный доход.'},
-    'step2Title': {'tr': 'Aylık ödemeleri ekle', 'en': 'Add monthly payments', 'ru': 'Добавьте ежемесячные платежи'},
-    'step2Description': {'tr': 'Ödeme ekranından kira, kredi, taksit, fatura gibi düzenli veya tek seferlik ödemeleri ekle.', 'en': 'Add regular or one-time payments such as rent, loans, installments, and bills from the Payments screen.', 'ru': 'Добавьте регулярные или разовые платежи, например аренду, кредит, рассрочку и счета, на экране платежей.'},
-    'step3Title': {'tr': 'Harcama ve ek gelirleri takip et', 'en': 'Track expenses and extra income', 'ru': 'Отслеживайте расходы и доп. доходы'},
-    'step3Description': {'tr': 'Ay içinde yaptığın değişken harcamaları ve prim/iade/freelance gibi ek gelirleri gir.', 'en': 'Enter variable expenses and extra income such as bonuses, refunds, or freelance earnings during the month.', 'ru': 'Вносите переменные расходы и доп. доходы, например премии, возвраты или фриланс, в течение месяца.'},
-    'step4Title': {'tr': 'Analiz ve limitleri kontrol et', 'en': 'Check analysis and limits', 'ru': 'Проверяйте анализ и лимиты'},
-    'step4Description': {'tr': 'Analiz ekranından kategori limitlerini, bütçe sağlığını ve ay sonu tahminini takip et.', 'en': 'Track category limits, budget health, and end-of-month forecast from the Analysis screen.', 'ru': 'Следите за лимитами категорий, состоянием бюджета и прогнозом на конец месяца на экране анализа.'},
-
+    'step1Title': {
+      'tr': 'Aylık geliri ayarla',
+      'en': 'Set monthly income',
+      'ru': 'Укажите месячный доход'
+    },
+    'step1Description': {
+      'tr':
+          'Profil > Aylık gelir bölümünden sabit aylık gelirini ve maaş gününü gir.',
+      'en':
+          'Enter your fixed monthly income and salary day from Profile > Monthly income.',
+      'ru':
+          'Введите стабильный месячный доход и день зарплаты в Профиль > Месячный доход.'
+    },
+    'step2Title': {
+      'tr': 'Aylık ödemeleri ekle',
+      'en': 'Add monthly payments',
+      'ru': 'Добавьте ежемесячные платежи'
+    },
+    'step2Description': {
+      'tr':
+          'Ödeme ekranından kira, kredi, taksit, fatura gibi düzenli veya tek seferlik ödemeleri ekle.',
+      'en':
+          'Add regular or one-time payments such as rent, loans, installments, and bills from the Payments screen.',
+      'ru':
+          'Добавьте регулярные или разовые платежи, например аренду, кредит, рассрочку и счета, на экране платежей.'
+    },
+    'step3Title': {
+      'tr': 'Harcama ve ek gelirleri takip et',
+      'en': 'Track expenses and extra income',
+      'ru': 'Отслеживайте расходы и доп. доходы'
+    },
+    'step3Description': {
+      'tr':
+          'Ay içinde yaptığın değişken harcamaları ve prim/iade/freelance gibi ek gelirleri gir.',
+      'en':
+          'Enter variable expenses and extra income such as bonuses, refunds, or freelance earnings during the month.',
+      'ru':
+          'Вносите переменные расходы и доп. доходы, например премии, возвраты или фриланс, в течение месяца.'
+    },
+    'step4Title': {
+      'tr': 'Analiz ve limitleri kontrol et',
+      'en': 'Check analysis and limits',
+      'ru': 'Проверяйте анализ и лимиты'
+    },
+    'step4Description': {
+      'tr':
+          'Analiz ekranından kategori limitlerini, bütçe sağlığını ve ay sonu tahminini takip et.',
+      'en':
+          'Track category limits, budget health, and end-of-month forecast from the Analysis screen.',
+      'ru':
+          'Следите за лимитами категорий, состоянием бюджета и прогнозом на конец месяца на экране анализа.'
+    },
     'homeTitle': {'tr': 'Ana ekran', 'en': 'Home', 'ru': 'Главная'},
-    'homeDescription': {'tr': 'Bu ayki gelir, ödeme, serbest bakiye, günlük güvenli limit ve hızlı özetleri gösterir.', 'en': 'Shows this month’s income, payments, free balance, daily safe limit, and quick summaries.', 'ru': 'Показывает доход за месяц, платежи, свободный баланс, дневной безопасный лимит и краткие сводки.'},
+    'homeDescription': {
+      'tr':
+          'Bu ayki gelir, ödeme, serbest bakiye, günlük güvenli limit ve hızlı özetleri gösterir.',
+      'en':
+          'Shows this month’s income, payments, free balance, daily safe limit, and quick summaries.',
+      'ru':
+          'Показывает доход за месяц, платежи, свободный баланс, дневной безопасный лимит и краткие сводки.'
+    },
     'paymentsTitle': {'tr': 'Ödeme', 'en': 'Payments', 'ru': 'Платежи'},
-    'paymentsDescription': {'tr': 'Aylık veya tek seferlik ödemeleri eklemek, düzenlemek ve ödendi/bekliyor yapmak için kullanılır.', 'en': 'Used to add, edit, and mark monthly or one-time payments as paid/waiting.', 'ru': 'Используется для добавления, редактирования и отметки ежемесячных или разовых платежей как оплачено/ожидает.'},
+    'paymentsDescription': {
+      'tr':
+          'Aylık veya tek seferlik ödemeleri eklemek, düzenlemek ve ödendi/bekliyor yapmak için kullanılır.',
+      'en':
+          'Used to add, edit, and mark monthly or one-time payments as paid/waiting.',
+      'ru':
+          'Используется для добавления, редактирования и отметки ежемесячных или разовых платежей как оплачено/ожидает.'
+    },
     'calendarTitle': {'tr': 'Takvim', 'en': 'Calendar', 'ru': 'Календарь'},
-    'calendarDescription': {'tr': 'Ödeme, harcama ve ek gelirleri gün bazında görmeni sağlar.', 'en': 'Lets you view payments, expenses, and extra income by day.', 'ru': 'Позволяет просматривать платежи, расходы и доп. доходы по дням.'},
+    'calendarDescription': {
+      'tr': 'Ödeme, harcama ve ek gelirleri gün bazında görmeni sağlar.',
+      'en': 'Lets you view payments, expenses, and extra income by day.',
+      'ru': 'Позволяет просматривать платежи, расходы и доп. доходы по дням.'
+    },
     'analysisTitle': {'tr': 'Analiz', 'en': 'Analysis', 'ru': 'Анализ'},
-    'analysisDescription': {'tr': 'Kategori limitleri, bütçe sağlığı, ay sonu tahmini ve detaylı raporları gösterir.', 'en': 'Shows category limits, budget health, end-of-month forecast, and detailed reports.', 'ru': 'Показывает лимиты категорий, состояние бюджета, прогноз на конец месяца и подробные отчёты.'},
+    'analysisDescription': {
+      'tr':
+          'Kategori limitleri, bütçe sağlığı, ay sonu tahmini ve detaylı raporları gösterir.',
+      'en':
+          'Shows category limits, budget health, end-of-month forecast, and detailed reports.',
+      'ru':
+          'Показывает лимиты категорий, состояние бюджета, прогноз на конец месяца и подробные отчёты.'
+    },
     'profileTitle': {'tr': 'Profil', 'en': 'Profile', 'ru': 'Профиль'},
-    'profileDescription': {'tr': 'Gelir, para birimi, gizlilik, bildirim tercihleri, yedekleme ve veri yönetimi ayarlarını içerir.', 'en': 'Includes income, currency, privacy, notification preferences, backup, and data management settings.', 'ru': 'Содержит настройки дохода, валюты, приватности, уведомлений, резервного копирования и управления данными.'},
-
-    'oneTimeTipTitle': {'tr': 'Tek seferlik ödeme ne zaman kullanılır?', 'en': 'When to use a one-time payment?', 'ru': 'Когда использовать разовый платёж?'},
-    'oneTimeTipDescription': {'tr': 'Sadece seçili ayda görünecek geçici ödemeler için kullan. Örneğin cihaz tamiri, ekstra borç veya tek aylık taksit.', 'en': 'Use it for temporary payments that should appear only in the selected month, such as device repair, extra debt, or a one-month installment.', 'ru': 'Используйте для временных платежей, которые должны отображаться только в выбранном месяце, например ремонт устройства, дополнительный долг или разовая рассрочка.'},
-    'monthlyPaymentTipTitle': {'tr': 'Aylık ödeme ne zaman kullanılır?', 'en': 'When to use a monthly payment?', 'ru': 'Когда использовать ежемесячный платёж?'},
-    'monthlyPaymentTipDescription': {'tr': 'Her ay tekrar eden kira, internet, kredi, abonelik gibi ödemeler için kullan.', 'en': 'Use it for recurring payments such as rent, internet, loans, and subscriptions.', 'ru': 'Используйте для повторяющихся платежей, например аренды, интернета, кредита и подписок.'},
-    'privacyTipTitle': {'tr': 'Gizli tutar modu', 'en': 'Hidden amount mode', 'ru': 'Режим скрытых сумм'},
-    'privacyTipDescription': {'tr': 'Telefonu başkasının yanında açarken tutarları gizlemek için Profil > Gizlilik bölümünden aktif et.', 'en': 'Enable it from Profile > Privacy to hide amounts when opening the app around others.', 'ru': 'Включите в Профиль > Приватность, чтобы скрывать суммы, когда открываете приложение рядом с другими.'},
-    'backupTipTitle': {'tr': 'Yedek almayı unutma', 'en': 'Do not forget to back up', 'ru': 'Не забывайте делать резервную копию'},
-    'backupTipDescription': {'tr': 'Büyük temizlik veya veri geri yükleme işlemlerinden önce Profil > Verileri yedekle bölümünden yedek oluştur.', 'en': 'Create a backup from Profile > Backup data before major cleanup or data restore actions.', 'ru': 'Создайте резервную копию в Профиль > Резервное копирование перед большой очисткой или восстановлением данных.'},
-    'dataNote': {'tr': 'Planora’daki veriler cihaz üzerinde saklanır. Uygulamayı silmeden önce yedek almak önemlidir.', 'en': 'Planora data is stored on the device. It is important to create a backup before deleting the app.', 'ru': 'Данные Planora хранятся на устройстве. Перед удалением приложения важно создать резервную копию.'},
+    'profileDescription': {
+      'tr':
+          'Gelir, para birimi, gizlilik, bildirim tercihleri, yedekleme ve veri yönetimi ayarlarını içerir.',
+      'en':
+          'Includes income, currency, privacy, notification preferences, backup, and data management settings.',
+      'ru':
+          'Содержит настройки дохода, валюты, приватности, уведомлений, резервного копирования и управления данными.'
+    },
+    'oneTimeTipTitle': {
+      'tr': 'Tek seferlik ödeme ne zaman kullanılır?',
+      'en': 'When to use a one-time payment?',
+      'ru': 'Когда использовать разовый платёж?'
+    },
+    'oneTimeTipDescription': {
+      'tr':
+          'Sadece seçili ayda görünecek geçici ödemeler için kullan. Örneğin cihaz tamiri, ekstra borç veya tek aylık taksit.',
+      'en':
+          'Use it for temporary payments that should appear only in the selected month, such as device repair, extra debt, or a one-month installment.',
+      'ru':
+          'Используйте для временных платежей, которые должны отображаться только в выбранном месяце, например ремонт устройства, дополнительный долг или разовая рассрочка.'
+    },
+    'monthlyPaymentTipTitle': {
+      'tr': 'Aylık ödeme ne zaman kullanılır?',
+      'en': 'When to use a monthly payment?',
+      'ru': 'Когда использовать ежемесячный платёж?'
+    },
+    'monthlyPaymentTipDescription': {
+      'tr':
+          'Her ay tekrar eden kira, internet, kredi, abonelik gibi ödemeler için kullan.',
+      'en':
+          'Use it for recurring payments such as rent, internet, loans, and subscriptions.',
+      'ru':
+          'Используйте для повторяющихся платежей, например аренды, интернета, кредита и подписок.'
+    },
+    'privacyTipTitle': {
+      'tr': 'Gizli tutar modu',
+      'en': 'Hidden amount mode',
+      'ru': 'Режим скрытых сумм'
+    },
+    'privacyTipDescription': {
+      'tr':
+          'Telefonu başkasının yanında açarken tutarları gizlemek için Profil > Gizlilik bölümünden aktif et.',
+      'en':
+          'Enable it from Profile > Privacy to hide amounts when opening the app around others.',
+      'ru':
+          'Включите в Профиль > Приватность, чтобы скрывать суммы, когда открываете приложение рядом с другими.'
+    },
+    'backupTipTitle': {
+      'tr': 'Yedek almayı unutma',
+      'en': 'Do not forget to back up',
+      'ru': 'Не забывайте делать резервную копию'
+    },
+    'backupTipDescription': {
+      'tr':
+          'Büyük temizlik veya veri geri yükleme işlemlerinden önce Profil > Verileri yedekle bölümünden yedek oluştur.',
+      'en':
+          'Create a backup from Profile > Backup data before major cleanup or data restore actions.',
+      'ru':
+          'Создайте резервную копию в Профиль > Резервное копирование перед большой очисткой или восстановлением данных.'
+    },
+    'dataNote': {
+      'tr':
+          'Planora’daki veriler cihaz üzerinde saklanır. Uygulamayı silmeden önce yedek almak önemlidir.',
+      'en':
+          'Planora data is stored on the device. It is important to create a backup before deleting the app.',
+      'ru':
+          'Данные Planora хранятся на устройстве. Перед удалением приложения важно создать резервную копию.'
+    },
   };
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
@@ -287,7 +437,8 @@ class _GuideStep extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -321,7 +472,9 @@ class _FeatureCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: const Color(0xFFEAF0FB),
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF172037)
+                    : const Color(0xFFEAF0FB),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: AppColors.brandBlue),
@@ -333,7 +486,8 @@ class _FeatureCard extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 3),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -360,7 +514,9 @@ class _TipCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: PremiumCard(
-        color: const Color(0xFFF4FFFB),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF0E2423)
+            : const Color(0xFFF4FFFB),
         borderColor: AppColors.brandGreen.withOpacity(0.20),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -374,7 +530,8 @@ class _TipCard extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),

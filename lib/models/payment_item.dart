@@ -73,7 +73,8 @@ class PaymentItem {
 
   factory PaymentItem.fromJson(Map<String, dynamic> json) {
     return PaymentItem(
-      id: json['id'] as String? ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      id: json['id'] as String? ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
       title: json['title'] as String? ?? '',
       category: json['category'] as String? ?? 'Diğer',
       amount: (json['amount'] as num?)?.toDouble() ?? 0,

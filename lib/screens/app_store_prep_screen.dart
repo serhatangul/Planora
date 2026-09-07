@@ -12,7 +12,7 @@ class AppStorePrepScreen extends StatelessWidget {
     final lang = PlanoraScope.of(context).appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -85,14 +85,16 @@ class AppStorePrepScreen extends StatelessWidget {
             _PrepItem(
               lang: lang,
               title: _appStorePrepText(lang, 'shortDescriptionTitle'),
-              description: _appStorePrepText(lang, 'shortDescriptionDescription'),
+              description:
+                  _appStorePrepText(lang, 'shortDescriptionDescription'),
               icon: Icons.short_text_rounded,
               status: _PrepStatus.needsReview,
             ),
             _PrepItem(
               lang: lang,
               title: _appStorePrepText(lang, 'storeDescriptionTitle'),
-              description: _appStorePrepText(lang, 'storeDescriptionDescription'),
+              description:
+                  _appStorePrepText(lang, 'storeDescriptionDescription'),
               icon: Icons.description_rounded,
               status: _PrepStatus.needsReview,
             ),
@@ -109,7 +111,8 @@ class AppStorePrepScreen extends StatelessWidget {
             _PrepItem(
               lang: lang,
               title: _appStorePrepText(lang, 'dataPersistenceTitle'),
-              description: _appStorePrepText(lang, 'dataPersistenceDescription'),
+              description:
+                  _appStorePrepText(lang, 'dataPersistenceDescription'),
               icon: Icons.save_rounded,
               status: _PrepStatus.ready,
             ),
@@ -140,7 +143,8 @@ class AppStorePrepScreen extends StatelessWidget {
             _PrepItem(
               lang: lang,
               title: _appStorePrepText(lang, 'dataSafetyScreenTitle'),
-              description: _appStorePrepText(lang, 'dataSafetyScreenDescription'),
+              description:
+                  _appStorePrepText(lang, 'dataSafetyScreenDescription'),
               icon: Icons.security_rounded,
               status: _PrepStatus.ready,
             ),
@@ -189,51 +193,220 @@ class AppStorePrepScreen extends StatelessWidget {
   }
 }
 
-
 String _appStorePrepText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
   const values = {
-    'title': {'tr': 'App Store hazırlığı', 'en': 'App Store preparation', 'ru': 'Подготовка к App Store'},
-    'subtitle': {'tr': 'TestFlight ve App Store yayını öncesi kontrol edilmesi gereken temel başlıklar.', 'en': 'Key items to check before TestFlight and App Store release.', 'ru': 'Основные пункты проверки перед TestFlight и публикацией в App Store.'},
-    'hero': {'tr': 'Planora yayın öncesi kalite kontrol listesi', 'en': 'Planora pre-release quality checklist', 'ru': 'Чек-лист качества Planora перед публикацией'},
-    'appInfo': {'tr': 'Uygulama bilgileri', 'en': 'App information', 'ru': 'Информация о приложении'},
-    'technicalCheck': {'tr': 'Teknik kontrol', 'en': 'Technical check', 'ru': 'Техническая проверка'},
-    'privacySupport': {'tr': 'Gizlilik ve destek', 'en': 'Privacy and support', 'ru': 'Приватность и поддержка'},
-    'testflightCheck': {'tr': 'TestFlight kontrolü', 'en': 'TestFlight check', 'ru': 'Проверка TestFlight'},
-
-    'appNameTitle': {'tr': 'Uygulama adı', 'en': 'App name', 'ru': 'Название приложения'},
-    'appNameDescription': {'tr': 'App Store tarafında kullanılacak isim netleştirilmeli: Planora.', 'en': 'The name to be used on the App Store should be finalized: Planora.', 'ru': 'Нужно зафиксировать название для App Store: Planora.'},
-    'shortDescriptionTitle': {'tr': 'Kısa açıklama', 'en': 'Short description', 'ru': 'Краткое описание'},
-    'shortDescriptionDescription': {'tr': 'Kişisel bütçe, ödeme ve harcama takibi için kısa, net açıklama hazırlanmalı.', 'en': 'A short and clear description for personal budget, payment, and expense tracking should be prepared.', 'ru': 'Нужно подготовить короткое и понятное описание для учёта бюджета, платежей и расходов.'},
-    'storeDescriptionTitle': {'tr': 'App Store açıklaması', 'en': 'App Store description', 'ru': 'Описание в App Store'},
-    'storeDescriptionDescription': {'tr': 'Ana özellikleri, veri güvenliği yaklaşımını ve kullanıcı faydasını anlatan açıklama hazırlanmalı.', 'en': 'Prepare a description covering key features, the data safety approach, and user benefits.', 'ru': 'Нужно подготовить описание основных функций, подхода к безопасности данных и пользы для пользователя.'},
-    'keywordsTitle': {'tr': 'Anahtar kelimeler', 'en': 'Keywords', 'ru': 'Ключевые слова'},
-    'keywordsDescription': {'tr': 'budget, finance, planner, payment, expense gibi arama kelimeleri belirlenecek.', 'en': 'Search keywords such as budget, finance, planner, payment, and expense should be defined.', 'ru': 'Нужно определить поисковые слова, например budget, finance, planner, payment, expense.'},
-
-    'dataPersistenceTitle': {'tr': 'Veri kaydı', 'en': 'Data persistence', 'ru': 'Сохранение данных'},
-    'dataPersistenceDescription': {'tr': 'Gelir, ödeme, harcama, ek gelir, kategori ve ayarlar uygulama kapanıp açılınca korunmalı.', 'en': 'Income, payments, expenses, extra income, categories, and settings should remain after closing and reopening the app.', 'ru': 'Доход, платежи, расходы, доп. доходы, категории и настройки должны сохраняться после закрытия и повторного открытия приложения.'},
-    'backupRestoreTitle': {'tr': 'Backup / restore', 'en': 'Backup / restore', 'ru': 'Резервная копия / восстановление'},
-    'backupRestoreDescription': {'tr': 'Yedek dışa aktarma ve geri yükleme test edilmeli.', 'en': 'Backup export and restore should be tested.', 'ru': 'Нужно протестировать экспорт резервной копии и восстановление.'},
-    'emptyStatesTitle': {'tr': 'Boş veri ekranları', 'en': 'Empty data screens', 'ru': 'Экраны без данных'},
-    'emptyStatesDescription': {'tr': 'Yeni kullanıcıda boş ekranlar hata gibi değil, yönlendirici görünmeli.', 'en': 'For new users, empty screens should look helpful rather than like an error.', 'ru': 'Для нового пользователя пустые экраны должны выглядеть как подсказки, а не как ошибка.'},
-    'darkModeTitle': {'tr': 'Koyu mod', 'en': 'Dark mode', 'ru': 'Тёмный режим'},
-    'darkModeDescription': {'tr': 'Tema tercihi altyapısı var; tam koyu UI daha sonra kontrollü yapılacak.', 'en': 'Theme preference infrastructure exists; full dark UI will be handled carefully later.', 'ru': 'Инфраструктура выбора темы есть; полноценный тёмный UI будет сделан позже контролируемо.'},
-
-    'dataSafetyScreenTitle': {'tr': 'Veri güvenliği ekranı', 'en': 'Data safety screen', 'ru': 'Экран безопасности данных'},
-    'dataSafetyScreenDescription': {'tr': 'Profil > Hakkında ekranında veri güvenliği bilgileri eklendi.', 'en': 'Data safety information has been added to Profile > About.', 'ru': 'Информация о безопасности данных добавлена в Профиль > О приложении.'},
-    'privacyPolicyTitle': {'tr': 'Gizlilik politikası', 'en': 'Privacy policy', 'ru': 'Политика конфиденциальности'},
-    'privacyPolicyDescription': {'tr': 'App Store için web üzerinde erişilebilir gizlilik politikası sayfası hazırlanmalı.', 'en': 'A web-accessible privacy policy page should be prepared for the App Store.', 'ru': 'Для App Store нужно подготовить страницу политики конфиденциальности, доступную в интернете.'},
-    'supportContactTitle': {'tr': 'Destek iletişimi', 'en': 'Support contact', 'ru': 'Контакт поддержки'},
-    'supportContactDescription': {'tr': 'Kullanıcıların ulaşabileceği destek e-posta adresi belirlenmeli.', 'en': 'A support email address that users can contact should be defined.', 'ru': 'Нужно указать e-mail поддержки, по которому смогут обращаться пользователи.'},
-
-    'basicFlowTitle': {'tr': 'Temel akış testi', 'en': 'Basic flow test', 'ru': 'Тест основного сценария'},
-    'basicFlowDescription': {'tr': 'Gelir ayarla, ödeme ekle, harcama ekle, ek gelir ekle, ay değiştir, yedek al/geri yükle.', 'en': 'Set income, add payment, add expense, add extra income, change month, back up and restore.', 'ru': 'Указать доход, добавить платёж, расход, доп. доход, сменить месяц, сделать резервную копию и восстановить.'},
-    'monthTestsTitle': {'tr': 'Farklı ay testleri', 'en': 'Different month tests', 'ru': 'Тесты разных месяцев'},
-    'monthTestsDescription': {'tr': 'Aylık ödeme, tek seferlik ödeme ve maaş günü döngüsü farklı aylarda kontrol edilmeli.', 'en': 'Monthly payments, one-time payments, and salary day cycle should be checked across different months.', 'ru': 'Ежемесячные платежи, разовые платежи и цикл зарплатного дня нужно проверить в разных месяцах.'},
-    'realDeviceTitle': {'tr': 'Gerçek cihaz testi', 'en': 'Real device test', 'ru': 'Тест на реальном устройстве'},
-    'realDeviceDescription': {'tr': 'Simulator sonrası gerçek iPhone üzerinde performans ve veri kaydı test edilmeli.', 'en': 'After the Simulator, performance and data persistence should be tested on a real iPhone.', 'ru': 'После Simulator нужно проверить производительность и сохранение данных на реальном iPhone.'},
-
+    'title': {
+      'tr': 'App Store hazırlığı',
+      'en': 'App Store preparation',
+      'ru': 'Подготовка к App Store'
+    },
+    'subtitle': {
+      'tr':
+          'TestFlight ve App Store yayını öncesi kontrol edilmesi gereken temel başlıklar.',
+      'en': 'Key items to check before TestFlight and App Store release.',
+      'ru':
+          'Основные пункты проверки перед TestFlight и публикацией в App Store.'
+    },
+    'hero': {
+      'tr': 'Planora yayın öncesi kalite kontrol listesi',
+      'en': 'Planora pre-release quality checklist',
+      'ru': 'Чек-лист качества Planora перед публикацией'
+    },
+    'appInfo': {
+      'tr': 'Uygulama bilgileri',
+      'en': 'App information',
+      'ru': 'Информация о приложении'
+    },
+    'technicalCheck': {
+      'tr': 'Teknik kontrol',
+      'en': 'Technical check',
+      'ru': 'Техническая проверка'
+    },
+    'privacySupport': {
+      'tr': 'Gizlilik ve destek',
+      'en': 'Privacy and support',
+      'ru': 'Приватность и поддержка'
+    },
+    'testflightCheck': {
+      'tr': 'TestFlight kontrolü',
+      'en': 'TestFlight check',
+      'ru': 'Проверка TestFlight'
+    },
+    'appNameTitle': {
+      'tr': 'Uygulama adı',
+      'en': 'App name',
+      'ru': 'Название приложения'
+    },
+    'appNameDescription': {
+      'tr': 'App Store tarafında kullanılacak isim netleştirilmeli: Planora.',
+      'en':
+          'The name to be used on the App Store should be finalized: Planora.',
+      'ru': 'Нужно зафиксировать название для App Store: Planora.'
+    },
+    'shortDescriptionTitle': {
+      'tr': 'Kısa açıklama',
+      'en': 'Short description',
+      'ru': 'Краткое описание'
+    },
+    'shortDescriptionDescription': {
+      'tr':
+          'Kişisel bütçe, ödeme ve harcama takibi için kısa, net açıklama hazırlanmalı.',
+      'en':
+          'A short and clear description for personal budget, payment, and expense tracking should be prepared.',
+      'ru':
+          'Нужно подготовить короткое и понятное описание для учёта бюджета, платежей и расходов.'
+    },
+    'storeDescriptionTitle': {
+      'tr': 'App Store açıklaması',
+      'en': 'App Store description',
+      'ru': 'Описание в App Store'
+    },
+    'storeDescriptionDescription': {
+      'tr':
+          'Ana özellikleri, veri güvenliği yaklaşımını ve kullanıcı faydasını anlatan açıklama hazırlanmalı.',
+      'en':
+          'Prepare a description covering key features, the data safety approach, and user benefits.',
+      'ru':
+          'Нужно подготовить описание основных функций, подхода к безопасности данных и пользы для пользователя.'
+    },
+    'keywordsTitle': {
+      'tr': 'Anahtar kelimeler',
+      'en': 'Keywords',
+      'ru': 'Ключевые слова'
+    },
+    'keywordsDescription': {
+      'tr':
+          'budget, finance, planner, payment, expense gibi arama kelimeleri belirlenecek.',
+      'en':
+          'Search keywords such as budget, finance, planner, payment, and expense should be defined.',
+      'ru':
+          'Нужно определить поисковые слова, например budget, finance, planner, payment, expense.'
+    },
+    'dataPersistenceTitle': {
+      'tr': 'Veri kaydı',
+      'en': 'Data persistence',
+      'ru': 'Сохранение данных'
+    },
+    'dataPersistenceDescription': {
+      'tr':
+          'Gelir, ödeme, harcama, ek gelir, kategori ve ayarlar uygulama kapanıp açılınca korunmalı.',
+      'en':
+          'Income, payments, expenses, extra income, categories, and settings should remain after closing and reopening the app.',
+      'ru':
+          'Доход, платежи, расходы, доп. доходы, категории и настройки должны сохраняться после закрытия и повторного открытия приложения.'
+    },
+    'backupRestoreTitle': {
+      'tr': 'Backup / restore',
+      'en': 'Backup / restore',
+      'ru': 'Резервная копия / восстановление'
+    },
+    'backupRestoreDescription': {
+      'tr': 'Yedek dışa aktarma ve geri yükleme test edilmeli.',
+      'en': 'Backup export and restore should be tested.',
+      'ru': 'Нужно протестировать экспорт резервной копии и восстановление.'
+    },
+    'emptyStatesTitle': {
+      'tr': 'Boş veri ekranları',
+      'en': 'Empty data screens',
+      'ru': 'Экраны без данных'
+    },
+    'emptyStatesDescription': {
+      'tr':
+          'Yeni kullanıcıda boş ekranlar hata gibi değil, yönlendirici görünmeli.',
+      'en':
+          'For new users, empty screens should look helpful rather than like an error.',
+      'ru':
+          'Для нового пользователя пустые экраны должны выглядеть как подсказки, а не как ошибка.'
+    },
+    'darkModeTitle': {
+      'tr': 'Koyu mod',
+      'en': 'Dark mode',
+      'ru': 'Тёмный режим'
+    },
+    'darkModeDescription': {
+      'tr':
+          'Tema tercihi altyapısı var; tam koyu UI daha sonra kontrollü yapılacak.',
+      'en':
+          'Theme preference infrastructure exists; full dark UI will be handled carefully later.',
+      'ru':
+          'Инфраструктура выбора темы есть; полноценный тёмный UI будет сделан позже контролируемо.'
+    },
+    'dataSafetyScreenTitle': {
+      'tr': 'Veri güvenliği ekranı',
+      'en': 'Data safety screen',
+      'ru': 'Экран безопасности данных'
+    },
+    'dataSafetyScreenDescription': {
+      'tr': 'Profil > Hakkında ekranında veri güvenliği bilgileri eklendi.',
+      'en': 'Data safety information has been added to Profile > About.',
+      'ru':
+          'Информация о безопасности данных добавлена в Профиль > О приложении.'
+    },
+    'privacyPolicyTitle': {
+      'tr': 'Gizlilik politikası',
+      'en': 'Privacy policy',
+      'ru': 'Политика конфиденциальности'
+    },
+    'privacyPolicyDescription': {
+      'tr':
+          'App Store için web üzerinde erişilebilir gizlilik politikası sayfası hazırlanmalı.',
+      'en':
+          'A web-accessible privacy policy page should be prepared for the App Store.',
+      'ru':
+          'Для App Store нужно подготовить страницу политики конфиденциальности, доступную в интернете.'
+    },
+    'supportContactTitle': {
+      'tr': 'Destek iletişimi',
+      'en': 'Support contact',
+      'ru': 'Контакт поддержки'
+    },
+    'supportContactDescription': {
+      'tr': 'Kullanıcıların ulaşabileceği destek e-posta adresi belirlenmeli.',
+      'en': 'A support email address that users can contact should be defined.',
+      'ru':
+          'Нужно указать e-mail поддержки, по которому смогут обращаться пользователи.'
+    },
+    'basicFlowTitle': {
+      'tr': 'Temel akış testi',
+      'en': 'Basic flow test',
+      'ru': 'Тест основного сценария'
+    },
+    'basicFlowDescription': {
+      'tr':
+          'Gelir ayarla, ödeme ekle, harcama ekle, ek gelir ekle, ay değiştir, yedek al/geri yükle.',
+      'en':
+          'Set income, add payment, add expense, add extra income, change month, back up and restore.',
+      'ru':
+          'Указать доход, добавить платёж, расход, доп. доход, сменить месяц, сделать резервную копию и восстановить.'
+    },
+    'monthTestsTitle': {
+      'tr': 'Farklı ay testleri',
+      'en': 'Different month tests',
+      'ru': 'Тесты разных месяцев'
+    },
+    'monthTestsDescription': {
+      'tr':
+          'Aylık ödeme, tek seferlik ödeme ve maaş günü döngüsü farklı aylarda kontrol edilmeli.',
+      'en':
+          'Monthly payments, one-time payments, and salary day cycle should be checked across different months.',
+      'ru':
+          'Ежемесячные платежи, разовые платежи и цикл зарплатного дня нужно проверить в разных месяцах.'
+    },
+    'realDeviceTitle': {
+      'tr': 'Gerçek cihaz testi',
+      'en': 'Real device test',
+      'ru': 'Тест на реальном устройстве'
+    },
+    'realDeviceDescription': {
+      'tr':
+          'Simulator sonrası gerçek iPhone üzerinde performans ve veri kaydı test edilmeli.',
+      'en':
+          'After the Simulator, performance and data persistence should be tested on a real iPhone.',
+      'ru':
+          'После Simulator нужно проверить производительность и сохранение данных на реальном iPhone.'
+    },
     'statusReady': {'tr': 'Hazır', 'en': 'Ready', 'ru': 'Готово'},
     'statusReview': {'tr': 'Kontrol', 'en': 'Review', 'ru': 'Проверить'},
     'statusLater': {'tr': 'Sonra', 'en': 'Later', 'ru': 'Позже'},
@@ -322,10 +495,12 @@ class _PrepItem extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+                        child: Text(title,
+                            style: Theme.of(context).textTheme.titleMedium),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 9, vertical: 5),
                         decoration: BoxDecoration(
                           color: _color.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(999),
@@ -349,7 +524,8 @@ class _PrepItem extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),

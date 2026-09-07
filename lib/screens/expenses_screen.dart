@@ -230,7 +230,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -1127,7 +1127,7 @@ class _InputField extends StatelessWidget {
         prefixIcon: Icon(icon, color: AppColors.textSecondary),
         prefixText: prefix,
         filled: true,
-        fillColor: AppColors.softBg,
+        fillColor: AppThemeColors.fieldBackground(context),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         border: OutlineInputBorder(

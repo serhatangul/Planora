@@ -53,14 +53,16 @@ class MonthComparisonScreen extends StatelessWidget {
     return key == _monthKey(month);
   }
 
-  bool _isLateInMonth(PlanoraController controller, PaymentItem payment, DateTime month) {
+  bool _isLateInMonth(
+      PlanoraController controller, PaymentItem payment, DateTime month) {
     final now = DateTime.now();
 
     if (!PlanoraDateUtils.isSameMonth(now, month)) {
       return false;
     }
 
-    return !controller.isPaymentPaid(payment, month: month) && payment.dueDay < now.day;
+    return !controller.isPaymentPaid(payment, month: month) &&
+        payment.dueDay < now.day;
   }
 
   _MonthSnapshot _snapshotFor(PlanoraController controller, DateTime month) {
@@ -93,12 +95,17 @@ class MonthComparisonScreen extends StatelessWidget {
         .where((payment) => !_isLateInMonth(controller, payment, month))
         .fold<double>(0, (sum, payment) => sum + payment.amount);
 
-    final paymentTotal = payments.fold<double>(0, (sum, payment) => sum + payment.amount);
-    final expenseTotal = expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
-    final extraIncomeTotal = incomes.fold<double>(0, (sum, income) => sum + income.amount);
+    final paymentTotal =
+        payments.fold<double>(0, (sum, payment) => sum + payment.amount);
+    final expenseTotal =
+        expenses.fold<double>(0, (sum, expense) => sum + expense.amount);
+    final extraIncomeTotal =
+        incomes.fold<double>(0, (sum, income) => sum + income.amount);
 
     final totalIncome = controller.monthlyIncome + extraIncomeTotal;
-    final freeBalance = (totalIncome - paymentTotal - expenseTotal - controller.currentSaving).clamp(0.0, double.infinity);
+    final freeBalance =
+        (totalIncome - paymentTotal - expenseTotal - controller.currentSaving)
+            .clamp(0.0, double.infinity);
 
     var score = 100;
     final incomeBase = totalIncome <= 0 ? 1 : totalIncome;
@@ -119,7 +126,9 @@ class MonthComparisonScreen extends StatelessWidget {
 
     if (latePayments > 0) score -= 10;
     if (freeBalance <= 0) score -= 18;
-    if (paidPayments >= paymentTotal * 0.75 && latePayments == 0 && paymentTotal > 0) {
+    if (paidPayments >= paymentTotal * 0.75 &&
+        latePayments == 0 &&
+        paymentTotal > 0) {
       score += 6;
     }
 
@@ -138,7 +147,8 @@ class MonthComparisonScreen extends StatelessWidget {
     );
   }
 
-  String _trendText(String lang, _MonthSnapshot current, _MonthSnapshot previous) {
+  String _trendText(
+      String lang, _MonthSnapshot current, _MonthSnapshot previous) {
     final scoreDiff = current.healthScore - previous.healthScore;
     final freeDiff = current.freeBalance - previous.freeBalance;
     final expenseDiff = current.expenses - previous.expenses;
@@ -163,7 +173,7 @@ class MonthComparisonScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -171,7 +181,8 @@ class MonthComparisonScreen extends StatelessWidget {
           builder: (context, _) {
             final lang = controller.appLanguageCode;
             final currentMonth = controller.selectedMonth;
-            final previousMonth = DateTime(currentMonth.year, currentMonth.month - 1, 1);
+            final previousMonth =
+                DateTime(currentMonth.year, currentMonth.month - 1, 1);
 
             final current = _snapshotFor(controller, currentMonth);
             final previous = _snapshotFor(controller, previousMonth);
@@ -218,7 +229,8 @@ class MonthComparisonScreen extends StatelessWidget {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: const Icon(Icons.compare_arrows_rounded, color: Colors.white),
+                        child: const Icon(Icons.compare_arrows_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -335,7 +347,8 @@ class MonthComparisonScreen extends StatelessWidget {
                     Expanded(
                       child: _MiniMetric(
                         label: _monthComparisonText(lang, 'extraIncomeDiff'),
-                        value: MoneyFormatter.format(current.extraIncome - previous.extraIncome),
+                        value: MoneyFormatter.format(
+                            current.extraIncome - previous.extraIncome),
                         color: (current.extraIncome - previous.extraIncome) >= 0
                             ? AppColors.brandGreen
                             : AppColors.danger,
@@ -349,7 +362,8 @@ class MonthComparisonScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -369,47 +383,105 @@ class MonthComparisonScreen extends StatelessWidget {
   }
 }
 
-
 String _monthComparisonText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
   const values = {
     'trendHealthy': {
-      'tr': 'Bu ay geçen aya göre daha sağlıklı ilerliyor. Serbest bakiye ve bütçe skoru güçlü.',
-      'en': 'This month is progressing healthier than last month. Free balance and budget score are strong.',
-      'ru': 'Этот месяц выглядит здоровее прошлого. Свободный баланс и бюджетный балл сильные.',
+      'tr':
+          'Bu ay geçen aya göre daha sağlıklı ilerliyor. Serbest bakiye ve bütçe skoru güçlü.',
+      'en':
+          'This month is progressing healthier than last month. Free balance and budget score are strong.',
+      'ru':
+          'Этот месяц выглядит здоровее прошлого. Свободный баланс и бюджетный балл сильные.',
     },
     'trendRisky': {
-      'tr': 'Bu ay geçen aya göre daha riskli görünüyor. Harcamalar ve ödeme yükü dikkat istiyor.',
-      'en': 'This month looks riskier than last month. Expenses and payment load need attention.',
-      'ru': 'Этот месяц выглядит рискованнее прошлого. Расходы и платёжная нагрузка требуют внимания.',
+      'tr':
+          'Bu ay geçen aya göre daha riskli görünüyor. Harcamalar ve ödeme yükü dikkat istiyor.',
+      'en':
+          'This month looks riskier than last month. Expenses and payment load need attention.',
+      'ru':
+          'Этот месяц выглядит рискованнее прошлого. Расходы и платёжная нагрузка требуют внимания.',
     },
     'trendFreeBalanceBetter': {
-      'tr': 'Bu ay serbest bakiye geçen aya göre daha iyi. Plan aynı disiplinle korunabilir.',
-      'en': 'Free balance is better this month than last month. The plan can be maintained with the same discipline.',
-      'ru': 'Свободный баланс в этом месяце лучше, чем в прошлом. План можно сохранить в том же темпе.',
+      'tr':
+          'Bu ay serbest bakiye geçen aya göre daha iyi. Plan aynı disiplinle korunabilir.',
+      'en':
+          'Free balance is better this month than last month. The plan can be maintained with the same discipline.',
+      'ru':
+          'Свободный баланс в этом месяце лучше, чем в прошлом. План можно сохранить в том же темпе.',
     },
     'trendStable': {
-      'tr': 'Bu ay geçen aya yakın ilerliyor. Büyük bir sapma yok ama harcama temposunu takip etmek iyi olur.',
-      'en': 'This month is close to last month. There is no major deviation, but it is good to watch spending pace.',
-      'ru': 'Этот месяц близок к прошлому. Большого отклонения нет, но стоит следить за темпом расходов.',
+      'tr':
+          'Bu ay geçen aya yakın ilerliyor. Büyük bir sapma yok ama harcama temposunu takip etmek iyi olur.',
+      'en':
+          'This month is close to last month. There is no major deviation, but it is good to watch spending pace.',
+      'ru':
+          'Этот месяц близок к прошлому. Большого отклонения нет, но стоит следить за темпом расходов.',
     },
-    'title': {'tr': 'Ay karşılaştırması', 'en': 'Month comparison', 'ru': 'Сравнение месяцев'},
-    'differenceSummary': {'tr': 'Fark özeti', 'en': 'Difference summary', 'ru': 'Сводка различий'},
-    'totalIncome': {'tr': 'Toplam gelir', 'en': 'Total income', 'ru': 'Общий доход'},
-    'plannedPayment': {'tr': 'Planlanan ödeme', 'en': 'Planned payments', 'ru': 'Плановые платежи'},
-    'variableExpense': {'tr': 'Değişken harcama', 'en': 'Variable expenses', 'ru': 'Переменные расходы'},
-    'freeBalance': {'tr': 'Serbest bakiye', 'en': 'Free balance', 'ru': 'Свободный баланс'},
-    'paidThisMonth': {'tr': 'Bu ay ödendi', 'en': 'Paid this month', 'ru': 'Оплачено за месяц'},
-    'waitingThisMonth': {'tr': 'Bu ay bekliyor', 'en': 'Waiting this month', 'ru': 'Ожидает за месяц'},
-    'lateThisMonth': {'tr': 'Bu ay gecikti', 'en': 'Late this month', 'ru': 'Просрочено за месяц'},
-    'extraIncomeDiff': {'tr': 'Ek gelir farkı', 'en': 'Extra income difference', 'ru': 'Разница доп. дохода'},
+    'title': {
+      'tr': 'Ay karşılaştırması',
+      'en': 'Month comparison',
+      'ru': 'Сравнение месяцев'
+    },
+    'differenceSummary': {
+      'tr': 'Fark özeti',
+      'en': 'Difference summary',
+      'ru': 'Сводка различий'
+    },
+    'totalIncome': {
+      'tr': 'Toplam gelir',
+      'en': 'Total income',
+      'ru': 'Общий доход'
+    },
+    'plannedPayment': {
+      'tr': 'Planlanan ödeme',
+      'en': 'Planned payments',
+      'ru': 'Плановые платежи'
+    },
+    'variableExpense': {
+      'tr': 'Değişken harcama',
+      'en': 'Variable expenses',
+      'ru': 'Переменные расходы'
+    },
+    'freeBalance': {
+      'tr': 'Serbest bakiye',
+      'en': 'Free balance',
+      'ru': 'Свободный баланс'
+    },
+    'paidThisMonth': {
+      'tr': 'Bu ay ödendi',
+      'en': 'Paid this month',
+      'ru': 'Оплачено за месяц'
+    },
+    'waitingThisMonth': {
+      'tr': 'Bu ay bekliyor',
+      'en': 'Waiting this month',
+      'ru': 'Ожидает за месяц'
+    },
+    'lateThisMonth': {
+      'tr': 'Bu ay gecikti',
+      'en': 'Late this month',
+      'ru': 'Просрочено за месяц'
+    },
+    'extraIncomeDiff': {
+      'tr': 'Ek gelir farkı',
+      'en': 'Extra income difference',
+      'ru': 'Разница доп. дохода'
+    },
     'infoNote': {
-      'tr': 'Karşılaştırma seçili ay ile bir önceki ay arasında yapılır. Tek seferlik ödemeler sadece ait olduğu ayda hesaba katılır.',
-      'en': 'The comparison is made between the selected month and the previous month. One-time payments are counted only in their own month.',
-      'ru': 'Сравнение выполняется между выбранным и предыдущим месяцем. Разовые платежи учитываются только в своём месяце.',
+      'tr':
+          'Karşılaştırma seçili ay ile bir önceki ay arasında yapılır. Tek seferlik ödemeler sadece ait olduğu ayda hesaba katılır.',
+      'en':
+          'The comparison is made between the selected month and the previous month. One-time payments are counted only in their own month.',
+      'ru':
+          'Сравнение выполняется между выбранным и предыдущим месяцем. Разовые платежи учитываются только в своём месяце.',
     },
-    'budgetScore': {'tr': 'Bütçe skoru', 'en': 'Budget score', 'ru': 'Бюджетный балл'},
+    'budgetScore': {
+      'tr': 'Bütçe skoru',
+      'en': 'Budget score',
+      'ru': 'Бюджетный балл'
+    },
   };
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;

@@ -25,7 +25,7 @@ class CurrencySettingsScreen extends StatelessWidget {
     MoneyFormatter.setCurrencySymbol(controller.currencySymbol);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -146,11 +146,19 @@ class CurrencySettingsScreen extends StatelessWidget {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(label, style: Theme.of(context).textTheme.titleMedium),
+                                    Text(label,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium),
                                     const SizedBox(height: 3),
                                     Text(
-                                      _exampleText(lang, MoneyFormatter.format(12500, symbol: symbol)),
-                                      style: Theme.of(context).textTheme.bodyMedium,
+                                      _exampleText(
+                                          lang,
+                                          MoneyFormatter.format(12500,
+                                              symbol: symbol)),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium,
                                     ),
                                   ],
                                 ),
@@ -173,7 +181,8 @@ class CurrencySettingsScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -191,62 +200,65 @@ class CurrencySettingsScreen extends StatelessWidget {
       ),
     );
   }
-String _currencyText(String code, String key) {
-  final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
 
-  const values = {
-    'title': {
-      'tr': 'Para birimi',
-      'en': 'Currency',
-      'ru': 'Валюта',
-      'vi': 'Tiền tệ',
-    },
-    'subtitle': {
-      'tr': 'Tüm tutarlar seçtiğin para birimiyle gösterilir.',
-      'en': 'All amounts are shown with the currency you choose.',
-      'ru': 'Все суммы отображаются в выбранной валюте.',
-      'vi': 'Tất cả số tiền được hiển thị bằng loại tiền bạn chọn.',
-    },
-    'selectCurrency': {
-      'tr': 'Para birimi seç',
-      'en': 'Choose currency',
-      'ru': 'Выберите валюту',
-      'vi': 'Chọn tiền tệ',
-    },
-    'note': {
-      'tr': 'Bu ayar sadece gösterimi değiştirir. Mevcut tutar değerleri dönüştürülmez.',
-      'en': 'This setting only changes the display. Existing amount values are not converted.',
-      'ru': 'Эта настройка меняет только отображение. Существующие суммы не конвертируются.',
-      'vi': 'Cài đặt này chỉ thay đổi cách hiển thị. Các số tiền hiện có không được quy đổi.',
-    },
-  };
+  String _currencyText(String code, String key) {
+    final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
 
-  return values[key]?[language] ?? values[key]?['tr'] ?? key;
-}
+    const values = {
+      'title': {
+        'tr': 'Para birimi',
+        'en': 'Currency',
+        'ru': 'Валюта',
+        'vi': 'Tiền tệ',
+      },
+      'subtitle': {
+        'tr': 'Tüm tutarlar seçtiğin para birimiyle gösterilir.',
+        'en': 'All amounts are shown with the currency you choose.',
+        'ru': 'Все суммы отображаются в выбранной валюте.',
+        'vi': 'Tất cả số tiền được hiển thị bằng loại tiền bạn chọn.',
+      },
+      'selectCurrency': {
+        'tr': 'Para birimi seç',
+        'en': 'Choose currency',
+        'ru': 'Выберите валюту',
+        'vi': 'Chọn tiền tệ',
+      },
+      'note': {
+        'tr':
+            'Bu ayar sadece gösterimi değiştirir. Mevcut tutar değerleri dönüştürülmez.',
+        'en':
+            'This setting only changes the display. Existing amount values are not converted.',
+        'ru':
+            'Эта настройка меняет только отображение. Существующие суммы не конвертируются.',
+        'vi':
+            'Cài đặt này chỉ thay đổi cách hiển thị. Các số tiền hiện có không được quy đổi.',
+      },
+    };
 
-String _previewText(String code, String amount) {
-  switch (code) {
-    case 'en':
-      return 'Preview: $amount';
-    case 'ru':
-      return 'Пример: $amount';
-    case 'tr':
-    default:
-      return 'Örnek görünüm: $amount';
+    return values[key]?[language] ?? values[key]?['tr'] ?? key;
   }
-}
 
-String _exampleText(String code, String amount) {
-  switch (code) {
-    case 'en':
-      return 'Example: $amount';
-    case 'ru':
-      return 'Пример: $amount';
-    case 'tr':
-    default:
-      return 'Örnek: $amount';
+  String _previewText(String code, String amount) {
+    switch (code) {
+      case 'en':
+        return 'Preview: $amount';
+      case 'ru':
+        return 'Пример: $amount';
+      case 'tr':
+      default:
+        return 'Örnek görünüm: $amount';
+    }
   }
-}
 
-
+  String _exampleText(String code, String amount) {
+    switch (code) {
+      case 'en':
+        return 'Example: $amount';
+      case 'ru':
+        return 'Пример: $amount';
+      case 'tr':
+      default:
+        return 'Örnek: $amount';
+    }
+  }
 }

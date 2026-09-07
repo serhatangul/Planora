@@ -14,7 +14,6 @@ import 'expenses_screen.dart';
 import 'extra_income_screen.dart';
 import 'add_payment_screen.dart';
 
-
 String _calendarText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -80,8 +79,10 @@ String _calendarText(String code, String key) {
       'ru': 'Календарь пока пуст',
     },
     'emptyCalendarDescription': {
-      'tr': 'Ödeme, harcama veya ek gelir eklediğinizde bu ayın takviminde görünecek.',
-      'en': 'Payments, expenses, and extra income will appear here once you add them.',
+      'tr':
+          'Ödeme, harcama veya ek gelir eklediğinizde bu ayın takviminde görünecek.',
+      'en':
+          'Payments, expenses, and extra income will appear here once you add them.',
       'ru': 'Платежи, расходы и доп. доходы появятся здесь после добавления.',
     },
     'emptyDayTitle': {
@@ -90,8 +91,10 @@ String _calendarText(String code, String key) {
       'ru': 'В этот день нет операций',
     },
     'emptyDayDescription': {
-      'tr': 'Seçtiğiniz güne ait ödeme, harcama veya ek gelir kaydı bulunmuyor.',
-      'en': 'There are no payments, expenses, or extra income records for the selected day.',
+      'tr':
+          'Seçtiğiniz güne ait ödeme, harcama veya ek gelir kaydı bulunmuyor.',
+      'en':
+          'There are no payments, expenses, or extra income records for the selected day.',
       'ru': 'Для выбранного дня нет платежей, расходов или доп. доходов.',
     },
     'addPayment': {
@@ -104,7 +107,6 @@ String _calendarText(String code, String key) {
       'en': 'Add Expense',
       'ru': 'Добавить расход',
     },
-
     'paid': {
       'tr': 'Ödendi',
       'en': 'Paid',
@@ -134,7 +136,6 @@ String _calendarText(String code, String key) {
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
-
 
 String _calendarMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -350,7 +351,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  String _paymentSubtitle(String code, PaymentItem payment, bool isPaid, bool isLate, PlanoraController controller) {
+  String _paymentSubtitle(String code, PaymentItem payment, bool isPaid,
+      bool isLate, PlanoraController controller) {
     final category = controller.categoryLabel(payment.category);
     if (isPaid) {
       switch (code) {
@@ -387,7 +389,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  String _expenseSubtitle(String code, ExpenseItem expense, PlanoraController controller) {
+  String _expenseSubtitle(
+      String code, ExpenseItem expense, PlanoraController controller) {
     final category = controller.categoryLabel(expense.category);
     switch (code) {
       case 'en':
@@ -400,7 +403,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  List<_CalendarEvent> _eventsForMonth(PlanoraController controller, String lang) {
+  List<_CalendarEvent> _eventsForMonth(
+      PlanoraController controller, String lang) {
     final events = <_CalendarEvent>[];
 
     for (final IncomeItem income in controller.extraIncomesForSelectedMonth) {
@@ -507,11 +511,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         final events = _eventsForMonth(controller, lang);
         final groupedEvents = _groupByDay(events);
 
-        final safeSelectedDay = _selectedDay != null && _selectedDay! <= daysInMonth
-            ? _selectedDay
-            : today.month == selectedMonth.month && today.year == selectedMonth.year
-                ? today.day
-                : null;
+        final safeSelectedDay =
+            _selectedDay != null && _selectedDay! <= daysInMonth
+                ? _selectedDay
+                : today.month == selectedMonth.month &&
+                        today.year == selectedMonth.year
+                    ? today.day
+                    : null;
 
         final selectedEvents = safeSelectedDay == null
             ? <_CalendarEvent>[]
@@ -522,7 +528,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 22, 24, 132),
             children: [
-              Text(_calendarText(lang, 'title'), style: Theme.of(context).textTheme.headlineLarge),
+              Text(_calendarText(lang, 'title'),
+                  style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 8),
               Text(
                 _calendarText(lang, 'subtitle'),
@@ -581,7 +588,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: totalCells,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 7,
                         mainAxisSpacing: 8,
                         crossAxisSpacing: 6,
@@ -592,8 +600,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         }
 
                         final day = index - firstOffset + 1;
-                        final cellDate = DateTime(selectedMonth.year, selectedMonth.month, day);
-                        final dayEvents = groupedEvents[day] ?? const <_CalendarEvent>[];
+                        final cellDate = DateTime(
+                            selectedMonth.year, selectedMonth.month, day);
+                        final dayEvents =
+                            groupedEvents[day] ?? const <_CalendarEvent>[];
 
                         return _CalendarDay(
                           day: day,
@@ -611,7 +621,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               ),
               const SizedBox(height: 24),
               PremiumCard(
-                color: const Color(0xFFF9FBFF),
+                color: AppThemeColors.mutedSurface(context),
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
@@ -667,7 +677,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   onActionTap: () => _openPaymentAdd(context),
                   secondaryActionLabel: _calendarText(lang, 'addExpense'),
                   onSecondaryActionTap: () => _openExpenses(context),
-                  color: AppColors.textSecondary,
+                  color: AppThemeColors.textSecondary(context),
                 )
               else
                 ...selectedEvents.map(
@@ -690,7 +700,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               const SizedBox(height: 12),
               SectionHeader(
                 title: _calendarText(lang, 'monthlyPaymentList'),
-                actionLabel: _paymentCountText(lang, controller.paymentsForSelectedMonth.length),
+                actionLabel: _paymentCountText(
+                    lang, controller.paymentsForSelectedMonth.length),
               ),
               const SizedBox(height: 12),
               if (controller.paymentsForSelectedMonth.isEmpty)
@@ -734,11 +745,12 @@ class _CalendarEventCard extends StatelessWidget {
         ? AppColors.brandGreen
         : event.isLate
             ? AppColors.danger
-            : AppColors.textPrimary;
+            : AppThemeColors.textPrimary(context);
 
     return PremiumCard(
       padding: const EdgeInsets.all(16),
-      borderColor: event.isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+      borderColor:
+          event.isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -761,16 +773,22 @@ class _CalendarEventCard extends StatelessWidget {
                   Text(
                     event.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          decoration: event.isPaid ? TextDecoration.lineThrough : null,
-                          color: event.isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                          decoration:
+                              event.isPaid ? TextDecoration.lineThrough : null,
+                          color: event.isPaid
+                              ? AppThemeColors.textSecondary(context)
+                              : AppThemeColors.textPrimary(context),
                         ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     event.subtitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: event.isLate ? AppColors.danger : AppColors.textSecondary,
-                          fontWeight: event.isLate ? FontWeight.w800 : FontWeight.w500,
+                          color: event.isLate
+                              ? AppColors.danger
+                              : AppThemeColors.textSecondary(context),
+                          fontWeight:
+                              event.isLate ? FontWeight.w800 : FontWeight.w500,
                         ),
                   ),
                 ],
@@ -820,7 +838,8 @@ class _CalendarPaymentItem extends StatelessWidget {
       onDismissed: (_) async => controller.removePayment(payment.id),
       child: PremiumCard(
         padding: const EdgeInsets.all(16),
-        borderColor: isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+        borderColor:
+            isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
         child: Column(
           children: [
             InkWell(
@@ -853,26 +872,46 @@ class _CalendarPaymentItem extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          PlanoraScope.of(context).defaultPaymentTitleLabel(payment.title),
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                                decoration: isPaid ? TextDecoration.lineThrough : null,
-                                color: isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                          PlanoraScope.of(context)
+                              .defaultPaymentTitleLabel(payment.title),
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(
+                                decoration:
+                                    isPaid ? TextDecoration.lineThrough : null,
+                                color: isPaid
+                                    ? AppThemeColors.textSecondary(context)
+                                    : AppThemeColors.textPrimary(context),
                               ),
                         ),
                         const SizedBox(height: 3),
                         Text(
                           isPaid
-                              ? _calendarText(PlanoraScope.of(context).appLanguageCode, 'paid')
+                              ? _calendarText(
+                                  PlanoraScope.of(context).appLanguageCode,
+                                  'paid')
                               : isLate
-                                  ? _calendarText(PlanoraScope.of(context).appLanguageCode, 'overduePayment')
-                                  : _paymentDayCategoryText(PlanoraScope.of(context).appLanguageCode, payment.dueDay, PlanoraScope.of(context).categoryLabel(payment.category)),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                  ? _calendarText(
+                                      PlanoraScope.of(context).appLanguageCode,
+                                      'overduePayment')
+                                  : _paymentDayCategoryText(
+                                      PlanoraScope.of(context).appLanguageCode,
+                                      payment.dueDay,
+                                      PlanoraScope.of(context)
+                                          .categoryLabel(payment.category)),
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
                                 color: isPaid
                                     ? AppColors.brandGreen
                                     : isLate
                                         ? AppColors.danger
-                                        : AppColors.textSecondary,
-                                fontWeight: isPaid || isLate ? FontWeight.w800 : FontWeight.w500,
+                                        : AppThemeColors.textSecondary(context),
+                                fontWeight: isPaid || isLate
+                                    ? FontWeight.w800
+                                    : FontWeight.w500,
                               ),
                         ),
                       ],
@@ -883,7 +922,8 @@ class _CalendarPaymentItem extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   const SizedBox(width: 6),
-                  const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                  Icon(Icons.chevron_right_rounded,
+                      color: AppThemeColors.textSecondary(context)),
                 ],
               ),
             ),
@@ -910,10 +950,13 @@ class _PaymentStatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
+    final backgroundColor =
+        isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
     final textColor = isPaid ? const Color(0xFF0A7A59) : AppColors.warning;
     final icon = isPaid ? Icons.undo_rounded : Icons.check_circle_rounded;
-    final label = isPaid ? _calendarText(PlanoraScope.of(context).appLanguageCode, 'markWaiting') : _calendarText(PlanoraScope.of(context).appLanguageCode, 'markPaid');
+    final label = isPaid
+        ? _calendarText(PlanoraScope.of(context).appLanguageCode, 'markWaiting')
+        : _calendarText(PlanoraScope.of(context).appLanguageCode, 'markPaid');
 
     return SizedBox(
       width: double.infinity,
@@ -1025,7 +1068,9 @@ class _CalendarDay extends StatelessWidget {
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(14),
-          border: borderColor == null ? null : Border.all(color: borderColor, width: 1.2),
+          border: borderColor == null
+              ? null
+              : Border.all(color: borderColor, width: 1.2),
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -1040,8 +1085,10 @@ class _CalendarDay extends StatelessWidget {
                     : isSelected
                         ? AppColors.brandBlue
                         : isToday
-                            ? const Color(0xFF0A7A59)
-                            : AppColors.textPrimary,
+                            ? (AppThemeColors.isDark(context)
+                                ? AppColors.brandGreen
+                                : const Color(0xFF0A7A59))
+                            : AppThemeColors.textPrimary(context),
               ),
             ),
             if (events.isNotEmpty)
@@ -1053,7 +1100,10 @@ class _CalendarDay extends StatelessWidget {
                     if (_hasIncome) const _Dot(color: AppColors.brandGreen),
                     if (_hasExpense) const _Dot(color: AppColors.warning),
                     if (_hasPayment)
-                      _Dot(color: _hasLatePayment ? AppColors.danger : AppColors.brandBlue),
+                      _Dot(
+                          color: _hasLatePayment
+                              ? AppColors.danger
+                              : AppColors.brandBlue),
                   ],
                 ),
               ),
@@ -1094,10 +1144,15 @@ class _CalendarLegend extends StatelessWidget {
       spacing: 12,
       runSpacing: 8,
       children: [
-        _LegendChip(label: _calendarText(lang, 'extraIncome'), color: AppColors.brandGreen),
-        _LegendChip(label: _calendarText(lang, 'expense'), color: AppColors.warning),
-        _LegendChip(label: _calendarText(lang, 'payment'), color: AppColors.brandBlue),
-        _LegendChip(label: _calendarText(lang, 'lateLegend'), color: AppColors.danger),
+        _LegendChip(
+            label: _calendarText(lang, 'extraIncome'),
+            color: AppColors.brandGreen),
+        _LegendChip(
+            label: _calendarText(lang, 'expense'), color: AppColors.warning),
+        _LegendChip(
+            label: _calendarText(lang, 'payment'), color: AppColors.brandBlue),
+        _LegendChip(
+            label: _calendarText(lang, 'lateLegend'), color: AppColors.danger),
       ],
     );
   }

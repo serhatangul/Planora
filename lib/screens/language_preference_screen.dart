@@ -13,7 +13,7 @@ class LanguagePreferenceScreen extends StatelessWidget {
     final lang = controller.appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -129,7 +129,8 @@ class LanguagePreferenceScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -173,8 +174,10 @@ class LanguagePreferenceScreen extends StatelessWidget {
         'vi': 'Ngôn ngữ',
       },
       'subtitle': {
-        'tr': 'Planora için kullanılacak dili seç. Bu adım çeviri altyapısının güvenli temelidir.',
-        'en': 'Choose the language used in Planora. This is the safe foundation for localization.',
+        'tr':
+            'Planora için kullanılacak dili seç. Bu adım çeviri altyapısının güvenli temelidir.',
+        'en':
+            'Choose the language used in Planora. This is the safe foundation for localization.',
         'ru': 'Выберите язык Planora. Это безопасная основа для локализации.',
         'vi': 'Chọn ngôn ngữ sử dụng trong Planora.',
       },
@@ -227,9 +230,12 @@ class LanguagePreferenceScreen extends StatelessWidget {
         'vi': 'Giao diện tiếng Việt',
       },
       'note': {
-        'tr': 'Bu adım sadece Dil ekranındaki metinleri seçili dile göre değiştirir. Diğer ekranlar sonraki küçük patchlerde çevrilecek.',
-        'en': 'This step only changes the text on the Language screen. Other screens will be localized in later small patches.',
-        'ru': 'Этот шаг меняет только текст на экране языка. Другие экраны будут переведены небольшими патчами позже.',
+        'tr':
+            'Bu adım sadece Dil ekranındaki metinleri seçili dile göre değiştirir. Diğer ekranlar sonraki küçük patchlerde çevrilecek.',
+        'en':
+            'This step only changes the text on the Language screen. Other screens will be localized in later small patches.',
+        'ru':
+            'Этот шаг меняет только текст на экране языка. Другие экраны будут переведены небольшими патчами позже.',
       },
     };
 
@@ -263,7 +269,9 @@ class _LanguageOption extends StatelessWidget {
       child: PremiumCard(
         onTap: onTap,
         borderColor: isSelected ? AppColors.brandGreen : AppColors.stroke,
-        color: isSelected ? const Color(0xFFE8FFF6) : Colors.white,
+        color: isSelected
+            ? AppThemeColors.card(context)
+            : AppThemeColors.card(context),
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
@@ -294,7 +302,8 @@ class _LanguageOption extends StatelessWidget {
             ),
             Icon(
               isSelected ? Icons.check_circle_rounded : Icons.circle_outlined,
-              color: isSelected ? AppColors.brandGreen : AppColors.textSecondary,
+              color:
+                  isSelected ? AppColors.brandGreen : AppColors.textSecondary,
             ),
           ],
         ),

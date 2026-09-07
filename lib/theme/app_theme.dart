@@ -48,6 +48,30 @@ class AppThemeColors {
   static Color fieldBackground(BuildContext context) {
     return isDark(context) ? const Color(0xFF11172C) : AppColors.softBg;
   }
+
+  static Color mutedSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF0E142A) : const Color(0xFFF9FBFF);
+  }
+
+  static Color infoSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF101A34) : const Color(0xFFF4F7FF);
+  }
+
+  static Color successSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF0B2622) : const Color(0xFFF4FFFB);
+  }
+
+  static Color warningSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF2A2113) : const Color(0xFFFFFBF4);
+  }
+
+  static Color dangerSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF2A151B) : const Color(0xFFFFF5F5);
+  }
+
+  static Color iconSurface(BuildContext context) {
+    return isDark(context) ? const Color(0xFF18213A) : const Color(0xFFEAF0FB);
+  }
 }
 
 class AppGradients {
@@ -195,6 +219,21 @@ class AppTheme {
           fontSize: 12,
           fontWeight: FontWeight.w700,
           color: Color(0xFFAAB3C8),
+        ),
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        filled: true,
+        fillColor: Color(0xFF11172C),
+        labelStyle: TextStyle(color: Color(0xFFAAB3C8)),
+        floatingLabelStyle: TextStyle(color: Color(0xFFD8DEEE)),
+        prefixIconColor: Color(0xFF7E89A4),
+        prefixStyle: TextStyle(color: Color(0xFFD8DEEE)),
+        hintStyle: TextStyle(color: Color(0xFF7E89A4)),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF2A3552)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColors.brandGreen, width: 1.4),
         ),
       ),
       iconTheme: const IconThemeData(color: Color(0xFFF4F7FF)),

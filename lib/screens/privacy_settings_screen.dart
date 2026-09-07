@@ -13,7 +13,7 @@ class PrivacySettingsScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -102,7 +102,8 @@ class PrivacySettingsScreen extends StatelessWidget {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_privacyText(lang, 'hiddenAmountMode'), style: Theme.of(context).textTheme.titleMedium),
+                            Text(_privacyText(lang, 'hiddenAmountMode'),
+                                style: Theme.of(context).textTheme.titleMedium),
                             const SizedBox(height: 4),
                             Text(
                               controller.hideAmounts
@@ -123,11 +124,12 @@ class PrivacySettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
-                  color: const Color(0xFFF9FBFF),
+                  color: AppThemeColors.card(context),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -140,15 +142,17 @@ class PrivacySettingsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
-                  color: const Color(0xFFF4FFFB),
+                  color: AppThemeColors.card(context),
                   borderColor: AppColors.brandGreen.withOpacity(0.22),
                   child: Row(
                     children: [
-                      const Icon(Icons.remove_red_eye_rounded, color: AppColors.brandGreen),
+                      const Icon(Icons.remove_red_eye_rounded,
+                          color: AppColors.brandGreen),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _privacyExampleText(lang, MoneyFormatter.format(12500)),
+                          _privacyExampleText(
+                              lang, MoneyFormatter.format(12500)),
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
                       ),
@@ -162,75 +166,80 @@ class PrivacySettingsScreen extends StatelessWidget {
       ),
     );
   }
-String _privacyText(String code, String key) {
-  final language = code == 'en' || code == 'ru' ? code : 'tr';
 
-  const values = {
-    'title': {
-      'tr': 'Gizlilik',
-      'en': 'Privacy',
-      'ru': 'Приватность',
-    },
-    'subtitle': {
-      'tr': 'Telefonu başkasının yanında açtığında finans tutarlarını gizleyebilirsin.',
-      'en': 'You can hide financial amounts when opening the app around others.',
-      'ru': 'Вы можете скрывать финансовые суммы, когда открываете приложение рядом с другими.',
-    },
-    'amountsHidden': {
-      'tr': 'Tutarlar gizli.',
-      'en': 'Amounts are hidden.',
-      'ru': 'Суммы скрыты.',
-    },
-    'amountsVisible': {
-      'tr': 'Tutarlar görüntüleniyor.',
-      'en': 'Amounts are shown.',
-      'ru': 'Суммы отображаются.',
-    },
-    'hiddenAmountMode': {
-      'tr': 'Gizli tutar modu',
-      'en': 'Hidden amount mode',
-      'ru': 'Режим скрытых сумм',
-    },
-    'normalAmounts': {
-      'tr': 'Tutarlar normal şekilde gösterilir.',
-      'en': 'Amounts are shown normally.',
-      'ru': 'Суммы отображаются.',
-    },
-    'infoNote': {
-      'tr': 'Bu mod sadece ekrandaki tutarları gizler. Kayıtlı veriler silinmez veya değişmez.',
-      'en': 'This mode only hides amounts on the screen. Saved data is not deleted or changed.',
-      'ru': 'Этот режим только скрывает суммы на экране. Сохранённые данные не удаляются и не изменяются.',
-    },
-  };
+  String _privacyText(String code, String key) {
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
 
-  return values[key]?[language] ?? values[key]?['tr'] ?? key;
-}
+    const values = {
+      'title': {
+        'tr': 'Gizlilik',
+        'en': 'Privacy',
+        'ru': 'Приватность',
+      },
+      'subtitle': {
+        'tr':
+            'Telefonu başkasının yanında açtığında finans tutarlarını gizleyebilirsin.',
+        'en':
+            'You can hide financial amounts when opening the app around others.',
+        'ru':
+            'Вы можете скрывать финансовые суммы, когда открываете приложение рядом с другими.',
+      },
+      'amountsHidden': {
+        'tr': 'Tutarlar gizli.',
+        'en': 'Amounts are hidden.',
+        'ru': 'Суммы скрыты.',
+      },
+      'amountsVisible': {
+        'tr': 'Tutarlar görüntüleniyor.',
+        'en': 'Amounts are shown.',
+        'ru': 'Суммы отображаются.',
+      },
+      'hiddenAmountMode': {
+        'tr': 'Gizli tutar modu',
+        'en': 'Hidden amount mode',
+        'ru': 'Режим скрытых сумм',
+      },
+      'normalAmounts': {
+        'tr': 'Tutarlar normal şekilde gösterilir.',
+        'en': 'Amounts are shown normally.',
+        'ru': 'Суммы отображаются.',
+      },
+      'infoNote': {
+        'tr':
+            'Bu mod sadece ekrandaki tutarları gizler. Kayıtlı veriler silinmez veya değişmez.',
+        'en':
+            'This mode only hides amounts on the screen. Saved data is not deleted or changed.',
+        'ru':
+            'Этот режим только скрывает суммы на экране. Сохранённые данные не удаляются и не изменяются.',
+      },
+    };
 
-String _hiddenAmountFormatText(String code) {
-  final symbol = MoneyFormatter.currencySymbol;
-
-  switch (code) {
-    case 'en':
-      return 'Amounts are shown as $symbol••••.';
-    case 'ru':
-      return 'Суммы отображаются как $symbol••••.';
-    case 'tr':
-    default:
-      return 'Tutarlar $symbol•••• şeklinde gösterilir.';
+    return values[key]?[language] ?? values[key]?['tr'] ?? key;
   }
-}
 
-String _privacyExampleText(String code, String amount) {
-  switch (code) {
-    case 'en':
-      return 'Preview: $amount';
-    case 'ru':
-      return 'Пример: $amount';
-    case 'tr':
-    default:
-      return 'Örnek görünüm: $amount';
+  String _hiddenAmountFormatText(String code) {
+    final symbol = MoneyFormatter.currencySymbol;
+
+    switch (code) {
+      case 'en':
+        return 'Amounts are shown as $symbol••••.';
+      case 'ru':
+        return 'Суммы отображаются как $symbol••••.';
+      case 'tr':
+      default:
+        return 'Tutarlar $symbol•••• şeklinde gösterilir.';
+    }
   }
-}
 
-
+  String _privacyExampleText(String code, String amount) {
+    switch (code) {
+      case 'en':
+        return 'Preview: $amount';
+      case 'ru':
+        return 'Пример: $amount';
+      case 'tr':
+      default:
+        return 'Örnek görünüm: $amount';
+    }
+  }
 }

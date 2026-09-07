@@ -46,7 +46,8 @@ class PlanoraController extends ChangeNotifier {
   static const String _settingsStorageKey = 'planora_settings_v1';
   static const String _categoriesStorageKey = 'planora_categories_v1';
   static const String _categoryLimitsStorageKey = 'planora_category_limits_v1';
-  static const String _paymentStatusesStorageKey = 'planora_payment_statuses_v1';
+  static const String _paymentStatusesStorageKey =
+      'planora_payment_statuses_v1';
   static const MethodChannel _storageChannel = MethodChannel('planora/storage');
 
   double monthlyIncome = 45000;
@@ -91,7 +92,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
   String monthKey([DateTime? month]) {
     final target = month ?? selectedMonth;
     return '${target.year}-${target.month.toString().padLeft(2, '0')}';
@@ -121,19 +121,19 @@ class PlanoraController extends ChangeNotifier {
     return paymentMonthKey == monthKey();
   }
 
-
   DateTime _safeMonthFromSettings({
     required int? year,
     required int? month,
   }) {
     final now = DateTime.now();
 
-    final safeYear = year == null || year < 2000 || year > 2100 ? now.year : year;
-    final safeMonth = month == null || month < 1 || month > 12 ? now.month : month;
+    final safeYear =
+        year == null || year < 2000 || year > 2100 ? now.year : year;
+    final safeMonth =
+        month == null || month < 1 || month > 12 ? now.month : month;
 
     return PlanoraDateUtils.monthOnly(DateTime(safeYear, safeMonth, 1));
   }
-
 
   Future<void> _loadSettings() async {
     final rawSettings = await _getStringWithRetry(_settingsStorageKey);
@@ -145,18 +145,25 @@ class PlanoraController extends ChangeNotifier {
     try {
       final json = jsonDecode(rawSettings) as Map<String, dynamic>;
 
-      monthlyIncome = (json['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
+      monthlyIncome =
+          (json['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
       savingTarget = (json['savingTarget'] as num?)?.toDouble() ?? savingTarget;
-      currentSaving = (json['currentSaving'] as num?)?.toDouble() ?? currentSaving;
-      salaryDay = ((json['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
+      currentSaving =
+          (json['currentSaving'] as num?)?.toDouble() ?? currentSaving;
+      salaryDay =
+          ((json['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
       currencySymbol = json['currencySymbol'] as String? ?? currencySymbol;
       hideAmounts = json['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = json['preferDarkMode'] as bool? ?? preferDarkMode;
       appLanguageCode = json['appLanguageCode'] as String? ?? appLanguageCode;
-      notifyUpcomingPayments = json['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
-      notifyLatePayments = json['notifyLatePayments'] as bool? ?? notifyLatePayments;
-      notifyCategoryLimits = json['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
-      notifyDailySafeLimit = json['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
+      notifyUpcomingPayments =
+          json['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
+      notifyLatePayments =
+          json['notifyLatePayments'] as bool? ?? notifyLatePayments;
+      notifyCategoryLimits =
+          json['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
+      notifyDailySafeLimit =
+          json['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
       notifySalaryDay = json['notifySalaryDay'] as bool? ?? notifySalaryDay;
       MoneyFormatter.setCurrencySymbol(currencySymbol);
       MoneyFormatter.setHideAmounts(hideAmounts);
@@ -182,7 +189,7 @@ class PlanoraController extends ChangeNotifier {
         ..addAll(_defaultCategories);
       await _saveCategories();
       await _saveCategoryLimits();
-    await _savePaymentStatuses();
+      await _savePaymentStatuses();
       return;
     }
 
@@ -209,7 +216,6 @@ class PlanoraController extends ChangeNotifier {
     }
   }
 
-
   Future<void> _loadCategoryLimits() async {
     final rawLimits = await _getStringWithRetry(_categoryLimitsStorageKey);
 
@@ -218,7 +224,8 @@ class PlanoraController extends ChangeNotifier {
         ..clear()
         ..addEntries(
           _categories.map(
-            (category) => MapEntry(category, _defaultLimitForCategory(category)),
+            (category) =>
+                MapEntry(category, _defaultLimitForCategory(category)),
           ),
         );
       await _saveCategoryLimits();
@@ -232,12 +239,14 @@ class PlanoraController extends ChangeNotifier {
         ..clear()
         ..addAll(
           decoded.map(
-            (key, value) => MapEntry(key, (value as num?)?.toDouble() ?? _defaultLimitForCategory(key)),
+            (key, value) => MapEntry(key,
+                (value as num?)?.toDouble() ?? _defaultLimitForCategory(key)),
           ),
         );
 
       for (final category in _categories) {
-        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        _categoryLimits.putIfAbsent(
+            category, () => _defaultLimitForCategory(category));
       }
 
       await _saveCategoryLimits();
@@ -246,7 +255,8 @@ class PlanoraController extends ChangeNotifier {
         ..clear()
         ..addEntries(
           _categories.map(
-            (category) => MapEntry(category, _defaultLimitForCategory(category)),
+            (category) =>
+                MapEntry(category, _defaultLimitForCategory(category)),
           ),
         );
       await _saveCategoryLimits();
@@ -288,14 +298,13 @@ class PlanoraController extends ChangeNotifier {
     await _syncCategoriesFromPayments();
   }
 
-
   Future<void> _loadExpenses() async {
     final rawExpenses = await _getStringWithRetry(_expensesStorageKey);
 
     if (rawExpenses == null || rawExpenses.isEmpty) {
       _expenses.clear();
 
-    _extraIncomes.clear();
+      _extraIncomes.clear();
       await _saveExpenses();
       return;
     }
@@ -317,11 +326,10 @@ class PlanoraController extends ChangeNotifier {
     } catch (_) {
       _expenses.clear();
 
-    _extraIncomes.clear();
+      _extraIncomes.clear();
       await _saveExpenses();
     }
   }
-
 
   Future<void> _loadExtraIncomes() async {
     final rawIncome = await _getStringWithRetry(_extraIncomeStorageKey);
@@ -357,7 +365,8 @@ class PlanoraController extends ChangeNotifier {
       final category = expense.category.trim();
       if (category.isNotEmpty && !_categories.contains(category)) {
         _categories.add(category);
-        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        _categoryLimits.putIfAbsent(
+            category, () => _defaultLimitForCategory(category));
         changed = true;
       }
     }
@@ -375,7 +384,8 @@ class PlanoraController extends ChangeNotifier {
       final category = payment.category.trim();
       if (category.isNotEmpty && !_categories.contains(category)) {
         _categories.add(category);
-        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        _categoryLimits.putIfAbsent(
+            category, () => _defaultLimitForCategory(category));
         changed = true;
       }
     }
@@ -385,7 +395,6 @@ class PlanoraController extends ChangeNotifier {
       await _saveCategoryLimits();
     }
   }
-
 
   Future<void> _loadPaymentStatuses() async {
     final rawStatuses = await _getStringWithRetry(_paymentStatusesStorageKey);
@@ -465,17 +474,20 @@ class PlanoraController extends ChangeNotifier {
   }
 
   Future<void> _savePayments() async {
-    final encoded = jsonEncode(_payments.map((payment) => payment.toJson()).toList());
+    final encoded =
+        jsonEncode(_payments.map((payment) => payment.toJson()).toList());
     await _setStringWithRetry(_paymentsStorageKey, encoded);
   }
 
   Future<void> _saveExpenses() async {
-    final encoded = jsonEncode(_expenses.map((expense) => expense.toJson()).toList());
+    final encoded =
+        jsonEncode(_expenses.map((expense) => expense.toJson()).toList());
     await _setStringWithRetry(_expensesStorageKey, encoded);
   }
 
   Future<void> _saveExtraIncomes() async {
-    final encoded = jsonEncode(_extraIncomes.map((income) => income.toJson()).toList());
+    final encoded =
+        jsonEncode(_extraIncomes.map((income) => income.toJson()).toList());
     await _setStringWithRetry(_extraIncomeStorageKey, encoded);
   }
 
@@ -557,7 +569,8 @@ class PlanoraController extends ChangeNotifier {
   Future<bool> addCategory(String rawName) async {
     final name = rawName.trim();
     if (name.isEmpty) return false;
-    if (_categories.any((category) => category.toLowerCase() == name.toLowerCase())) {
+    if (_categories
+        .any((category) => category.toLowerCase() == name.toLowerCase())) {
       return false;
     }
 
@@ -583,7 +596,8 @@ class PlanoraController extends ChangeNotifier {
       return true;
     }
 
-    if (_categories.any((category) => category.toLowerCase() == cleanNewName.toLowerCase())) {
+    if (_categories.any(
+        (category) => category.toLowerCase() == cleanNewName.toLowerCase())) {
       return false;
     }
 
@@ -593,7 +607,8 @@ class PlanoraController extends ChangeNotifier {
     _categories[categoryIndex] = cleanNewName;
 
     final oldLimit = _categoryLimits.remove(oldName);
-    _categoryLimits[cleanNewName] = oldLimit ?? _defaultLimitForCategory(cleanNewName);
+    _categoryLimits[cleanNewName] =
+        oldLimit ?? _defaultLimitForCategory(cleanNewName);
 
     for (int i = 0; i < _payments.length; i++) {
       final payment = _payments[i];
@@ -740,12 +755,15 @@ class PlanoraController extends ChangeNotifier {
     String? newAppLanguageCode,
     String? newCurrencySymbol,
   }) async {
-    final cleanLanguage = newAppLanguageCode == 'en' || newAppLanguageCode == 'ru' || newAppLanguageCode == 'tr'
+    final cleanLanguage = newAppLanguageCode == 'en' ||
+            newAppLanguageCode == 'ru' ||
+            newAppLanguageCode == 'tr'
         ? newAppLanguageCode!
         : appLanguageCode;
-    final cleanCurrency = newCurrencySymbol == null || newCurrencySymbol.trim().isEmpty
-        ? currencySymbol
-        : newCurrencySymbol.trim();
+    final cleanCurrency =
+        newCurrencySymbol == null || newCurrencySymbol.trim().isEmpty
+            ? currencySymbol
+            : newCurrencySymbol.trim();
 
     appLanguageCode = cleanLanguage;
     currencySymbol = cleanCurrency;
@@ -774,7 +792,8 @@ class PlanoraController extends ChangeNotifier {
   }
 
   Future<void> changeSelectedMonth(int monthDelta) async {
-    selectedMonth = DateTime(selectedMonth.year, selectedMonth.month + monthDelta);
+    selectedMonth =
+        DateTime(selectedMonth.year, selectedMonth.month + monthDelta);
     await _saveSettings();
     notifyListeners();
   }
@@ -824,8 +843,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   List<IncomeItem> get extraIncomes {
     final sorted = [..._extraIncomes];
     sorted.sort((a, b) {
@@ -838,9 +855,8 @@ class PlanoraController extends ChangeNotifier {
 
   List<IncomeItem> get extraIncomesForSelectedMonth {
     final key = monthKey();
-    final sorted = _extraIncomes
-        .where((income) => income.monthKey == key)
-        .toList();
+    final sorted =
+        _extraIncomes.where((income) => income.monthKey == key).toList();
 
     sorted.sort((a, b) => b.day.compareTo(a.day));
     return List.unmodifiable(sorted);
@@ -873,9 +889,8 @@ class PlanoraController extends ChangeNotifier {
 
   List<ExpenseItem> get expensesForSelectedMonth {
     final key = monthKey();
-    final sorted = _expenses
-        .where((expense) => expense.monthKey == key)
-        .toList();
+    final sorted =
+        _expenses.where((expense) => expense.monthKey == key).toList();
 
     sorted.sort((a, b) => b.day.compareTo(a.day));
     return List.unmodifiable(sorted);
@@ -937,11 +952,13 @@ class PlanoraController extends ChangeNotifier {
       return [];
     }
 
-    final endDay = (now.day + days).clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth));
+    final endDay =
+        (now.day + days).clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth));
 
     return paymentsForSelectedMonth
         .where((payment) => !isPaymentPaid(payment))
-        .where((payment) => payment.dueDay > now.day && payment.dueDay <= endDay)
+        .where(
+            (payment) => payment.dueDay > now.day && payment.dueDay <= endDay)
         .toList();
   }
 
@@ -997,7 +1014,8 @@ class PlanoraController extends ChangeNotifier {
           type: PlanoraAlertType.budget,
         ),
       );
-    } else if (freeBalance < dailySafeLimit * 3 && paymentsForSelectedMonth.isNotEmpty) {
+    } else if (freeBalance < dailySafeLimit * 3 &&
+        paymentsForSelectedMonth.isNotEmpty) {
       alerts.add(
         PlanoraAlert(
           id: 'budget_low_free_balance',
@@ -1016,7 +1034,8 @@ class PlanoraController extends ChangeNotifier {
           PlanoraAlert(
             id: 'category_limit_exceeded_${category.title}',
             title: _categoryAlertTitleText(lang, 'exceeded', category.title),
-            message: _categoryAlertMessageText(lang, 'exceeded', category.used.round(), category.limit.round()),
+            message: _categoryAlertMessageText(lang, 'exceeded',
+                category.used.round(), category.limit.round()),
             type: PlanoraAlertType.budget,
           ),
         );
@@ -1025,7 +1044,8 @@ class PlanoraController extends ChangeNotifier {
           PlanoraAlert(
             id: 'category_limit_near_${category.title}',
             title: _categoryAlertTitleText(lang, 'near', category.title),
-            message: _categoryAlertMessageText(lang, 'near', (category.ratio * 100).round(), category.limit.round()),
+            message: _categoryAlertMessageText(lang, 'near',
+                (category.ratio * 100).round(), category.limit.round()),
             type: PlanoraAlertType.budget,
           ),
         );
@@ -1047,9 +1067,10 @@ class PlanoraController extends ChangeNotifier {
   }
 
   int get activeAlertCount {
-    return smartAlerts.where((alert) => alert.type != PlanoraAlertType.info).length;
+    return smartAlerts
+        .where((alert) => alert.type != PlanoraAlertType.info)
+        .length;
   }
-
 
   List<PaymentItem> get paidPaymentsForSelectedMonth {
     return paymentsForSelectedMonth.where(isPaymentPaid).toList();
@@ -1100,7 +1121,6 @@ class PlanoraController extends ChangeNotifier {
     return (paidPaymentsTotal / plannedPayments).clamp(0.0, 1.0);
   }
 
-
   PaymentItem? paymentById(String id) {
     try {
       return _payments.firstWhere((payment) => payment.id == id);
@@ -1110,7 +1130,8 @@ class PlanoraController extends ChangeNotifier {
   }
 
   double get plannedPayments {
-    return paymentsForSelectedMonth.fold<double>(0, (sum, item) => sum + item.amount);
+    return paymentsForSelectedMonth.fold<double>(
+        0, (sum, item) => sum + item.amount);
   }
 
   double get remainingAfterPlan {
@@ -1140,8 +1161,12 @@ class PlanoraController extends ChangeNotifier {
     final nextMonthDays = PlanoraDateUtils.daysInMonth(nextMonth);
     final nextSalaryDay = salaryDay.clamp(1, nextMonthDays);
 
-    final nextSalaryDate = DateTime(nextMonth.year, nextMonth.month, nextSalaryDay);
-    return nextSalaryDate.difference(DateTime(now.year, now.month, now.day)).inDays.clamp(1, 62);
+    final nextSalaryDate =
+        DateTime(nextMonth.year, nextMonth.month, nextSalaryDay);
+    return nextSalaryDate
+        .difference(DateTime(now.year, now.month, now.day))
+        .inDays
+        .clamp(1, 62);
   }
 
   DateTime get nextSalaryDate {
@@ -1149,7 +1174,8 @@ class PlanoraController extends ChangeNotifier {
 
     if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
       final days = PlanoraDateUtils.daysInMonth(selectedMonth);
-      return DateTime(selectedMonth.year, selectedMonth.month, salaryDay.clamp(1, days));
+      return DateTime(
+          selectedMonth.year, selectedMonth.month, salaryDay.clamp(1, days));
     }
 
     final selectedMonthDays = PlanoraDateUtils.daysInMonth(selectedMonth);
@@ -1161,7 +1187,8 @@ class PlanoraController extends ChangeNotifier {
 
     final nextMonth = DateTime(selectedMonth.year, selectedMonth.month + 1, 1);
     final nextMonthDays = PlanoraDateUtils.daysInMonth(nextMonth);
-    return DateTime(nextMonth.year, nextMonth.month, salaryDay.clamp(1, nextMonthDays));
+    return DateTime(
+        nextMonth.year, nextMonth.month, salaryDay.clamp(1, nextMonthDays));
   }
 
   double get dailySafeLimit {
@@ -1176,13 +1203,12 @@ class PlanoraController extends ChangeNotifier {
     final candidates = paymentsForSelectedMonth
         .where((payment) => !isPaymentPaid(payment))
         .where((payment) {
-          if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
-            return true;
-          }
+      if (!PlanoraDateUtils.isSameMonth(now, selectedMonth)) {
+        return true;
+      }
 
-          return payment.dueDay >= now.day;
-        })
-        .toList();
+      return payment.dueDay >= now.day;
+    }).toList();
 
     if (candidates.isEmpty) {
       final waiting = paymentsForSelectedMonth
@@ -1190,7 +1216,8 @@ class PlanoraController extends ChangeNotifier {
           .toList();
 
       if (waiting.isNotEmpty) return waiting.first;
-      if (paymentsForSelectedMonth.isNotEmpty) return paymentsForSelectedMonth.first;
+      if (paymentsForSelectedMonth.isNotEmpty)
+        return paymentsForSelectedMonth.first;
       return null;
     }
 
@@ -1281,7 +1308,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
   Future<void> addOneTimePaymentAmountFromExisting({
     required String sourcePaymentId,
     required double amount,
@@ -1291,7 +1317,8 @@ class PlanoraController extends ChangeNotifier {
     final source = paymentById(sourcePaymentId);
     if (source == null) return;
 
-    final cleanCategory = source.category.trim().isEmpty ? 'Diğer' : source.category.trim();
+    final cleanCategory =
+        source.category.trim().isEmpty ? 'Diğer' : source.category.trim();
 
     if (!_categories.contains(cleanCategory)) {
       _categories.add(cleanCategory);
@@ -1305,7 +1332,8 @@ class PlanoraController extends ChangeNotifier {
       title: source.title,
       category: cleanCategory,
       amount: amount,
-      dueDay: source.dueDay.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
+      dueDay:
+          source.dueDay.clamp(1, PlanoraDateUtils.daysInMonth(selectedMonth)),
       status: PaymentStatus.waiting,
       color: source.color,
       isMonthly: false,
@@ -1345,8 +1373,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   int get budgetHealthScore {
     var score = 100;
 
@@ -1373,7 +1399,8 @@ class PlanoraController extends ChangeNotifier {
     }
 
     final exceededCategoryCount = categorySummary
-        .where((category) => category.limit > 0 && category.used > category.limit)
+        .where(
+            (category) => category.limit > 0 && category.used > category.limit)
         .length;
 
     final nearCategoryCount = categorySummary
@@ -1508,7 +1535,6 @@ class PlanoraController extends ChangeNotifier {
     }
   }
 
-
   Color get budgetHealthColor {
     final score = budgetHealthScore;
 
@@ -1517,9 +1543,6 @@ class PlanoraController extends ChangeNotifier {
     if (score >= 40) return const Color(0xFFFF7A1A);
     return AppColors.danger;
   }
-
-
-
 
   Future<void> clearSelectedMonthExpenses() async {
     final key = monthKey();
@@ -1641,8 +1664,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   Map<String, dynamic> diagnosticsSnapshot() {
     return {
       'hasCompletedOnboarding': hasCompletedOnboarding,
@@ -1665,24 +1686,36 @@ class PlanoraController extends ChangeNotifier {
     final lang = appLanguageCode;
 
     buffer.writeln(_reportText(lang, 'title'));
-    buffer.writeln(_reportMonthLine(lang, _controllerMonthYearLabel(lang, selectedMonth)));
+    buffer.writeln(
+        _reportMonthLine(lang, _controllerMonthYearLabel(lang, selectedMonth)));
     buffer.writeln('');
     buffer.writeln(_reportText(lang, 'generalStatus'));
-    buffer.writeln(_reportBudgetHealthLine(lang, budgetHealthLabel, budgetHealthScore));
-    buffer.writeln(_reportAmountLine(lang, 'fixedIncome', monthlyIncome.round()));
-    buffer.writeln(_reportAmountLine(lang, 'extraIncome', extraIncomeTotal.round()));
-    buffer.writeln(_reportAmountLine(lang, 'totalIncome', totalMonthlyIncome.round()));
-    buffer.writeln(_reportAmountLine(lang, 'plannedPayments', plannedPayments.round()));
-    buffer.writeln(_reportAmountLine(lang, 'variableExpenses', expensesTotal.round()));
+    buffer.writeln(
+        _reportBudgetHealthLine(lang, budgetHealthLabel, budgetHealthScore));
+    buffer
+        .writeln(_reportAmountLine(lang, 'fixedIncome', monthlyIncome.round()));
+    buffer.writeln(
+        _reportAmountLine(lang, 'extraIncome', extraIncomeTotal.round()));
+    buffer.writeln(
+        _reportAmountLine(lang, 'totalIncome', totalMonthlyIncome.round()));
+    buffer.writeln(
+        _reportAmountLine(lang, 'plannedPayments', plannedPayments.round()));
+    buffer.writeln(
+        _reportAmountLine(lang, 'variableExpenses', expensesTotal.round()));
     buffer.writeln(_reportAmountLine(lang, 'freeBalance', freeBalance.round()));
-    buffer.writeln(_reportAmountLine(lang, 'dailySafeLimit', dailySafeLimit.round()));
+    buffer.writeln(
+        _reportAmountLine(lang, 'dailySafeLimit', dailySafeLimit.round()));
     buffer.writeln(_reportDaysUntilSalaryLine(lang, daysUntilNextSalary));
     buffer.writeln('');
     buffer.writeln(_reportText(lang, 'paymentStatus'));
-    buffer.writeln(_reportPaymentLine(lang, 'paid', paidPaymentsTotal.round(), paidPaymentCount));
-    buffer.writeln(_reportPaymentLine(lang, 'waiting', waitingPaymentsTotal.round(), waitingPaymentCount));
-    buffer.writeln(_reportPaymentLine(lang, 'late', latePaymentsTotal.round(), latePaymentCount));
-    buffer.writeln(_reportCompletionLine(lang, (paidProgressRatio * 100).round()));
+    buffer.writeln(_reportPaymentLine(
+        lang, 'paid', paidPaymentsTotal.round(), paidPaymentCount));
+    buffer.writeln(_reportPaymentLine(
+        lang, 'waiting', waitingPaymentsTotal.round(), waitingPaymentCount));
+    buffer.writeln(_reportPaymentLine(
+        lang, 'late', latePaymentsTotal.round(), latePaymentCount));
+    buffer.writeln(
+        _reportCompletionLine(lang, (paidProgressRatio * 100).round()));
     buffer.writeln('');
     buffer.writeln(_reportText(lang, 'categories'));
 
@@ -1711,7 +1744,6 @@ class PlanoraController extends ChangeNotifier {
     return buffer.toString();
   }
 
-
   String exportBackupJson() {
     final data = {
       'version': 1,
@@ -1723,8 +1755,8 @@ class PlanoraController extends ChangeNotifier {
         'salaryDay': salaryDay,
         'currencySymbol': currencySymbol,
         'hideAmounts': hideAmounts,
-      'preferDarkMode': preferDarkMode,
-      'appLanguageCode': appLanguageCode,
+        'preferDarkMode': preferDarkMode,
+        'appLanguageCode': appLanguageCode,
         'notifyUpcomingPayments': notifyUpcomingPayments,
         'notifyLatePayments': notifyLatePayments,
         'notifyCategoryLimits': notifyCategoryLimits,
@@ -1758,26 +1790,37 @@ class PlanoraController extends ChangeNotifier {
 
       final settings = decoded['settings'] as Map<String, dynamic>? ?? {};
 
-      monthlyIncome = (settings['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
-      savingTarget = (settings['savingTarget'] as num?)?.toDouble() ?? savingTarget;
-      currentSaving = (settings['currentSaving'] as num?)?.toDouble() ?? currentSaving;
-      salaryDay = ((settings['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
+      monthlyIncome =
+          (settings['monthlyIncome'] as num?)?.toDouble() ?? monthlyIncome;
+      savingTarget =
+          (settings['savingTarget'] as num?)?.toDouble() ?? savingTarget;
+      currentSaving =
+          (settings['currentSaving'] as num?)?.toDouble() ?? currentSaving;
+      salaryDay =
+          ((settings['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
       currencySymbol = settings['currencySymbol'] as String? ?? currencySymbol;
       hideAmounts = settings['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = settings['preferDarkMode'] as bool? ?? preferDarkMode;
-      appLanguageCode = settings['appLanguageCode'] as String? ?? appLanguageCode;
-      notifyUpcomingPayments = settings['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
-      notifyLatePayments = settings['notifyLatePayments'] as bool? ?? notifyLatePayments;
-      notifyCategoryLimits = settings['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
-      notifyDailySafeLimit = settings['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
+      appLanguageCode =
+          settings['appLanguageCode'] as String? ?? appLanguageCode;
+      notifyUpcomingPayments =
+          settings['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
+      notifyLatePayments =
+          settings['notifyLatePayments'] as bool? ?? notifyLatePayments;
+      notifyCategoryLimits =
+          settings['notifyCategoryLimits'] as bool? ?? notifyCategoryLimits;
+      notifyDailySafeLimit =
+          settings['notifyDailySafeLimit'] as bool? ?? notifyDailySafeLimit;
       notifySalaryDay = settings['notifySalaryDay'] as bool? ?? notifySalaryDay;
       MoneyFormatter.setCurrencySymbol(currencySymbol);
       MoneyFormatter.setHideAmounts(hideAmounts);
-      hasCompletedOnboarding = settings['hasCompletedOnboarding'] as bool? ?? hasCompletedOnboarding;
+      hasCompletedOnboarding =
+          settings['hasCompletedOnboarding'] as bool? ?? hasCompletedOnboarding;
 
       final selectedMonthRaw = settings['selectedMonth'] as String?;
       if (selectedMonthRaw != null && selectedMonthRaw.isNotEmpty) {
-        selectedMonth = PlanoraDateUtils.monthOnly(DateTime.tryParse(selectedMonthRaw) ?? selectedMonth);
+        selectedMonth = PlanoraDateUtils.monthOnly(
+            DateTime.tryParse(selectedMonthRaw) ?? selectedMonth);
       }
 
       final decodedCategories = decoded['categories'];
@@ -1800,7 +1843,8 @@ class PlanoraController extends ChangeNotifier {
       if (decodedLimits is Map<String, dynamic>) {
         for (final entry in decodedLimits.entries) {
           final category = entry.key.trim();
-          final limit = (entry.value as num?)?.toDouble() ?? _defaultLimitForCategory(category);
+          final limit = (entry.value as num?)?.toDouble() ??
+              _defaultLimitForCategory(category);
 
           if (category.isNotEmpty) {
             _categoryLimits[category] = limit;
@@ -1809,7 +1853,8 @@ class PlanoraController extends ChangeNotifier {
       }
 
       for (final category in _categories) {
-        _categoryLimits.putIfAbsent(category, () => _defaultLimitForCategory(category));
+        _categoryLimits.putIfAbsent(
+            category, () => _defaultLimitForCategory(category));
       }
 
       final decodedPayments = decoded['payments'];
@@ -1827,7 +1872,7 @@ class PlanoraController extends ChangeNotifier {
       final decodedExpenses = decoded['expenses'];
       _expenses.clear();
 
-    _extraIncomes.clear();
+      _extraIncomes.clear();
 
       if (decodedExpenses is List) {
         _expenses.addAll(
@@ -1897,7 +1942,6 @@ class PlanoraController extends ChangeNotifier {
     }
   }
 
-
   List<String> get budgetHealthTips {
     final tips = <String>[];
     final lang = appLanguageCode;
@@ -1911,11 +1955,13 @@ class PlanoraController extends ChangeNotifier {
     }
 
     final exceededCategories = categorySummary
-        .where((category) => category.limit > 0 && category.used > category.limit)
+        .where(
+            (category) => category.limit > 0 && category.used > category.limit)
         .toList();
 
     if (notifyCategoryLimits && exceededCategories.isNotEmpty) {
-      tips.add(_budgetTipText(lang, 'categoryExceeded', category: exceededCategories.first.title));
+      tips.add(_budgetTipText(lang, 'categoryExceeded',
+          category: exceededCategories.first.title));
     }
 
     final nearCategories = categorySummary
@@ -1925,7 +1971,8 @@ class PlanoraController extends ChangeNotifier {
         .toList();
 
     if (nearCategories.isNotEmpty) {
-      tips.add(_budgetTipText(lang, 'categoryNear', category: nearCategories.first.title));
+      tips.add(_budgetTipText(lang, 'categoryNear',
+          category: nearCategories.first.title));
     }
 
     if (expensesTotal > totalMonthlyIncome * 0.15) {
@@ -1944,16 +1991,14 @@ class PlanoraController extends ChangeNotifier {
     return tips.take(3).toList();
   }
 
-
-
-
   String _alertTitleText(String code, String key, String name) {
     switch (code) {
       case 'en':
         if (key == 'late') return '$name is late';
         if (key == 'today') return '$name is due today';
         if (key == 'upcoming') return '$name is coming up';
-        if (key == 'budgetNegative') return 'Planned payments exceed your income';
+        if (key == 'budgetNegative')
+          return 'Planned payments exceed your income';
         if (key == 'lowFreeBalance') return 'Your free balance is low';
         if (key == 'allClear') return 'Everything is under control';
         return name;
@@ -1970,7 +2015,8 @@ class PlanoraController extends ChangeNotifier {
         if (key == 'late') return '$name gecikti';
         if (key == 'today') return '$name bugün ödenmeli';
         if (key == 'upcoming') return '$name yaklaşıyor';
-        if (key == 'budgetNegative') return 'Planlanan ödemeler gelirini aşıyor';
+        if (key == 'budgetNegative')
+          return 'Planlanan ödemeler gelirini aşıyor';
         if (key == 'lowFreeBalance') return 'Serbest bakiyen düşük';
         if (key == 'allClear') return 'Her şey kontrol altında';
         return name;
@@ -1980,29 +2026,47 @@ class PlanoraController extends ChangeNotifier {
   String _alertMessageText(String code, String key, {int? day}) {
     switch (code) {
       case 'en':
-        if (key == 'late') return 'The payment due on day $day is still waiting.';
-        if (key == 'today') return 'Today is the due date. Mark it if you have paid.';
-        if (key == 'upcoming') return 'It appears in your payment plan for day $day.';
-        if (key == 'budgetNegative') return 'This month’s payment plan is higher than your monthly income. Review your income or payment plan.';
-        if (key == 'lowFreeBalance') return 'It may be better to spend more carefully until the end of the month.';
-        if (key == 'allClear') return 'There are no late or upcoming critical payments for this month.';
+        if (key == 'late')
+          return 'The payment due on day $day is still waiting.';
+        if (key == 'today')
+          return 'Today is the due date. Mark it if you have paid.';
+        if (key == 'upcoming')
+          return 'It appears in your payment plan for day $day.';
+        if (key == 'budgetNegative')
+          return 'This month’s payment plan is higher than your monthly income. Review your income or payment plan.';
+        if (key == 'lowFreeBalance')
+          return 'It may be better to spend more carefully until the end of the month.';
+        if (key == 'allClear')
+          return 'There are no late or upcoming critical payments for this month.';
         return '';
       case 'ru':
-        if (key == 'late') return 'Платёж на $day-й день всё ещё ожидает оплаты.';
-        if (key == 'today') return 'Сегодня срок оплаты. Отметьте платёж, если он уже оплачен.';
-        if (key == 'upcoming') return 'Он указан в плане платежей на $day-й день.';
-        if (key == 'budgetNegative') return 'План платежей на этот месяц выше месячного дохода. Проверьте доход или план платежей.';
-        if (key == 'lowFreeBalance') return 'До конца месяца лучше тратить более осторожно.';
-        if (key == 'allClear') return 'В этом месяце нет просроченных или приближающихся критических платежей.';
+        if (key == 'late')
+          return 'Платёж на $day-й день всё ещё ожидает оплаты.';
+        if (key == 'today')
+          return 'Сегодня срок оплаты. Отметьте платёж, если он уже оплачен.';
+        if (key == 'upcoming')
+          return 'Он указан в плане платежей на $day-й день.';
+        if (key == 'budgetNegative')
+          return 'План платежей на этот месяц выше месячного дохода. Проверьте доход или план платежей.';
+        if (key == 'lowFreeBalance')
+          return 'До конца месяца лучше тратить более осторожно.';
+        if (key == 'allClear')
+          return 'В этом месяце нет просроченных или приближающихся критических платежей.';
         return '';
       case 'tr':
       default:
-        if (key == 'late') return '$day. gün ödenmesi gereken ödeme hâlâ bekliyor.';
-        if (key == 'today') return 'Bugün son ödeme günü. Ödediysen durumunu işaretleyebilirsin.';
-        if (key == 'upcoming') return '$day. gün için ödeme planında görünüyor.';
-        if (key == 'budgetNegative') return 'Bu ayki ödeme planı aylık gelirinden yüksek. Gelir veya ödeme planını kontrol et.';
-        if (key == 'lowFreeBalance') return 'Ay sonuna kadar daha kontrollü harcama yapmak iyi olabilir.';
-        if (key == 'allClear') return 'Bu ay için geciken veya yaklaşan kritik ödeme görünmüyor.';
+        if (key == 'late')
+          return '$day. gün ödenmesi gereken ödeme hâlâ bekliyor.';
+        if (key == 'today')
+          return 'Bugün son ödeme günü. Ödediysen durumunu işaretleyebilirsin.';
+        if (key == 'upcoming')
+          return '$day. gün için ödeme planında görünüyor.';
+        if (key == 'budgetNegative')
+          return 'Bu ayki ödeme planı aylık gelirinden yüksek. Gelir veya ödeme planını kontrol et.';
+        if (key == 'lowFreeBalance')
+          return 'Ay sonuna kadar daha kontrollü harcama yapmak iyi olabilir.';
+        if (key == 'allClear')
+          return 'Bu ay için geciken veya yaklaşan kritik ödeme görünmüyor.';
         return '';
     }
   }
@@ -2010,62 +2074,93 @@ class PlanoraController extends ChangeNotifier {
   String _categoryAlertTitleText(String code, String key, String category) {
     switch (code) {
       case 'en':
-        return key == 'exceeded' ? '$category limit exceeded' : '$category is near its limit';
+        return key == 'exceeded'
+            ? '$category limit exceeded'
+            : '$category is near its limit';
       case 'ru':
-        return key == 'exceeded' ? 'Лимит $category превышен' : '$category приближается к лимиту';
+        return key == 'exceeded'
+            ? 'Лимит $category превышен'
+            : '$category приближается к лимиту';
       case 'tr':
       default:
-        return key == 'exceeded' ? '$category limiti aşıldı' : '$category limitine yaklaşıldı';
+        return key == 'exceeded'
+            ? '$category limiti aşıldı'
+            : '$category limitine yaklaşıldı';
     }
   }
 
-  String _categoryAlertMessageText(String code, String key, int primaryValue, int limit) {
+  String _categoryAlertMessageText(
+      String code, String key, int primaryValue, int limit) {
     switch (code) {
       case 'en':
-        if (key == 'exceeded') return 'Payment and expense total in this category reached ${formatMoney(primaryValue)}. Limit is ${formatMoney(limit)}.';
+        if (key == 'exceeded')
+          return 'Payment and expense total in this category reached ${formatMoney(primaryValue)}. Limit is ${formatMoney(limit)}.';
         return 'This category reached about $primaryValue% of its limit.';
       case 'ru':
-        if (key == 'exceeded') return 'Сумма платежей и расходов в этой категории достигла ${formatMoney(primaryValue)}. Лимит: ${formatMoney(limit)}.';
+        if (key == 'exceeded')
+          return 'Сумма платежей и расходов в этой категории достигла ${formatMoney(primaryValue)}. Лимит: ${formatMoney(limit)}.';
         return 'Эта категория достигла примерно $primaryValue% лимита.';
       case 'tr':
       default:
-        if (key == 'exceeded') return 'Bu kategoride ödeme ve harcama toplamı ${formatMoney(primaryValue)} oldu. Limit ${formatMoney(limit)}.';
+        if (key == 'exceeded')
+          return 'Bu kategoride ödeme ve harcama toplamı ${formatMoney(primaryValue)} oldu. Limit ${formatMoney(limit)}.';
         return 'Bu kategoride limitin yaklaşık %$primaryValue seviyesine ulaşıldı.';
     }
   }
 
-  String _budgetTipText(String code, String key, {int? count, String? category}) {
+  String _budgetTipText(String code, String key,
+      {int? count, String? category}) {
     switch (code) {
       case 'en':
-        if (key == 'latePayments') return '$count late payments. Close the late payments first.';
-        if (key == 'noFreeBalance') return 'Free balance has reached zero. Review the plan before adding new expenses this month.';
+        if (key == 'latePayments')
+          return '$count late payments. Close the late payments first.';
+        if (key == 'noFreeBalance')
+          return 'Free balance has reached zero. Review the plan before adding new expenses this month.';
         if (key == 'categoryExceeded') return '$category exceeded its limit.';
         if (key == 'categoryNear') return '$category is approaching its limit.';
-        if (key == 'expensesHigh') return 'Variable expenses increased this month. Review groceries, food, and transport spending.';
-        if (key == 'dailySafeLow') return 'The daily safe limit is low. Reduce spending until the next salary.';
-        if (key == 'goodPlan') return 'Your budget looks good this month. Keep the plan.';
-        if (key == 'checkLimits') return 'You can maintain balance by checking category limits regularly.';
+        if (key == 'expensesHigh')
+          return 'Variable expenses increased this month. Review groceries, food, and transport spending.';
+        if (key == 'dailySafeLow')
+          return 'The daily safe limit is low. Reduce spending until the next salary.';
+        if (key == 'goodPlan')
+          return 'Your budget looks good this month. Keep the plan.';
+        if (key == 'checkLimits')
+          return 'You can maintain balance by checking category limits regularly.';
         return '';
       case 'ru':
-        if (key == 'latePayments') return '$count просроченных платежей. Сначала закройте просрочки.';
-        if (key == 'noFreeBalance') return 'Свободный баланс достиг нуля. Проверьте план перед добавлением новых расходов.';
+        if (key == 'latePayments')
+          return '$count просроченных платежей. Сначала закройте просрочки.';
+        if (key == 'noFreeBalance')
+          return 'Свободный баланс достиг нуля. Проверьте план перед добавлением новых расходов.';
         if (key == 'categoryExceeded') return '$category превысила лимит.';
         if (key == 'categoryNear') return '$category приближается к лимиту.';
-        if (key == 'expensesHigh') return 'Переменные расходы выросли в этом месяце. Проверьте траты на продукты, еду и транспорт.';
-        if (key == 'dailySafeLow') return 'Дневной безопасный лимит низкий. Сократите расходы до следующей зарплаты.';
-        if (key == 'goodPlan') return 'В этом месяце бюджет выглядит хорошо. Продолжайте придерживаться плана.';
-        if (key == 'checkLimits') return 'Регулярная проверка лимитов категорий поможет сохранить баланс.';
+        if (key == 'expensesHigh')
+          return 'Переменные расходы выросли в этом месяце. Проверьте траты на продукты, еду и транспорт.';
+        if (key == 'dailySafeLow')
+          return 'Дневной безопасный лимит низкий. Сократите расходы до следующей зарплаты.';
+        if (key == 'goodPlan')
+          return 'В этом месяце бюджет выглядит хорошо. Продолжайте придерживаться плана.';
+        if (key == 'checkLimits')
+          return 'Регулярная проверка лимитов категорий поможет сохранить баланс.';
         return '';
       case 'tr':
       default:
-        if (key == 'latePayments') return '$count geciken ödeme var. Önce geciken ödemeleri kapat.';
-        if (key == 'noFreeBalance') return 'Serbest bakiye sıfıra indi. Bu ay yeni harcama eklemeden önce planı kontrol et.';
-        if (key == 'categoryExceeded') return '$category kategorisi limitini aştı.';
-        if (key == 'categoryNear') return '$category kategorisi limite yaklaştı.';
-        if (key == 'expensesHigh') return 'Değişken harcamalar bu ay yükseldi. Market, yemek ve ulaşım giderlerini kontrol et.';
-        if (key == 'dailySafeLow') return 'Günlük güvenli limit düşük. Bir sonraki maaşa kadar harcamaları azalt.';
-        if (key == 'goodPlan') return 'Bu ay bütçen iyi görünüyor. Planı korumaya devam et.';
-        if (key == 'checkLimits') return 'Kategori limitlerini düzenli kontrol ederek dengeyi sürdürebilirsin.';
+        if (key == 'latePayments')
+          return '$count geciken ödeme var. Önce geciken ödemeleri kapat.';
+        if (key == 'noFreeBalance')
+          return 'Serbest bakiye sıfıra indi. Bu ay yeni harcama eklemeden önce planı kontrol et.';
+        if (key == 'categoryExceeded')
+          return '$category kategorisi limitini aştı.';
+        if (key == 'categoryNear')
+          return '$category kategorisi limite yaklaştı.';
+        if (key == 'expensesHigh')
+          return 'Değişken harcamalar bu ay yükseldi. Market, yemek ve ulaşım giderlerini kontrol et.';
+        if (key == 'dailySafeLow')
+          return 'Günlük güvenli limit düşük. Bir sonraki maaşa kadar harcamaları azalt.';
+        if (key == 'goodPlan')
+          return 'Bu ay bütçen iyi görünüyor. Planı korumaya devam et.';
+        if (key == 'checkLimits')
+          return 'Kategori limitlerini düzenli kontrol ederek dengeyi sürdürebilirsin.';
         return '';
     }
   }
@@ -2074,18 +2169,45 @@ class PlanoraController extends ChangeNotifier {
     final language = code == 'en' || code == 'ru' ? code : 'tr';
 
     const values = {
-      'title': {'tr': 'PLANORA AYLIK RAPOR', 'en': 'PLANORA MONTHLY REPORT', 'ru': 'МЕСЯЧНЫЙ ОТЧЁТ PLANORA'},
-      'generalStatus': {'tr': 'GENEL DURUM', 'en': 'GENERAL STATUS', 'ru': 'ОБЩЕЕ СОСТОЯНИЕ'},
-      'paymentStatus': {'tr': 'ÖDEME DURUMU', 'en': 'PAYMENT STATUS', 'ru': 'СТАТУС ПЛАТЕЖЕЙ'},
-      'categories': {'tr': 'KATEGORİLER', 'en': 'CATEGORIES', 'ru': 'КАТЕГОРИИ'},
-      'noCategoryData': {'tr': 'Kategori verisi yok.', 'en': 'No category data.', 'ru': 'Нет данных по категориям.'},
-      'planoraComment': {'tr': 'PLANORA YORUMU', 'en': 'PLANORA COMMENT', 'ru': 'КОММЕНТАРИЙ PLANORA'},
-      'recommendations': {'tr': 'ÖNERİLER', 'en': 'RECOMMENDATIONS', 'ru': 'РЕКОМЕНДАЦИИ'},
+      'title': {
+        'tr': 'PLANORA AYLIK RAPOR',
+        'en': 'PLANORA MONTHLY REPORT',
+        'ru': 'МЕСЯЧНЫЙ ОТЧЁТ PLANORA'
+      },
+      'generalStatus': {
+        'tr': 'GENEL DURUM',
+        'en': 'GENERAL STATUS',
+        'ru': 'ОБЩЕЕ СОСТОЯНИЕ'
+      },
+      'paymentStatus': {
+        'tr': 'ÖDEME DURUMU',
+        'en': 'PAYMENT STATUS',
+        'ru': 'СТАТУС ПЛАТЕЖЕЙ'
+      },
+      'categories': {
+        'tr': 'KATEGORİLER',
+        'en': 'CATEGORIES',
+        'ru': 'КАТЕГОРИИ'
+      },
+      'noCategoryData': {
+        'tr': 'Kategori verisi yok.',
+        'en': 'No category data.',
+        'ru': 'Нет данных по категориям.'
+      },
+      'planoraComment': {
+        'tr': 'PLANORA YORUMU',
+        'en': 'PLANORA COMMENT',
+        'ru': 'КОММЕНТАРИЙ PLANORA'
+      },
+      'recommendations': {
+        'tr': 'ÖNERİLER',
+        'en': 'RECOMMENDATIONS',
+        'ru': 'РЕКОМЕНДАЦИИ'
+      },
     };
 
     return values[key]?[language] ?? values[key]?['tr'] ?? key;
   }
-
 
   String _controllerMonthYearLabel(String code, DateTime month) {
     final months = {
@@ -2163,13 +2285,41 @@ class PlanoraController extends ChangeNotifier {
 
   String _reportAmountLine(String code, String key, int amount) {
     final labels = {
-      'fixedIncome': {'tr': 'Sabit aylık gelir', 'en': 'Fixed monthly income', 'ru': 'Основной месячный доход'},
-      'extraIncome': {'tr': 'Ek gelirler', 'en': 'Extra income', 'ru': 'Дополнительные доходы'},
-      'totalIncome': {'tr': 'Toplam gelir', 'en': 'Total income', 'ru': 'Общий доход'},
-      'plannedPayments': {'tr': 'Planlanan ödemeler', 'en': 'Planned payments', 'ru': 'Плановые платежи'},
-      'variableExpenses': {'tr': 'Değişken harcamalar', 'en': 'Variable expenses', 'ru': 'Переменные расходы'},
-      'freeBalance': {'tr': 'Serbest bakiye', 'en': 'Free balance', 'ru': 'Свободный баланс'},
-      'dailySafeLimit': {'tr': 'Günlük güvenli limit', 'en': 'Daily safe limit', 'ru': 'Дневной безопасный лимит'},
+      'fixedIncome': {
+        'tr': 'Sabit aylık gelir',
+        'en': 'Fixed monthly income',
+        'ru': 'Основной месячный доход'
+      },
+      'extraIncome': {
+        'tr': 'Ek gelirler',
+        'en': 'Extra income',
+        'ru': 'Дополнительные доходы'
+      },
+      'totalIncome': {
+        'tr': 'Toplam gelir',
+        'en': 'Total income',
+        'ru': 'Общий доход'
+      },
+      'plannedPayments': {
+        'tr': 'Planlanan ödemeler',
+        'en': 'Planned payments',
+        'ru': 'Плановые платежи'
+      },
+      'variableExpenses': {
+        'tr': 'Değişken harcamalar',
+        'en': 'Variable expenses',
+        'ru': 'Переменные расходы'
+      },
+      'freeBalance': {
+        'tr': 'Serbest bakiye',
+        'en': 'Free balance',
+        'ru': 'Свободный баланс'
+      },
+      'dailySafeLimit': {
+        'tr': 'Günlük güvenli limit',
+        'en': 'Daily safe limit',
+        'ru': 'Дневной безопасный лимит'
+      },
     };
 
     final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -2277,7 +2427,6 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
-
   ExpenseItem? expenseById(String id) {
     try {
       return _expenses.firstWhere((expense) => expense.id == id);
@@ -2359,11 +2508,13 @@ class PlanoraController extends ChangeNotifier {
     final Map<String, double> totals = {};
 
     for (final payment in paymentsForSelectedMonth) {
-      totals[payment.category] = (totals[payment.category] ?? 0) + payment.amount;
+      totals[payment.category] =
+          (totals[payment.category] ?? 0) + payment.amount;
     }
 
     for (final expense in expensesForSelectedMonth) {
-      totals[expense.category] = (totals[expense.category] ?? 0) + expense.amount;
+      totals[expense.category] =
+          (totals[expense.category] ?? 0) + expense.amount;
     }
 
     final categories = totals.entries.map((entry) {
@@ -2437,7 +2588,9 @@ class PlanoraController extends ChangeNotifier {
           const Color(0xFFEF4444),
         ];
 
-        final index = category.codeUnits.fold<int>(0, (sum, code) => sum + code) % palette.length;
+        final index =
+            category.codeUnits.fold<int>(0, (sum, code) => sum + code) %
+                palette.length;
         return palette[index];
     }
   }

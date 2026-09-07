@@ -60,7 +60,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     );
   }
 
-
   Future<void> _openOneTimePaymentAdd(BuildContext context) async {
     final controller = PlanoraScope.of(context);
     final lang = controller.appLanguageCode;
@@ -93,8 +92,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     );
   }
 
-
-
   List<PaymentItem> _filteredPayments(PlanoraController controller) {
     final query = _searchController.text.trim().toLowerCase();
 
@@ -125,7 +122,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
 
     if (query.isNotEmpty) {
       payments = payments.where((payment) {
-        return controller.paymentTitleSearchText(payment.title).contains(query) ||
+        return controller
+                .paymentTitleSearchText(payment.title)
+                .contains(query) ||
             controller.categorySearchText(payment.category).contains(query) ||
             payment.amount.round().toString().contains(query);
       }).toList();
@@ -153,7 +152,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -187,7 +186,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _paymentsMonthSubtitleText(lang, _paymentsMonthYearLabel(lang, controller.selectedMonth)),
+                  _paymentsMonthSubtitleText(lang,
+                      _paymentsMonthYearLabel(lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -203,7 +203,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.receipt_long_rounded, color: Colors.white),
+                        child: const Icon(Icons.receipt_long_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -231,7 +232,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         ),
                       ),
                       Text(
-                        _paymentsCountText(lang, controller.paymentsForSelectedMonth.length),
+                        _paymentsCountText(
+                            lang, controller.paymentsForSelectedMonth.length),
                         style: const TextStyle(
                           color: Color(0xFF9FFFE0),
                           fontSize: 13,
@@ -241,7 +243,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -249,7 +250,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                       child: _PaymentMiniStat(
                         label: _paymentsShortText(lang, 'waiting'),
                         value: controller.paymentsForSelectedMonth
-                            .where((payment) => !controller.isPaymentPaid(payment) && !controller.isPaymentLate(payment))
+                            .where((payment) =>
+                                !controller.isPaymentPaid(payment) &&
+                                !controller.isPaymentLate(payment))
                             .length
                             .toString(),
                         color: AppColors.warning,
@@ -285,7 +288,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                     Expanded(
                       child: _PaymentQuickActionCard(
                         title: _paymentsShortText(lang, 'monthlyPaymentTitle'),
-                        subtitle: _paymentsShortText(lang, 'monthlyPaymentSubtitle'),
+                        subtitle:
+                            _paymentsShortText(lang, 'monthlyPaymentSubtitle'),
                         icon: Icons.repeat_rounded,
                         color: AppColors.brandBlue,
                         onTap: () => _openPaymentAdd(context),
@@ -295,7 +299,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                     Expanded(
                       child: _PaymentQuickActionCard(
                         title: _paymentsShortText(lang, 'oneTimePaymentTitle'),
-                        subtitle: _paymentsShortText(lang, 'oneTimePaymentSubtitle'),
+                        subtitle:
+                            _paymentsShortText(lang, 'oneTimePaymentSubtitle'),
                         icon: Icons.add_card_rounded,
                         color: AppColors.brandGreen,
                         onTap: () => _openOneTimePaymentAdd(context),
@@ -309,7 +314,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: _paymentsShortText(lang, 'searchHint'),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                    prefixIcon: Icon(Icons.search_rounded,
+                        color: AppThemeColors.textSecondary(context)),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
                         : IconButton(
@@ -320,8 +326,9 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                             icon: const Icon(Icons.close_rounded),
                           ),
                     filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                    fillColor: AppThemeColors.fieldBackground(context),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 18),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
                       borderSide: const BorderSide(color: AppColors.stroke),
@@ -332,11 +339,12 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
-                      borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
+                      borderSide: const BorderSide(
+                          color: AppColors.brandGreen, width: 1.4),
                     ),
                   ),
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
+                  style: TextStyle(
+                    color: AppThemeColors.textPrimary(context),
                     fontSize: 16,
                     fontWeight: FontWeight.w800,
                   ),
@@ -349,32 +357,38 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                       _FilterChip(
                         label: _paymentsShortText(lang, 'all'),
                         active: _filter == PaymentListFilter.all,
-                        onTap: () => setState(() => _filter = PaymentListFilter.all),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.all),
                       ),
                       _FilterChip(
                         label: _paymentsShortText(lang, 'waiting'),
                         active: _filter == PaymentListFilter.waiting,
-                        onTap: () => setState(() => _filter = PaymentListFilter.waiting),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.waiting),
                       ),
                       _FilterChip(
                         label: _paymentsShortText(lang, 'paid'),
                         active: _filter == PaymentListFilter.paid,
-                        onTap: () => setState(() => _filter = PaymentListFilter.paid),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.paid),
                       ),
                       _FilterChip(
                         label: _paymentsShortText(lang, 'late'),
                         active: _filter == PaymentListFilter.late,
-                        onTap: () => setState(() => _filter = PaymentListFilter.late),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.late),
                       ),
                       _FilterChip(
                         label: _paymentsShortText(lang, 'monthly'),
                         active: _filter == PaymentListFilter.monthly,
-                        onTap: () => setState(() => _filter = PaymentListFilter.monthly),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.monthly),
                       ),
                       _FilterChip(
                         label: _paymentsShortText(lang, 'oneTime'),
                         active: _filter == PaymentListFilter.oneTime,
-                        onTap: () => setState(() => _filter = PaymentListFilter.oneTime),
+                        onTap: () =>
+                            setState(() => _filter = PaymentListFilter.oneTime),
                       ),
                     ],
                   ),
@@ -395,9 +409,14 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         : _paymentsEmptyText(lang, 'noFilterResultsTitle'),
                     description: controller.paymentsForSelectedMonth.isEmpty
                         ? _paymentsEmptyText(lang, 'noPaymentsDescription')
-                        : _paymentsEmptyText(lang, 'noFilterResultsDescription'),
-                    actionLabel: controller.paymentsForSelectedMonth.isEmpty ? _paymentsEmptyText(lang, 'addPayment') : null,
-                    onActionTap: controller.paymentsForSelectedMonth.isEmpty ? () => _openPaymentAdd(context) : null,
+                        : _paymentsEmptyText(
+                            lang, 'noFilterResultsDescription'),
+                    actionLabel: controller.paymentsForSelectedMonth.isEmpty
+                        ? _paymentsEmptyText(lang, 'addPayment')
+                        : null,
+                    onActionTap: controller.paymentsForSelectedMonth.isEmpty
+                        ? () => _openPaymentAdd(context)
+                        : null,
                     color: AppColors.brandBlue,
                   )
                 else
@@ -410,7 +429,8 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         isPaid: controller.isPaymentPaid(payment),
                         isLate: controller.isPaymentLate(payment),
                         onTap: () => _openPaymentEdit(context, payment.id),
-                        onStatusTap: () => controller.togglePaymentPaid(payment.id),
+                        onStatusTap: () =>
+                            controller.togglePaymentPaid(payment.id),
                       ),
                     ),
                   ),
@@ -422,9 +442,6 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
     );
   }
 }
-
-
-
 
 String _paymentsMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -488,7 +505,6 @@ String _paymentsTitleText(String code) {
   }
 }
 
-
 String _paymentsMonthSubtitleText(String code, String month) {
   switch (code) {
     case 'en':
@@ -524,7 +540,6 @@ String _paymentsCountText(String code, int count) {
       return '$count ödeme';
   }
 }
-
 
 String _paymentsShortText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -650,7 +665,6 @@ String _paymentsShortText(String code, String key) {
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
 
-
 String _paymentsEmptyText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -666,12 +680,16 @@ String _paymentsEmptyText(String code, String key) {
       'ru': 'Нет платежей по этому фильтру',
     },
     'noPaymentsDescription': {
-      'tr': 'İlk sabit ödemenizi ekleyerek aylık ödeme planınızı oluşturmaya başlayın.',
-      'en': 'Add your first fixed payment to start building your monthly payment plan.',
-      'ru': 'Добавьте первый регулярный платёж, чтобы начать формировать месячный план.',
+      'tr':
+          'İlk sabit ödemenizi ekleyerek aylık ödeme planınızı oluşturmaya başlayın.',
+      'en':
+          'Add your first fixed payment to start building your monthly payment plan.',
+      'ru':
+          'Добавьте первый регулярный платёж, чтобы начать формировать месячный план.',
     },
     'noFilterResultsDescription': {
-      'tr': 'Arama kelimesini veya üstteki filtreleri değiştirerek tekrar deneyebilirsin.',
+      'tr':
+          'Arama kelimesini veya üstteki filtreleri değiştirerek tekrar deneyebilirsin.',
       'en': 'Change the search term or filters above and try again.',
       'ru': 'Измените поисковый запрос или фильтры выше и попробуйте снова.',
     },
@@ -685,9 +703,9 @@ String _paymentsEmptyText(String code, String key) {
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
 
-
 String _paymentCardStatusText(String code, String status, bool isMonthly) {
-  final typeText = _paymentsShortText(code, isMonthly ? 'monthlyType' : 'oneTimeType');
+  final typeText =
+      _paymentsShortText(code, isMonthly ? 'monthlyType' : 'oneTimeType');
 
   switch (code) {
     case 'en':
@@ -712,8 +730,10 @@ String _paymentCardLateText(String code, String category) {
   }
 }
 
-String _paymentCardDayText(String code, int day, String category, bool isMonthly) {
-  final typeText = _paymentsShortText(code, isMonthly ? 'monthlyType' : 'oneTimeType');
+String _paymentCardDayText(
+    String code, int day, String category, bool isMonthly) {
+  final typeText =
+      _paymentsShortText(code, isMonthly ? 'monthlyType' : 'oneTimeType');
 
   switch (code) {
     case 'en':
@@ -725,7 +745,6 @@ String _paymentCardDayText(String code, int day, String category, bool isMonthly
       return '$day. gün · $category · $typeText';
   }
 }
-
 
 class _PaymentQuickActionCard extends StatelessWidget {
   const _PaymentQuickActionCard({
@@ -867,7 +886,6 @@ class _OneTimePaymentDialogState extends State<_OneTimePaymentDialog> {
   }
 }
 
-
 class _PaymentMiniStat extends StatelessWidget {
   const _PaymentMiniStat({
     required this.label,
@@ -925,7 +943,11 @@ class _FilterChip extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(right: 9),
       child: Material(
-        color: active ? AppColors.darkNavy : Colors.white,
+        color: active
+            ? (AppThemeColors.isDark(context)
+                ? AppColors.brandBlue.withValues(alpha: 0.22)
+                : AppColors.darkNavy)
+            : AppThemeColors.card(context),
         borderRadius: BorderRadius.circular(999),
         child: InkWell(
           onTap: onTap,
@@ -941,7 +963,9 @@ class _FilterChip extends StatelessWidget {
             child: Text(
               label,
               style: TextStyle(
-                color: active ? Colors.white : AppColors.textSecondary,
+                color: active
+                    ? Colors.white
+                    : AppThemeColors.textSecondary(context),
                 fontSize: 13,
                 fontWeight: FontWeight.w900,
               ),
@@ -973,7 +997,8 @@ class _PaymentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      borderColor: isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+      borderColor:
+          isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -1007,26 +1032,44 @@ class _PaymentCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        PlanoraScope.of(context).defaultPaymentTitleLabel(payment.title),
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              decoration: isPaid ? TextDecoration.lineThrough : null,
-                              color: isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                        PlanoraScope.of(context)
+                            .defaultPaymentTitleLabel(payment.title),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              decoration:
+                                  isPaid ? TextDecoration.lineThrough : null,
+                              color: isPaid
+                                  ? AppThemeColors.textSecondary(context)
+                                  : AppThemeColors.textPrimary(context),
                             ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         isPaid
-                            ? _paymentCardStatusText(lang, 'paid', payment.isMonthly)
+                            ? _paymentCardStatusText(
+                                lang, 'paid', payment.isMonthly)
                             : isLate
-                                ? _paymentCardLateText(lang, PlanoraScope.of(context).categoryLabel(payment.category))
-                                : _paymentCardDayText(lang, payment.dueDay, PlanoraScope.of(context).categoryLabel(payment.category), payment.isMonthly),
+                                ? _paymentCardLateText(
+                                    lang,
+                                    PlanoraScope.of(context)
+                                        .categoryLabel(payment.category))
+                                : _paymentCardDayText(
+                                    lang,
+                                    payment.dueDay,
+                                    PlanoraScope.of(context)
+                                        .categoryLabel(payment.category),
+                                    payment.isMonthly),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                               color: isPaid
                                   ? AppColors.brandGreen
                                   : isLate
                                       ? AppColors.danger
-                                      : AppColors.textSecondary,
-                              fontWeight: isPaid || isLate ? FontWeight.w800 : FontWeight.w500,
+                                      : AppThemeColors.textSecondary(context),
+                              fontWeight: isPaid || isLate
+                                  ? FontWeight.w800
+                                  : FontWeight.w500,
                             ),
                       ),
                     ],
@@ -1037,7 +1080,8 @@ class _PaymentCard extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                Icon(Icons.chevron_right_rounded,
+                    color: AppThemeColors.textSecondary(context)),
               ],
             ),
           ),
@@ -1066,10 +1110,13 @@ class _PaymentStatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final backgroundColor = isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
+    final backgroundColor =
+        isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
     final textColor = isPaid ? const Color(0xFF0A7A59) : AppColors.warning;
     final icon = isPaid ? Icons.undo_rounded : Icons.check_circle_rounded;
-    final label = isPaid ? _paymentsShortText(lang, 'markWaiting') : _paymentsShortText(lang, 'markPaid');
+    final label = isPaid
+        ? _paymentsShortText(lang, 'markWaiting')
+        : _paymentsShortText(lang, 'markPaid');
 
     return SizedBox(
       width: double.infinity,

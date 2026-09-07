@@ -24,7 +24,7 @@ class NotificationsScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -74,7 +74,8 @@ class NotificationsScreen extends StatelessWidget {
                         child: Text(
                           controller.activeAlertCount == 0
                               ? _smartAlertsText(lang, 'noCriticalAlerts')
-                              : _activeAlertCountText(lang, controller.activeAlertCount),
+                              : _activeAlertCountText(
+                                  lang, controller.activeAlertCount),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 17,
@@ -100,10 +101,11 @@ class NotificationsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 PremiumCard(
-                  color: const Color(0xFFF9FBFF),
+                  color: AppColors.darkCard,
                   child: Row(
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
@@ -123,7 +125,6 @@ class NotificationsScreen extends StatelessWidget {
   }
 }
 
-
 String _smartAlertsText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -139,9 +140,12 @@ String _smartAlertsText(String code, String key) {
       'ru': 'Сейчас нет критических уведомлений по платежам.',
     },
     'footerNote': {
-      'tr': 'Bu ekran uygulama içi uyarı merkezidir. Gerçek telefon bildirimi sonraki fazda eklenecek.',
-      'en': 'This screen is the in-app alert center. Real phone notifications will be added in a later phase.',
-      'ru': 'Этот экран — центр уведомлений внутри приложения. Реальные уведомления телефона будут добавлены позже.',
+      'tr':
+          'Bu ekran uygulama içi uyarı merkezidir. Gerçek telefon bildirimi sonraki fazda eklenecek.',
+      'en':
+          'This screen is the in-app alert center. Real phone notifications will be added in a later phase.',
+      'ru':
+          'Этот экран — центр уведомлений внутри приложения. Реальные уведомления телефона будут добавлены позже.',
     },
   };
 
@@ -193,7 +197,8 @@ class _AlertCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(alert.title, style: Theme.of(context).textTheme.titleMedium),
+                Text(alert.title,
+                    style: Theme.of(context).textTheme.titleMedium),
                 const SizedBox(height: 4),
                 Text(
                   alert.message,
@@ -203,9 +208,14 @@ class _AlertCard extends StatelessWidget {
             ),
           ),
           if (onTap != null)
-            const Padding(
-              padding: EdgeInsets.only(left: 8),
-              child: Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Icon(
+                Icons.chevron_right_rounded,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFFB9C2D8)
+                    : AppColors.textSecondary,
+              ),
             ),
         ],
       ),
@@ -235,7 +245,7 @@ class _AlertVisualStyle {
           icon: Icons.warning_rounded,
           iconColor: AppColors.danger,
           iconBackgroundColor: const Color(0xFFFFECEC),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.darkCard,
           borderColor: AppColors.danger.withOpacity(0.45),
         );
       case PlanoraAlertType.today:
@@ -243,7 +253,7 @@ class _AlertVisualStyle {
           icon: Icons.today_rounded,
           iconColor: AppColors.warning,
           iconBackgroundColor: const Color(0xFFFFF6E5),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.darkCard,
           borderColor: AppColors.warning.withOpacity(0.35),
         );
       case PlanoraAlertType.upcoming:
@@ -251,7 +261,7 @@ class _AlertVisualStyle {
           icon: Icons.schedule_rounded,
           iconColor: AppColors.brandBlue,
           iconBackgroundColor: const Color(0xFFEAF1FF),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.darkCard,
           borderColor: AppColors.stroke,
         );
       case PlanoraAlertType.budget:
@@ -259,7 +269,7 @@ class _AlertVisualStyle {
           icon: Icons.account_balance_wallet_rounded,
           iconColor: const Color(0xFF8B5CF6),
           iconBackgroundColor: const Color(0xFFF2EDFF),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.darkCard,
           borderColor: const Color(0xFFD9CCFF),
         );
       case PlanoraAlertType.info:
@@ -267,7 +277,7 @@ class _AlertVisualStyle {
           icon: Icons.check_circle_rounded,
           iconColor: AppColors.brandGreen,
           iconBackgroundColor: const Color(0xFFE8FFF6),
-          backgroundColor: Colors.white,
+          backgroundColor: AppColors.darkCard,
           borderColor: AppColors.stroke,
         );
     }

@@ -134,7 +134,9 @@ class ProgressLine extends StatelessWidget {
         return Container(
           height: height,
           decoration: BoxDecoration(
-            color: backgroundColor,
+            color: AppThemeColors.isDark(context)
+                ? const Color(0xFF2A3552)
+                : backgroundColor,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Align(

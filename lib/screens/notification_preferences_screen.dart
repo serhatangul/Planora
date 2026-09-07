@@ -12,7 +12,7 @@ class NotificationPreferencesScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -27,7 +27,7 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back_rounded),
+                      icon: Icon(Icons.arrow_back_rounded),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -56,13 +56,15 @@ class NotificationPreferencesScreen extends StatelessWidget {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: const Icon(Icons.notifications_active_rounded, color: Colors.white),
+                        child: Icon(Icons.notifications_active_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
                         child: Text(
-                          _activeAlertTypeText(lang, controller.activeNotificationPreferenceCount),
-                          style: const TextStyle(
+                          _activeAlertTypeText(lang,
+                              controller.activeNotificationPreferenceCount),
+                          style: TextStyle(
                             color: Colors.white,
                             fontSize: 19,
                             fontWeight: FontWeight.w900,
@@ -78,30 +80,35 @@ class NotificationPreferencesScreen extends StatelessWidget {
                 _ExplanationCard(
                   icon: Icons.category_rounded,
                   title: _notificationText(lang, 'categoryLimitsInfoTitle'),
-                  description: _notificationText(lang, 'categoryLimitsInfoDescription'),
+                  description:
+                      _notificationText(lang, 'categoryLimitsInfoDescription'),
                   color: AppColors.warning,
                 ),
                 _ExplanationCard(
                   icon: Icons.speed_rounded,
                   title: _notificationText(lang, 'dailySafeLimitInfoTitle'),
-                  description: _notificationText(lang, 'dailySafeLimitInfoDescription'),
+                  description:
+                      _notificationText(lang, 'dailySafeLimitInfoDescription'),
                   color: AppColors.brandGreen,
                 ),
                 _ExplanationCard(
                   icon: Icons.warning_rounded,
                   title: _notificationText(lang, 'latePaymentsInfoTitle'),
-                  description: _notificationText(lang, 'latePaymentsInfoDescription'),
+                  description:
+                      _notificationText(lang, 'latePaymentsInfoDescription'),
                   color: AppColors.danger,
                 ),
                 const SizedBox(height: 12),
-                SectionHeader(title: _notificationText(lang, 'alertPreferences')),
+                SectionHeader(
+                    title: _notificationText(lang, 'alertPreferences')),
                 const SizedBox(height: 12),
                 _PreferenceSwitch(
                   title: _notificationText(lang, 'upcomingPayments'),
                   subtitle: _notificationText(lang, 'upcomingPaymentsSubtitle'),
                   icon: Icons.schedule_rounded,
                   value: controller.notifyUpcomingPayments,
-                  onChanged: (value) => controller.updateNotificationPreferences(
+                  onChanged: (value) =>
+                      controller.updateNotificationPreferences(
                     upcomingPayments: value,
                   ),
                 ),
@@ -111,7 +118,8 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   icon: Icons.warning_rounded,
                   value: controller.notifyLatePayments,
                   danger: true,
-                  onChanged: (value) => controller.updateNotificationPreferences(
+                  onChanged: (value) =>
+                      controller.updateNotificationPreferences(
                     latePayments: value,
                   ),
                 ),
@@ -120,7 +128,8 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   subtitle: _notificationText(lang, 'categoryLimitsSubtitle'),
                   icon: Icons.category_rounded,
                   value: controller.notifyCategoryLimits,
-                  onChanged: (value) => controller.updateNotificationPreferences(
+                  onChanged: (value) =>
+                      controller.updateNotificationPreferences(
                     categoryLimits: value,
                   ),
                 ),
@@ -129,7 +138,8 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   subtitle: _notificationText(lang, 'dailySafeLimitSubtitle'),
                   icon: Icons.speed_rounded,
                   value: controller.notifyDailySafeLimit,
-                  onChanged: (value) => controller.updateNotificationPreferences(
+                  onChanged: (value) =>
+                      controller.updateNotificationPreferences(
                     dailySafeLimit: value,
                   ),
                 ),
@@ -138,7 +148,8 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   subtitle: _notificationText(lang, 'salaryDaySubtitle'),
                   icon: Icons.event_available_rounded,
                   value: controller.notifySalaryDay,
-                  onChanged: (value) => controller.updateNotificationPreferences(
+                  onChanged: (value) =>
+                      controller.updateNotificationPreferences(
                     salaryDay: value,
                   ),
                 ),
@@ -160,7 +171,11 @@ class NotificationPreferencesScreen extends StatelessWidget {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.restart_alt_rounded, color: AppColors.textPrimary),
+                              Icon(Icons.restart_alt_rounded,
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : AppColors.textPrimary),
                               const SizedBox(width: 8),
                               Text(
                                 _notificationText(lang, 'resetDefaults'),
@@ -179,11 +194,11 @@ class NotificationPreferencesScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
-                  color: const Color(0xFFF9FBFF),
+                  color: Colors.white,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      Icon(Icons.info_rounded, color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -203,7 +218,6 @@ class NotificationPreferencesScreen extends StatelessWidget {
   }
 }
 
-
 String _notificationText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -214,7 +228,8 @@ String _notificationText(String code, String key) {
       'ru': 'Уведомления',
     },
     'subtitle': {
-      'tr': 'Uygulama içi akıllı uyarılarda hangi konuları görmek istediğini seç.',
+      'tr':
+          'Uygulama içi akıllı uyarılarda hangi konuları görmek istediğini seç.',
       'en': 'Choose which topics you want to see in in-app smart alerts.',
       'ru': 'Выберите, какие темы показывать во внутренних умных уведомлениях.',
     },
@@ -234,9 +249,12 @@ String _notificationText(String code, String key) {
       'ru': 'Уведомления о лимитах категорий',
     },
     'categoryLimitsInfoDescription': {
-      'tr': 'Bir kategori limitinin %80’ine yaklaştığında veya limit aşıldığında uygulama içinde uyarı gösterir.',
-      'en': 'Shows an in-app alert when a category reaches 80% of its limit or goes over the limit.',
-      'ru': 'Показывает уведомление в приложении, когда категория достигает 80% лимита или превышает лимит.',
+      'tr':
+          'Bir kategori limitinin %80’ine yaklaştığında veya limit aşıldığında uygulama içinde uyarı gösterir.',
+      'en':
+          'Shows an in-app alert when a category reaches 80% of its limit or goes over the limit.',
+      'ru':
+          'Показывает уведомление в приложении, когда категория достигает 80% лимита или превышает лимит.',
     },
     'dailySafeLimitInfoTitle': {
       'tr': 'Günlük güvenli limit',
@@ -244,9 +262,12 @@ String _notificationText(String code, String key) {
       'ru': 'Дневной безопасный лимит',
     },
     'dailySafeLimitInfoDescription': {
-      'tr': 'Maaş gününe kadar kalan günlere göre önerilen günlük harcama limitini takip eder.',
-      'en': 'Tracks the suggested daily spending limit based on the days left until salary day.',
-      'ru': 'Отслеживает рекомендуемый дневной лимит расходов по дням до зарплаты.',
+      'tr':
+          'Maaş gününe kadar kalan günlere göre önerilen günlük harcama limitini takip eder.',
+      'en':
+          'Tracks the suggested daily spending limit based on the days left until salary day.',
+      'ru':
+          'Отслеживает рекомендуемый дневной лимит расходов по дням до зарплаты.',
     },
     'latePaymentsInfoTitle': {
       'tr': 'Geciken ödemeler',
@@ -254,9 +275,11 @@ String _notificationText(String code, String key) {
       'ru': 'Просроченные платежи',
     },
     'latePaymentsInfoDescription': {
-      'tr': 'Ödeme tarihi geçen ve hâlâ bekleyen kayıtları uyarı olarak gösterir.',
+      'tr':
+          'Ödeme tarihi geçen ve hâlâ bekleyen kayıtları uyarı olarak gösterir.',
       'en': 'Shows overdue records that are still waiting as alerts.',
-      'ru': 'Показывает просроченные и ещё не оплаченные записи как уведомления.',
+      'ru':
+          'Показывает просроченные и ещё не оплаченные записи как уведомления.',
     },
     'upcomingPayments': {
       'tr': 'Yaklaşan ödemeler',
@@ -284,9 +307,12 @@ String _notificationText(String code, String key) {
       'ru': 'Лимиты категорий',
     },
     'categoryLimitsSubtitle': {
-      'tr': 'Limitin %80’ine yaklaşınca veya limit aşılınca Dashboard ve Analiz ekranında uyarı göster.',
-      'en': 'Show alerts on Dashboard and Analysis when a category reaches 80% of its limit or exceeds it.',
-      'ru': 'Показывать уведомления на Главной и в Анализе, когда категория достигает 80% лимита или превышает его.',
+      'tr':
+          'Limitin %80’ine yaklaşınca veya limit aşılınca Dashboard ve Analiz ekranında uyarı göster.',
+      'en':
+          'Show alerts on Dashboard and Analysis when a category reaches 80% of its limit or exceeds it.',
+      'ru':
+          'Показывать уведомления на Главной и в Анализе, когда категория достигает 80% лимита или превышает его.',
     },
     'dailySafeLimit': {
       'tr': 'Günlük güvenli limit',
@@ -314,9 +340,12 @@ String _notificationText(String code, String key) {
       'ru': 'Сбросить по умолчанию',
     },
     'footerNote': {
-      'tr': 'Bu tercihler uygulama içindeki akıllı uyarıları yönetir. iOS sistem bildirimi kullanılmadan, uyarılar Planora içinde gösterilir.',
-      'en': 'These preferences manage in-app smart alerts. Alerts are shown inside Planora without using iOS system notifications.',
-      'ru': 'Эти настройки управляют умными уведомлениями внутри приложения. Уведомления показываются в Planora без системных уведомлений iOS.',
+      'tr':
+          'Bu tercihler uygulama içindeki akıllı uyarıları yönetir. iOS sistem bildirimi kullanılmadan, uyarılar Planora içinde gösterilir.',
+      'en':
+          'These preferences manage in-app smart alerts. Alerts are shown inside Planora without using iOS system notifications.',
+      'ru':
+          'Эти настройки управляют умными уведомлениями внутри приложения. Уведомления показываются в Planora без системных уведомлений iOS.',
     },
   };
 
@@ -334,7 +363,6 @@ String _activeAlertTypeText(String code, int count) {
       return '$count/5 uyarı türü aktif';
   }
 }
-
 
 class _ExplanationCard extends StatelessWidget {
   const _ExplanationCard({
@@ -376,7 +404,8 @@ class _ExplanationCard extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),

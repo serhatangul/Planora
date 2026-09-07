@@ -86,7 +86,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-
   void _openPaymentsScreen(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -149,7 +148,9 @@ class DashboardScreen extends StatelessWidget {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      _dashboardText(lang, 'monthUnderControl', month: _dashboardMonthYearLabel(lang, controller.selectedMonth)),
+                      _dashboardText(lang, 'monthUnderControl',
+                          month: _dashboardMonthYearLabel(
+                              lang, controller.selectedMonth)),
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
                   ),
@@ -177,7 +178,8 @@ class DashboardScreen extends StatelessWidget {
                   onViewAnalysis: () => _openAnalysisScreen(context),
                 ),
               ],
-              if (controller.payments.isEmpty && controller.expenseCount == 0) ...[
+              if (controller.payments.isEmpty &&
+                  controller.expenseCount == 0) ...[
                 const SizedBox(height: 24),
                 _StartGuideCard(
                   lang: lang,
@@ -220,7 +222,8 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                           Spacer(),
-                          Icon(Icons.edit_rounded, color: Colors.white70, size: 18),
+                          Icon(Icons.edit_rounded,
+                              color: Colors.white70, size: 18),
                         ],
                       ),
                       const SizedBox(height: 12),
@@ -246,7 +249,8 @@ class DashboardScreen extends StatelessWidget {
                               _incomeBreakdownText(
                                 lang,
                                 MoneyFormatter.format(controller.monthlyIncome),
-                                MoneyFormatter.format(controller.extraIncomeTotal),
+                                MoneyFormatter.format(
+                                    controller.extraIncomeTotal),
                               ),
                               style: const TextStyle(
                                 color: Color(0xFFC8D3FF),
@@ -256,7 +260,10 @@ class DashboardScreen extends StatelessWidget {
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              _remainingText(lang, MoneyFormatter.format(controller.remainingAfterPlan)),
+                              _remainingText(
+                                  lang,
+                                  MoneyFormatter.format(
+                                      controller.remainingAfterPlan)),
                               style: const TextStyle(
                                 color: Color(0xFF9FFFE0),
                                 fontSize: 12,
@@ -270,7 +277,6 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ),
               ),
-
               const SizedBox(height: 24),
               PremiumCard(
                 borderColor: controller.budgetHealthColor.withOpacity(0.30),
@@ -300,12 +306,14 @@ class DashboardScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _dashboardBudgetHealthTitle(lang, controller.budgetHealthScore),
+                            _dashboardBudgetHealthTitle(
+                                lang, controller.budgetHealthScore),
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            _dashboardBudgetHealthMessage(lang, controller.budgetHealthScore),
+                            _dashboardBudgetHealthMessage(
+                                lang, controller.budgetHealthScore),
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
@@ -314,9 +322,6 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
-
-
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -339,7 +344,6 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
               Row(
                 children: [
@@ -349,7 +353,8 @@ class DashboardScreen extends StatelessWidget {
                       value: nextPayment?.title ?? _dashboardText(lang, 'none'),
                       footer: nextPayment == null
                           ? _dashboardText(lang, 'noPaymentThisMonth')
-                          : _paymentDueText(lang, nextPayment.dueDay, MoneyFormatter.format(nextPayment.amount)),
+                          : _paymentDueText(lang, nextPayment.dueDay,
+                              MoneyFormatter.format(nextPayment.amount)),
                       footerColor: AppColors.warning,
                     ),
                   ),
@@ -359,7 +364,7 @@ class DashboardScreen extends StatelessWidget {
                       label: _dashboardText(lang, 'freeBalance'),
                       value: MoneyFormatter.format(controller.freeBalance),
                       footer: _dashboardText(lang, 'availableThisMonth'),
-                      footerColor: AppColors.textSecondary,
+                      footerColor: AppThemeColors.textSecondary(context),
                     ),
                   ),
                 ],
@@ -382,7 +387,7 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               PremiumCard(
-                color: const Color(0xFFF9FBFF),
+                color: AppThemeColors.mutedSurface(context),
                 child: Row(
                   children: [
                     Container(
@@ -400,16 +405,14 @@ class DashboardScreen extends StatelessWidget {
                     const SizedBox(width: 14),
                     Expanded(
                       child: Text(
-                        _salaryTipText(lang, controller.daysUntilNextSalary, MoneyFormatter.format(controller.dailySafeLimit)),
+                        _salaryTipText(lang, controller.daysUntilNextSalary,
+                            MoneyFormatter.format(controller.dailySafeLimit)),
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
                   ],
                 ),
               ),
-
-
-
               const SizedBox(height: 16),
               Row(
                 children: [
@@ -418,10 +421,11 @@ class DashboardScreen extends StatelessWidget {
                       label: _dashboardText(lang, 'extraIncome'),
                       value: MoneyFormatter.format(controller.extraIncomeTotal),
                       count: controller.extraIncomeCount,
-                      countLabel: _recordCountText(lang, controller.extraIncomeCount),
+                      countLabel:
+                          _recordCountText(lang, controller.extraIncomeCount),
                       icon: Icons.add_chart_rounded,
                       color: AppColors.brandGreen,
-                      backgroundColor: const Color(0xFFF4FFFB),
+                      backgroundColor: AppThemeColors.successSurface(context),
                       onTap: () => _openExtraIncomeScreen(context),
                     ),
                   ),
@@ -431,16 +435,16 @@ class DashboardScreen extends StatelessWidget {
                       label: _dashboardText(lang, 'spent'),
                       value: MoneyFormatter.format(controller.expensesTotal),
                       count: controller.expenseCount,
-                      countLabel: _recordCountText(lang, controller.expenseCount),
+                      countLabel:
+                          _recordCountText(lang, controller.expenseCount),
                       icon: Icons.shopping_bag_rounded,
                       color: AppColors.warning,
-                      backgroundColor: const Color(0xFFFFFBF4),
+                      backgroundColor: AppThemeColors.warningSurface(context),
                       onTap: () => _openExpensesScreen(context),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 24),
               PremiumCard(
                 child: Column(
@@ -478,9 +482,11 @@ class DashboardScreen extends StatelessWidget {
                         Expanded(
                           child: _SmallSummaryItem(
                             label: _dashboardText(lang, 'paid'),
-                            value: MoneyFormatter.format(controller.paidPaymentsTotal),
+                            value: MoneyFormatter.format(
+                                controller.paidPaymentsTotal),
                             count: controller.paidPaymentCount,
-                            countLabel: _paymentCountText(lang, controller.paidPaymentCount),
+                            countLabel: _paymentCountText(
+                                lang, controller.paidPaymentCount),
                             color: AppColors.brandGreen,
                           ),
                         ),
@@ -488,9 +494,11 @@ class DashboardScreen extends StatelessWidget {
                         Expanded(
                           child: _SmallSummaryItem(
                             label: _dashboardText(lang, 'waiting'),
-                            value: MoneyFormatter.format(controller.waitingPaymentsTotal),
+                            value: MoneyFormatter.format(
+                                controller.waitingPaymentsTotal),
                             count: controller.waitingPaymentCount,
-                            countLabel: _paymentCountText(lang, controller.waitingPaymentCount),
+                            countLabel: _paymentCountText(
+                                lang, controller.waitingPaymentCount),
                             color: AppColors.warning,
                           ),
                         ),
@@ -498,9 +506,11 @@ class DashboardScreen extends StatelessWidget {
                         Expanded(
                           child: _SmallSummaryItem(
                             label: _dashboardText(lang, 'late'),
-                            value: MoneyFormatter.format(controller.latePaymentsTotal),
+                            value: MoneyFormatter.format(
+                                controller.latePaymentsTotal),
                             count: controller.latePaymentCount,
-                            countLabel: _paymentCountText(lang, controller.latePaymentCount),
+                            countLabel: _paymentCountText(
+                                lang, controller.latePaymentCount),
                             color: AppColors.danger,
                           ),
                         ),
@@ -509,7 +519,6 @@ class DashboardScreen extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 24),
               SectionHeader(
                 title: _dashboardText(lang, 'thisMonthPayments'),
@@ -544,11 +553,6 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
 
 String _startGuideText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -889,9 +893,12 @@ String _dashboardText(String code, String key, {String? month}) {
       'ru': 'Нет платежей за этот месяц',
     },
     'noPaymentsDescription': {
-      'tr': 'Aylık veya tek seferlik ödemelerini eklediğinde ana ekranda hızlıca takip edebilirsin.',
-      'en': 'Add monthly or one-time payments to track them quickly on the dashboard.',
-      'ru': 'Добавьте ежемесячные или разовые платежи, чтобы быстро отслеживать их на главном экране.',
+      'tr':
+          'Aylık veya tek seferlik ödemelerini eklediğinde ana ekranda hızlıca takip edebilirsin.',
+      'en':
+          'Add monthly or one-time payments to track them quickly on the dashboard.',
+      'ru':
+          'Добавьте ежемесячные или разовые платежи, чтобы быстро отслеживать их на главном экране.',
     },
     'addPayment': {
       'tr': 'Ödeme Ekle',
@@ -914,7 +921,8 @@ String _dashboardText(String code, String key, {String? month}) {
   return month == null ? text : text.replaceAll('{month}', month);
 }
 
-String _incomeBreakdownText(String code, String fixedIncome, String extraIncome) {
+String _incomeBreakdownText(
+    String code, String fixedIncome, String extraIncome) {
   switch (code) {
     case 'en':
       return 'Fixed: $fixedIncome · Extra: $extraIncome';
@@ -1034,7 +1042,6 @@ String _paymentCategoryText(String code, int day, String category) {
   }
 }
 
-
 class _StartGuideCard extends StatelessWidget {
   const _StartGuideCard({
     required this.lang,
@@ -1059,7 +1066,7 @@ class _StartGuideCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      color: const Color(0xFFF7FAFF),
+      color: AppThemeColors.infoSurface(context),
       borderColor: AppColors.brandBlue.withOpacity(0.14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1153,7 +1160,7 @@ class _StartGuideStep extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppThemeColors.card(context),
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isDone
@@ -1202,7 +1209,6 @@ class _StartGuideStep extends StatelessWidget {
   }
 }
 
-
 class _ShortcutTile extends StatelessWidget {
   const _ShortcutTile({
     required this.title,
@@ -1220,7 +1226,7 @@ class _ShortcutTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
-      color: const Color(0xFFF9FBFF),
+      color: AppThemeColors.mutedSurface(context),
       padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1229,7 +1235,7 @@ class _ShortcutTile extends StatelessWidget {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: const Color(0xFFEAF0FB),
+              color: AppThemeColors.iconSurface(context),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(icon, color: AppColors.brandBlue, size: 22),
@@ -1278,7 +1284,9 @@ class _TrackingTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
-      color: backgroundColor,
+      color: AppThemeColors.isDark(context)
+          ? AppThemeColors.card(context)
+          : backgroundColor,
       borderColor: color.withOpacity(0.22),
       padding: const EdgeInsets.all(15),
       child: Column(
@@ -1333,7 +1341,6 @@ class _TrackingTile extends StatelessWidget {
   }
 }
 
-
 class _SmartLimitDashboardCard extends StatelessWidget {
   const _SmartLimitDashboardCard({
     required this.title,
@@ -1352,7 +1359,9 @@ class _SmartLimitDashboardCard extends StatelessWidget {
     final alertColor = alert.isExceeded ? AppColors.danger : AppColors.warning;
 
     return PremiumCard(
-      color: alert.isExceeded ? const Color(0xFFFFF5F5) : const Color(0xFFFFFBF4),
+      color: alert.isExceeded
+          ? AppThemeColors.dangerSurface(context)
+          : AppThemeColors.warningSurface(context),
       borderColor: alertColor.withOpacity(0.28),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -1368,7 +1377,9 @@ class _SmartLimitDashboardCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
-                  alert.isExceeded ? Icons.error_rounded : Icons.warning_amber_rounded,
+                  alert.isExceeded
+                      ? Icons.error_rounded
+                      : Icons.warning_amber_rounded,
                   color: alertColor,
                 ),
               ),
@@ -1385,13 +1396,16 @@ class _SmartLimitDashboardCard extends StatelessWidget {
                           ),
                     ),
                     const SizedBox(height: 5),
-                    Text(alert.title, style: Theme.of(context).textTheme.titleMedium),
+                    Text(alert.title,
+                        style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 5),
-                    Text(alert.message, style: Theme.of(context).textTheme.bodyMedium),
+                    Text(alert.message,
+                        style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: 12),
                     ProgressLine(
                       value: alert.ratio.clamp(0, 1),
-                      gradient: LinearGradient(colors: [alertColor, alertColor]),
+                      gradient:
+                          LinearGradient(colors: [alertColor, alertColor]),
                     ),
                   ],
                 ),
@@ -1413,7 +1427,8 @@ class _SmartLimitDashboardCard extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.analytics_rounded, color: alertColor, size: 20),
+                      Icon(Icons.analytics_rounded,
+                          color: alertColor, size: 20),
                       const SizedBox(width: 8),
                       Flexible(
                         child: Text(
@@ -1453,7 +1468,7 @@ class _AlertSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
-      color: const Color(0xFFFFFBF4),
+      color: AppThemeColors.warningSurface(context),
       borderColor: AppColors.warning.withOpacity(0.35),
       padding: const EdgeInsets.all(16),
       child: Row(
@@ -1465,7 +1480,8 @@ class _AlertSummaryCard extends StatelessWidget {
               color: const Color(0xFFFFF0D3),
               borderRadius: BorderRadius.circular(15),
             ),
-            child: const Icon(Icons.notifications_active_rounded, color: AppColors.warning),
+            child: const Icon(Icons.notifications_active_rounded,
+                color: AppColors.warning),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -1474,13 +1490,13 @@ class _AlertSummaryCard extends StatelessWidget {
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          Icon(Icons.chevron_right_rounded,
+              color: AppThemeColors.textSecondary(context)),
         ],
       ),
     );
   }
 }
-
 
 class _SmallSummaryItem extends StatelessWidget {
   const _SmallSummaryItem({
@@ -1528,8 +1544,8 @@ class _SmallSummaryItem extends StatelessWidget {
             alignment: Alignment.centerLeft,
             child: Text(
               value,
-              style: const TextStyle(
-                color: AppColors.textPrimary,
+              style: TextStyle(
+                color: AppThemeColors.textPrimary(context),
                 fontSize: 14,
                 fontWeight: FontWeight.w900,
               ),
@@ -1563,7 +1579,8 @@ class _PaymentListItem extends StatelessWidget {
     final isPaid = controller.isPaymentPaid(payment);
 
     return PremiumCard(
-      borderColor: isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+      borderColor:
+          isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -1591,19 +1608,32 @@ class _PaymentListItem extends StatelessWidget {
                     children: [
                       Text(
                         payment.title,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              decoration: isPaid ? TextDecoration.lineThrough : null,
-                              color: isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(
+                              decoration:
+                                  isPaid ? TextDecoration.lineThrough : null,
+                              color: isPaid
+                                  ? AppThemeColors.textSecondary(context)
+                                  : AppThemeColors.textPrimary(context),
                             ),
                       ),
                       const SizedBox(height: 3),
                       Text(
                         isLate
-                            ? _latePaymentText(controller.appLanguageCode, payment.dueDay)
-                            : _paymentCategoryText(controller.appLanguageCode, payment.dueDay, controller.categoryLabel(payment.category)),
+                            ? _latePaymentText(
+                                controller.appLanguageCode, payment.dueDay)
+                            : _paymentCategoryText(
+                                controller.appLanguageCode,
+                                payment.dueDay,
+                                controller.categoryLabel(payment.category)),
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: isLate ? AppColors.danger : AppColors.textSecondary,
-                              fontWeight: isLate ? FontWeight.w800 : FontWeight.w500,
+                              color: isLate
+                                  ? AppColors.danger
+                                  : AppThemeColors.textSecondary(context),
+                              fontWeight:
+                                  isLate ? FontWeight.w800 : FontWeight.w500,
                             ),
                       ),
                     ],
@@ -1614,7 +1644,8 @@ class _PaymentListItem extends StatelessWidget {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(width: 6),
-                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+                Icon(Icons.chevron_right_rounded,
+                    color: AppThemeColors.textSecondary(context)),
               ],
             ),
           ),
@@ -1641,10 +1672,13 @@ class _PaymentStatusButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final lang = PlanoraScope.of(context).appLanguageCode;
-    final backgroundColor = isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
+    final backgroundColor =
+        isPaid ? const Color(0xFFE8FFF6) : const Color(0xFFFFF6E5);
     final textColor = isPaid ? const Color(0xFF0A7A59) : AppColors.warning;
     final icon = isPaid ? Icons.undo_rounded : Icons.check_circle_rounded;
-    final label = isPaid ? _dashboardText(lang, 'markWaiting') : _dashboardText(lang, 'markPaid');
+    final label = isPaid
+        ? _dashboardText(lang, 'markWaiting')
+        : _dashboardText(lang, 'markPaid');
 
     return SizedBox(
       width: double.infinity,
@@ -1712,7 +1746,10 @@ class _MetricCard extends StatelessWidget {
               footer,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(color: footerColor),
+              style: Theme.of(context)
+                  .textTheme
+                  .labelMedium
+                  ?.copyWith(color: footerColor),
             ),
           ],
         ),
@@ -1743,11 +1780,11 @@ class _IconChip extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppThemeColors.card(context),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.stroke),
+              border: Border.all(color: AppThemeColors.stroke(context)),
             ),
-            child: Icon(icon, color: AppColors.textPrimary),
+            child: Icon(icon, color: AppThemeColors.textPrimary(context)),
           ),
           if (badgeCount > 0)
             Positioned(
@@ -1759,7 +1796,8 @@ class _IconChip extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: AppColors.danger,
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: Colors.white, width: 2),
+                  border:
+                      Border.all(color: AppThemeColors.card(context), width: 2),
                 ),
                 child: Center(
                   child: Text(

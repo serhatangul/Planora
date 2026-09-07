@@ -28,11 +28,12 @@ class PlanoraEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPrimaryAction = actionLabel != null && onActionTap != null;
-    final hasSecondaryAction = secondaryActionLabel != null && onSecondaryActionTap != null;
+    final hasSecondaryAction =
+        secondaryActionLabel != null && onSecondaryActionTap != null;
 
     return PremiumCard(
-      color: Colors.white,
-      borderColor: AppColors.stroke,
+      color: AppThemeColors.card(context),
+      borderColor: AppThemeColors.stroke(context),
       padding: const EdgeInsets.fromLTRB(18, 20, 18, 20),
       child: Column(
         children: [
@@ -65,7 +66,9 @@ class PlanoraEmptyState extends StatelessWidget {
               _EmptyStateActionButton(
                 label: actionLabel!,
                 onTap: onActionTap!,
-                color: AppColors.darkNavy,
+                color: AppThemeColors.isDark(context)
+                    ? AppColors.brandBlue.withValues(alpha: 0.24)
+                    : AppColors.darkNavy,
                 textColor: Colors.white,
               ),
             if (hasPrimaryAction && hasSecondaryAction)

@@ -43,8 +43,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
 
     if (firstLetter == upperFirstLetter) return;
 
-    final updatedText =
-        text.substring(0, firstLetterIndex) +
+    final updatedText = text.substring(0, firstLetterIndex) +
         upperFirstLetter +
         text.substring(firstLetterIndex + 1);
 
@@ -103,7 +102,10 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
     final title = _titleController.text.trim();
     final amount = MoneyFormatter.parseAmount(_amountController.text);
     final dueDay = int.tryParse(_dayController.text.trim()) ?? 1;
-    final selectedCategory = _category ?? (categories.isNotEmpty ? categories.first : _editPaymentText(lang, 'otherCategory'));
+    final selectedCategory = _category ??
+        (categories.isNotEmpty
+            ? categories.first
+            : _editPaymentText(lang, 'otherCategory'));
 
     if (title.isEmpty || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -148,7 +150,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 : null;
 
         return Scaffold(
-          backgroundColor: AppColors.softBg,
+          backgroundColor: AppThemeColors.background(context),
           body: SafeArea(
             bottom: false,
             child: ListView(
@@ -199,10 +201,16 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                         items: categories
                             .map((category) => DropdownMenuItem(
                                   value: category,
-                                  child: Text(controller.categoryLabel(category)),
+                                  child: Text(
+                                    controller.categoryLabel(category),
+                                    style: TextStyle(
+                                        color: AppThemeColors.textPrimary(
+                                            context)),
+                                  ),
                                 ))
                             .toList(),
                         decoration: _inputDecoration(
+                          context: context,
                           label: _editPaymentText(lang, 'category'),
                           icon: Icons.category_rounded,
                         ),
@@ -239,11 +247,12 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
-                  color: const Color(0xFFF9FBFF),
+                  color: AppThemeColors.mutedSurface(context),
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -265,7 +274,8 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                 const SizedBox(height: 14),
                 TextButton.icon(
                   onPressed: _delete,
-                  icon: const Icon(Icons.delete_rounded, color: AppColors.danger),
+                  icon:
+                      const Icon(Icons.delete_rounded, color: AppColors.danger),
                   label: Text(
                     _editPaymentText(lang, 'deletePayment'),
                     style: const TextStyle(
@@ -282,7 +292,6 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
     );
   }
 }
-
 
 String _editPaymentText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -335,13 +344,17 @@ String _editPaymentText(String code, String key) {
     },
     'monthlyInfo': {
       'tr': 'Aylık seçilirse ödeme her ay takvimde görünür.',
-      'en': 'If monthly is selected, the payment appears on the calendar every month.',
-      'ru': 'Если выбран ежемесячный платёж, он будет появляться в календаре каждый месяц.',
+      'en':
+          'If monthly is selected, the payment appears on the calendar every month.',
+      'ru':
+          'Если выбран ежемесячный платёж, он будет появляться в календаре каждый месяц.',
     },
     'oneTimeInfo': {
       'tr': 'Tek sefer seçilirse ödeme sadece bu ödeme ayına ait görünür.',
-      'en': 'If one-time is selected, the payment appears only in this payment month.',
-      'ru': 'Если выбран разовый платёж, он появится только в месяце этого платежа.',
+      'en':
+          'If one-time is selected, the payment appears only in this payment month.',
+      'ru':
+          'Если выбран разовый платёж, он появится только в месяце этого платежа.',
     },
     'saveChanges': {
       'tr': 'Değişiklikleri Kaydet',
@@ -389,35 +402,41 @@ class _InputField extends StatelessWidget {
       inputFormatters: inputFormatters,
       keyboardType: keyboardType,
       textCapitalization: textCapitalization,
-      decoration: _inputDecoration(label: label, icon: icon, prefix: prefix),
-      style: const TextStyle(
+      decoration: _inputDecoration(
+        context: context,
+        label: label,
+        icon: icon,
+        prefix: prefix,
+      ),
+      style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w800,
-        color: AppColors.textPrimary,
+        color: AppThemeColors.textPrimary(context),
       ),
     );
   }
 }
 
 InputDecoration _inputDecoration({
+  required BuildContext context,
   required String label,
   required IconData icon,
   String? prefix,
 }) {
   return InputDecoration(
     labelText: label,
-    prefixIcon: Icon(icon, color: AppColors.textSecondary),
+    prefixIcon: Icon(icon, color: AppThemeColors.textSecondary(context)),
     prefixText: prefix,
     filled: true,
-    fillColor: AppColors.softBg,
+    fillColor: AppThemeColors.fieldBackground(context),
     contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
-      borderSide: const BorderSide(color: AppColors.stroke),
+      borderSide: BorderSide(color: AppThemeColors.stroke(context)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
-      borderSide: const BorderSide(color: AppColors.stroke),
+      borderSide: BorderSide(color: AppThemeColors.stroke(context)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
@@ -441,13 +460,22 @@ class _ToggleOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
-      color: active ? const Color(0xFFE8FFF6) : Colors.white,
-      borderColor: active ? AppColors.brandGreen : AppColors.stroke,
+      color: active
+          ? (AppThemeColors.isDark(context)
+              ? AppColors.brandGreen.withValues(alpha: 0.14)
+              : const Color(0xFFE8FFF6))
+          : AppThemeColors.card(context),
+      borderColor:
+          active ? AppColors.brandGreen : AppThemeColors.stroke(context),
       child: Center(
         child: Text(
           label,
           style: TextStyle(
-            color: active ? const Color(0xFF0A7A59) : AppColors.textSecondary,
+            color: active
+                ? (AppThemeColors.isDark(context)
+                    ? AppColors.brandGreen
+                    : const Color(0xFF0A7A59))
+                : AppThemeColors.textSecondary(context),
             fontSize: 15,
             fontWeight: FontWeight.w900,
           ),

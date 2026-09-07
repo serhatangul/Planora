@@ -57,7 +57,7 @@ class _AppShellState extends State<AppShell> {
         }
 
         return Scaffold(
-          extendBody: true,
+          extendBody: false,
           body: AnimatedSwitcher(
             duration: const Duration(milliseconds: 220),
             child: screens[_selectedIndex],

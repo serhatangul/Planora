@@ -38,7 +38,8 @@ class _PlanoraAppState extends State<PlanoraApp> {
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
-            themeMode: _controller.preferDarkMode ? ThemeMode.dark : ThemeMode.light,
+            themeMode:
+                _controller.preferDarkMode ? ThemeMode.dark : ThemeMode.light,
             home: const AppShell(),
           ),
         );

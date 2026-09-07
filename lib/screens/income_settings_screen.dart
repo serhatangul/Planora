@@ -74,7 +74,7 @@ class _IncomeSettingsScreenState extends State<IncomeSettingsScreen> {
     final lang = PlanoraScope.of(context).appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -157,7 +157,6 @@ class _IncomeSettingsScreenState extends State<IncomeSettingsScreen> {
   }
 }
 
-
 String _incomeSettingsText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -193,9 +192,12 @@ String _incomeSettingsText(String code, String key) {
       'ru': 'День зарплаты',
     },
     'infoNote': {
-      'tr': 'Maaş günü, güvenli günlük harcama limitinin bir sonraki maaşa kadar hesaplanmasını sağlar.',
-      'en': 'Salary day helps calculate the safe daily spending limit until your next salary.',
-      'ru': 'День зарплаты помогает рассчитать безопасный дневной лимит расходов до следующей зарплаты.',
+      'tr':
+          'Maaş günü, güvenli günlük harcama limitinin bir sonraki maaşa kadar hesaplanmasını sağlar.',
+      'en':
+          'Salary day helps calculate the safe daily spending limit until your next salary.',
+      'ru':
+          'День зарплаты помогает рассчитать безопасный дневной лимит расходов до следующей зарплаты.',
     },
     'saveIncome': {
       'tr': 'Geliri Kaydet',
@@ -230,8 +232,9 @@ class _InputField extends StatelessWidget {
         prefixIcon: Icon(icon, color: AppColors.textSecondary),
         prefixText: prefix,
         filled: true,
-        fillColor: AppColors.softBg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        fillColor: AppThemeColors.fieldBackground(context),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: AppColors.stroke),
@@ -245,10 +248,12 @@ class _InputField extends StatelessWidget {
           borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
         ),
       ),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 17,
         fontWeight: FontWeight.w800,
-        color: AppColors.textPrimary,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFFF4F7FF)
+            : AppColors.textPrimary,
       ),
     );
   }

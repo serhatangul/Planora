@@ -12,7 +12,7 @@ class ThemePreferenceScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -252,9 +252,19 @@ class _ThemeChoiceCard extends StatelessWidget {
             color: selected ? AppColors.brandGreen : AppColors.textSecondary,
           ),
           const SizedBox(height: 12),
-          Text(title, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: AppColors.textPrimary,
+                ),
+          ),
           const SizedBox(height: 3),
-          Text(subtitle, style: Theme.of(context).textTheme.bodySmall),
+          Text(
+            subtitle,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
           const SizedBox(height: 10),
           Icon(
             selected ? Icons.check_circle_rounded : Icons.circle_outlined,

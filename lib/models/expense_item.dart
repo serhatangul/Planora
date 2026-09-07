@@ -57,7 +57,8 @@ class ExpenseItem {
 
   factory ExpenseItem.fromJson(Map<String, dynamic> json) {
     return ExpenseItem(
-      id: json['id'] as String? ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      id: json['id'] as String? ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
       title: json['title'] as String? ?? '',
       category: json['category'] as String? ?? 'Diğer',
       amount: (json['amount'] as num?)?.toDouble() ?? 0,

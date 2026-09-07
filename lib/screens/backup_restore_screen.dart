@@ -5,7 +5,6 @@ import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
 import '../widgets/premium_widgets.dart';
 
-
 String _backupText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -30,15 +29,26 @@ String _backupText(String code, String key) {
       'en': 'Paste the backup JSON text first.',
       'ru': 'Сначала вставьте JSON резервной копии.',
     },
-    'restoreDialogTitle': {'tr': 'Yedeği geri yükle', 'en': 'Restore backup', 'ru': 'Восстановить резервную копию'},
+    'restoreDialogTitle': {
+      'tr': 'Yedeği geri yükle',
+      'en': 'Restore backup',
+      'ru': 'Восстановить резервную копию'
+    },
     'restoreDialogMessage': {
-      'tr': 'Bu işlem mevcut Planora verilerini yedekteki verilerle değiştirecek. Devam etmek istiyor musun?',
-      'en': 'This will replace your current Planora data with the backup data. Do you want to continue?',
-      'ru': 'Это заменит текущие данные Planora данными из резервной копии. Продолжить?',
+      'tr':
+          'Bu işlem mevcut Planora verilerini yedekteki verilerle değiştirecek. Devam etmek istiyor musun?',
+      'en':
+          'This will replace your current Planora data with the backup data. Do you want to continue?',
+      'ru':
+          'Это заменит текущие данные Planora данными из резервной копии. Продолжить?',
     },
     'cancel': {'tr': 'Vazgeç', 'en': 'Cancel', 'ru': 'Отмена'},
     'restore': {'tr': 'Geri yükle', 'en': 'Restore', 'ru': 'Восстановить'},
-    'restoreSuccess': {'tr': 'Yedek başarıyla geri yüklendi.', 'en': 'Backup restored successfully.', 'ru': 'Резервная копия успешно восстановлена.'},
+    'restoreSuccess': {
+      'tr': 'Yedek başarıyla geri yüklendi.',
+      'en': 'Backup restored successfully.',
+      'ru': 'Резервная копия успешно восстановлена.'
+    },
     'restoreFailed': {
       'tr': 'Yedek geri yüklenemedi. JSON formatını kontrol et.',
       'en': 'Backup could not be restored. Check the JSON format.',
@@ -46,28 +56,49 @@ String _backupText(String code, String key) {
     },
     'title': {'tr': 'Yedekleme', 'en': 'Backup', 'ru': 'Резервное копирование'},
     'subtitle': {
-      'tr': 'Planora verilerini JSON olarak dışa aktar veya daha önce aldığın yedeği geri yükle.',
-      'en': 'Export Planora data as JSON or restore a backup you created earlier.',
-      'ru': 'Экспортируйте данные Planora в JSON или восстановите ранее созданную копию.',
+      'tr':
+          'Planora verilerini JSON olarak dışa aktar veya daha önce aldığın yedeği geri yükle.',
+      'en':
+          'Export Planora data as JSON or restore a backup you created earlier.',
+      'ru':
+          'Экспортируйте данные Planora в JSON или восстановите ранее созданную копию.',
     },
     'info': {
-      'tr': 'Yedek; gelir ayarları, ödemeler, ödeme durumları, harcamalar, kategoriler ve limitleri içerir.',
-      'en': 'The backup includes income settings, payments, payment statuses, expenses, categories, and limits.',
-      'ru': 'Резервная копия включает настройки дохода, платежи, статусы, расходы, категории и лимиты.',
+      'tr':
+          'Yedek; gelir ayarları, ödemeler, ödeme durumları, harcamalar, kategoriler ve limitleri içerir.',
+      'en':
+          'The backup includes income settings, payments, payment statuses, expenses, categories, and limits.',
+      'ru':
+          'Резервная копия включает настройки дохода, платежи, статусы, расходы, категории и лимиты.',
     },
-    'createBackup': {'tr': 'Yedek Oluştur', 'en': 'Create Backup', 'ru': 'Создать копию'},
+    'createBackup': {
+      'tr': 'Yedek Oluştur',
+      'en': 'Create Backup',
+      'ru': 'Создать копию'
+    },
     'copy': {'tr': 'Kopyala', 'en': 'Copy', 'ru': 'Копировать'},
-    'pasteFromClipboard': {'tr': 'Panodan Yapıştır', 'en': 'Paste from Clipboard', 'ru': 'Вставить из буфера'},
+    'pasteFromClipboard': {
+      'tr': 'Panodan Yapıştır',
+      'en': 'Paste from Clipboard',
+      'ru': 'Вставить из буфера'
+    },
     'jsonHint': {
       'tr': 'Yedek JSON metni burada görünecek veya buraya yapıştırılacak.',
       'en': 'Backup JSON text will appear here or can be pasted here.',
       'ru': 'JSON резервной копии появится здесь или может быть вставлен сюда.',
     },
-    'restoreBackup': {'tr': 'Yedeği Geri Yükle', 'en': 'Restore Backup', 'ru': 'Восстановить копию'},
+    'restoreBackup': {
+      'tr': 'Yedeği Geri Yükle',
+      'en': 'Restore Backup',
+      'ru': 'Восстановить копию'
+    },
     'warning': {
-      'tr': 'Geri yükleme mevcut verilerin üzerine yazar. Önce mevcut verilerin yedeğini almak güvenlidir.',
-      'en': 'Restoring overwrites current data. It is safer to create a backup first.',
-      'ru': 'Восстановление перезапишет текущие данные. Сначала безопаснее создать резервную копию.',
+      'tr':
+          'Geri yükleme mevcut verilerin üzerine yazar. Önce mevcut verilerin yedeğini almak güvenlidir.',
+      'en':
+          'Restoring overwrites current data. It is safer to create a backup first.',
+      'ru':
+          'Восстановление перезапишет текущие данные. Сначала безопаснее создать резервную копию.',
     },
   };
 
@@ -178,7 +209,9 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          ok ? _backupText(lang, 'restoreSuccess') : _backupText(lang, 'restoreFailed'),
+          ok
+              ? _backupText(lang, 'restoreSuccess')
+              : _backupText(lang, 'restoreFailed'),
         ),
       ),
     );
@@ -193,7 +226,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -237,7 +270,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.cloud_done_rounded, color: Colors.white),
+                        child: const Icon(Icons.cloud_done_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -301,7 +335,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
-                      borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
+                      borderSide: const BorderSide(
+                          color: AppColors.brandGreen, width: 1.4),
                     ),
                   ),
                   style: const TextStyle(
@@ -325,7 +360,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.restore_rounded, color: Colors.white),
+                            const Icon(Icons.restore_rounded,
+                                color: Colors.white),
                             const SizedBox(width: 8),
                             Text(
                               _backupText(lang, 'restoreBackup'),
@@ -348,7 +384,8 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.warning_rounded, color: AppColors.warning),
+                      const Icon(Icons.warning_rounded,
+                          color: AppColors.warning),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(

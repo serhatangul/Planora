@@ -17,7 +17,8 @@ class ExtraIncomeScreen extends StatefulWidget {
 class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
-  final _dayController = TextEditingController(text: DateTime.now().day.toString());
+  final _dayController =
+      TextEditingController(text: DateTime.now().day.toString());
 
   bool _showForm = false;
   String? _editingIncomeId;
@@ -110,7 +111,7 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -137,7 +138,10 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _extraIncomeMonthSubtitle(lang, _extraIncomeMonthYearLabel(lang, controller.selectedMonth)),
+                  _extraIncomeMonthSubtitle(
+                      lang,
+                      _extraIncomeMonthYearLabel(
+                          lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -153,7 +157,8 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                           color: Colors.white.withOpacity(0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
-                        child: const Icon(Icons.add_chart_rounded, color: Colors.white),
+                        child: const Icon(Icons.add_chart_rounded,
+                            color: Colors.white),
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -170,7 +175,8 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              MoneyFormatter.format(controller.extraIncomeTotal),
+                              MoneyFormatter.format(
+                                  controller.extraIncomeTotal),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 28,
@@ -198,7 +204,9 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         SectionHeader(
-                          title: _editingIncomeId == null ? _extraIncomeText(lang, 'newExtraIncome') : _extraIncomeText(lang, 'editExtraIncome'),
+                          title: _editingIncomeId == null
+                              ? _extraIncomeText(lang, 'newExtraIncome')
+                              : _extraIncomeText(lang, 'editExtraIncome'),
                           actionLabel: _extraIncomeText(lang, 'close'),
                           onActionTap: _cancelForm,
                         ),
@@ -238,7 +246,10 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                               onTap: _saveIncome,
                               child: Center(
                                 child: Text(
-                                  _editingIncomeId == null ? _extraIncomeText(lang, 'saveExtraIncome') : _extraIncomeText(lang, 'save'),
+                                  _editingIncomeId == null
+                                      ? _extraIncomeText(
+                                          lang, 'saveExtraIncome')
+                                      : _extraIncomeText(lang, 'save'),
                                   style: const TextStyle(
                                     color: Colors.white,
                                     fontSize: 15,
@@ -265,7 +276,8 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.add_rounded, color: Colors.white),
+                              const Icon(Icons.add_rounded,
+                                  color: Colors.white),
                               const SizedBox(width: 8),
                               Text(
                                 _extraIncomeText(lang, 'addExtraIncome'),
@@ -284,14 +296,16 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                 const SizedBox(height: 24),
                 SectionHeader(
                   title: _extraIncomeText(lang, 'incomeList'),
-                  actionLabel: _recordCountText(lang, controller.extraIncomesForSelectedMonth.length),
+                  actionLabel: _recordCountText(
+                      lang, controller.extraIncomesForSelectedMonth.length),
                 ),
                 const SizedBox(height: 12),
                 if (controller.extraIncomesForSelectedMonth.isEmpty)
                   PremiumCard(
                     child: Column(
                       children: [
-                        const Icon(Icons.add_chart_rounded, color: AppColors.textSecondary, size: 38),
+                        const Icon(Icons.add_chart_rounded,
+                            color: AppColors.textSecondary, size: 38),
                         const SizedBox(height: 10),
                         Text(
                           _extraIncomeText(lang, 'emptyRecordMessage'),
@@ -315,9 +329,11 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                             color: AppColors.danger,
                             borderRadius: BorderRadius.circular(24),
                           ),
-                          child: const Icon(Icons.delete_rounded, color: Colors.white),
+                          child: const Icon(Icons.delete_rounded,
+                              color: Colors.white),
                         ),
-                        onDismissed: (_) => controller.removeExtraIncome(income.id),
+                        onDismissed: (_) =>
+                            controller.removeExtraIncome(income.id),
                         child: _IncomeCard(
                           income: income,
                           onTap: () => _startEdit(income),
@@ -333,7 +349,6 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
     );
   }
 }
-
 
 String _extraIncomeText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -445,9 +460,12 @@ String _extraIncomeText(String code, String key) {
       'ru': 'Нет доп. доходов по этому фильтру',
     },
     'emptyDescription': {
-      'tr': 'Maaş dışında gelen ek kazançlarını ekleyerek aylık bütçeni daha net görebilirsin.',
-      'en': 'Add income outside your salary to see your monthly budget more clearly.',
-      'ru': 'Добавьте доходы помимо зарплаты, чтобы точнее видеть месячный бюджет.',
+      'tr':
+          'Maaş dışında gelen ek kazançlarını ekleyerek aylık bütçeni daha net görebilirsin.',
+      'en':
+          'Add income outside your salary to see your monthly budget more clearly.',
+      'ru':
+          'Добавьте доходы помимо зарплаты, чтобы точнее видеть месячный бюджет.',
     },
     'emptyRecordMessage': {
       'tr': 'Bu ay için ek gelir kaydı yok.',
@@ -455,7 +473,8 @@ String _extraIncomeText(String code, String key) {
       'ru': 'За этот месяц записей доп. дохода нет.',
     },
     'filterEmptyDescription': {
-      'tr': 'Arama kelimesini veya sıralamayı değiştirerek tekrar deneyebilirsin.',
+      'tr':
+          'Arama kelimesini veya sıralamayı değiştirerek tekrar deneyebilirsin.',
       'en': 'Change the search term or sorting and try again.',
       'ru': 'Измените поиск или сортировку и попробуйте снова.',
     },
@@ -463,7 +482,6 @@ String _extraIncomeText(String code, String key) {
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
-
 
 String _extraIncomeMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -605,7 +623,8 @@ class _IncomeCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(income.title, style: Theme.of(context).textTheme.titleMedium),
+                  Text(income.title,
+                      style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 3),
                   Text(
                     _incomeCardSubtitle(lang, income.day),
@@ -621,7 +640,8 @@ class _IncomeCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
           ],
         ),
       ),
@@ -658,8 +678,9 @@ class _InputField extends StatelessWidget {
         prefixIcon: Icon(icon, color: AppColors.textSecondary),
         prefixText: prefix,
         filled: true,
-        fillColor: AppColors.softBg,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        fillColor: AppThemeColors.fieldBackground(context),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: AppColors.stroke),

@@ -33,7 +33,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-
   void _openAboutDataSafety(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -246,7 +245,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     final controller = PlanoraScope.of(context);
@@ -282,8 +280,12 @@ class ProfileScreen extends StatelessWidget {
           ),
           _ProfileItem(
             title: _profileText(lang, 'theme'),
-            subtitle: controller.preferDarkMode ? _profileText(lang, 'themeDarkSelected') : _profileText(lang, 'themeLightSelected'),
-            icon: controller.preferDarkMode ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+            subtitle: controller.preferDarkMode
+                ? _profileText(lang, 'themeDarkSelected')
+                : _profileText(lang, 'themeLightSelected'),
+            icon: controller.preferDarkMode
+                ? Icons.dark_mode_rounded
+                : Icons.light_mode_rounded,
             onTap: () => _openThemePreference(context),
           ),
         ];
@@ -297,7 +299,8 @@ class ProfileScreen extends StatelessWidget {
           ),
           _ProfileItem(
             title: _profileText(lang, 'notifications'),
-            subtitle: _notificationCountSubtitle(lang, controller.activeNotificationPreferenceCount),
+            subtitle: _notificationCountSubtitle(
+                lang, controller.activeNotificationPreferenceCount),
             icon: Icons.notifications_rounded,
             onTap: () => _openNotificationPreferences(context),
           ),
@@ -308,13 +311,15 @@ class ProfileScreen extends StatelessWidget {
           ),
           _ProfileItem(
             title: _profileText(lang, 'extraIncome'),
-            subtitle: _recordsMoneySubtitle(lang, controller.extraIncomeCount, MoneyFormatter.format(controller.extraIncomeTotal)),
+            subtitle: _recordsMoneySubtitle(lang, controller.extraIncomeCount,
+                MoneyFormatter.format(controller.extraIncomeTotal)),
             icon: Icons.add_chart_rounded,
             onTap: () => _openExtraIncomeScreen(context),
           ),
           _ProfileItem(
             title: _profileText(lang, 'expenseRecords'),
-            subtitle: _recordsMoneySubtitle(lang, controller.expenseCount, MoneyFormatter.format(controller.expensesTotal)),
+            subtitle: _recordsMoneySubtitle(lang, controller.expenseCount,
+                MoneyFormatter.format(controller.expensesTotal)),
             icon: Icons.shopping_bag_rounded,
             onTap: () => _openExpensesScreen(context),
           ),
@@ -323,8 +328,12 @@ class ProfileScreen extends StatelessWidget {
         final privacyItems = [
           _ProfileItem(
             title: _profileText(lang, 'privacy'),
-            subtitle: controller.hideAmounts ? _profileText(lang, 'amountsHidden') : _profileText(lang, 'amountsVisible'),
-            icon: controller.hideAmounts ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+            subtitle: controller.hideAmounts
+                ? _profileText(lang, 'amountsHidden')
+                : _profileText(lang, 'amountsVisible'),
+            icon: controller.hideAmounts
+                ? Icons.visibility_off_rounded
+                : Icons.visibility_rounded,
             onTap: () => _openPrivacySettings(context),
           ),
           _ProfileItem(
@@ -361,7 +370,8 @@ class ProfileScreen extends StatelessWidget {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(24, 22, 24, 132),
             children: [
-              Text(_profileText(lang, 'title'), style: Theme.of(context).textTheme.headlineLarge),
+              Text(_profileText(lang, 'title'),
+                  style: Theme.of(context).textTheme.headlineLarge),
               const SizedBox(height: 24),
               PremiumCard(
                 child: Row(
@@ -372,7 +382,8 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(_profileText(lang, 'planoraUser'), style: Theme.of(context).textTheme.titleLarge),
+                          Text(_profileText(lang, 'planoraUser'),
+                              style: Theme.of(context).textTheme.titleLarge),
                           const SizedBox(height: 4),
                           Text(
                             _profileText(lang, 'monthlyPlanActive'),
@@ -423,7 +434,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
 
 String _restartOnboardingDialogTitle(String code) {
   switch (code) {
@@ -733,9 +743,12 @@ String _profileText(String code, String key) {
       'ru': 'Очистить все данные?',
     },
     'clearAllDataDialogDescription': {
-      'tr': 'Bu işlem ödemeleri, harcamaları, ek gelirleri, ödeme durumlarını ve kategori limitlerini temizler. İşlem geri alınamaz.',
-      'en': 'This will clear payments, expenses, extra income, payment statuses, and category limits. This action cannot be undone.',
-      'ru': 'Это удалит платежи, расходы, дополнительные доходы, статусы платежей и лимиты категорий. Действие нельзя отменить.',
+      'tr':
+          'Bu işlem ödemeleri, harcamaları, ek gelirleri, ödeme durumlarını ve kategori limitlerini temizler. İşlem geri alınamaz.',
+      'en':
+          'This will clear payments, expenses, extra income, payment statuses, and category limits. This action cannot be undone.',
+      'ru':
+          'Это удалит платежи, расходы, дополнительные доходы, статусы платежей и лимиты категорий. Действие нельзя отменить.',
     },
     'cancel': {
       'tr': 'İptal',
@@ -770,8 +783,6 @@ String _languageLabel(String code, String uiLanguage) {
       return 'Türkçe';
   }
 }
-
-
 
 class _AdvancedActionsSection extends StatelessWidget {
   const _AdvancedActionsSection({
@@ -948,7 +959,8 @@ class _ProfileItem extends StatelessWidget {
             ),
           ),
           if (onTap != null)
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
         ],
       ),
     );

@@ -12,7 +12,7 @@ class AboutDataSafetyScreen extends StatelessWidget {
     final lang = PlanoraScope.of(context).appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -166,12 +166,13 @@ class AboutDataSafetyScreen extends StatelessWidget {
             SectionHeader(title: _aboutText(lang, 'importantNote')),
             const SizedBox(height: 12),
             PremiumCard(
-              color: const Color(0xFFFFFBF4),
+              color: AppThemeColors.card(context),
               borderColor: AppColors.warning.withOpacity(0.24),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.warning_amber_rounded, color: AppColors.warning),
+                  const Icon(Icons.warning_amber_rounded,
+                      color: AppColors.warning),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
@@ -185,9 +186,14 @@ class AboutDataSafetyScreen extends StatelessWidget {
             const SizedBox(height: 22),
             SectionHeader(title: _aboutText(lang, 'versionInfo')),
             const SizedBox(height: 12),
-            _VersionRow(label: _aboutText(lang, 'application'), value: 'Planora'),
-            _VersionRow(label: _aboutText(lang, 'appType'), value: _aboutText(lang, 'appTypeValue')),
-            _VersionRow(label: _aboutText(lang, 'dataStorage'), value: _aboutText(lang, 'dataStorageValue')),
+            _VersionRow(
+                label: _aboutText(lang, 'application'), value: 'Planora'),
+            _VersionRow(
+                label: _aboutText(lang, 'appType'),
+                value: _aboutText(lang, 'appTypeValue')),
+            _VersionRow(
+                label: _aboutText(lang, 'dataStorage'),
+                value: _aboutText(lang, 'dataStorageValue')),
           ],
         ),
       ),
@@ -215,9 +221,12 @@ String _aboutText(String code, String key) {
       'ru': 'Личный планировщик бюджета',
     },
     'heroMessage': {
-      'tr': 'Planora, banka bağlantısı gerektirmeden bütçeni manuel ve güvenli şekilde takip etmen için tasarlandı.',
-      'en': 'Planora is designed to help you track your budget manually and safely without requiring a bank connection.',
-      'ru': 'Planora помогает вручную и безопасно отслеживать бюджет без подключения к банку.',
+      'tr':
+          'Planora, banka bağlantısı gerektirmeden bütçeni manuel ve güvenli şekilde takip etmen için tasarlandı.',
+      'en':
+          'Planora is designed to help you track your budget manually and safely without requiring a bank connection.',
+      'ru':
+          'Planora помогает вручную и безопасно отслеживать бюджет без подключения к банку.',
     },
     'trustTitle': {
       'tr': 'Güven ve veri yaklaşımı',
@@ -230,9 +239,12 @@ String _aboutText(String code, String key) {
       'ru': 'Данные остаются на устройстве',
     },
     'localDataDescription': {
-      'tr': 'Planora’da girdiğin bütçe bilgileri cihazın yerel depolama alanında tutulur.',
-      'en': 'Budget information entered in Planora is stored locally on your device.',
-      'ru': 'Бюджетные данные, введённые в Planora, хранятся локально на устройстве.',
+      'tr':
+          'Planora’da girdiğin bütçe bilgileri cihazın yerel depolama alanında tutulur.',
+      'en':
+          'Budget information entered in Planora is stored locally on your device.',
+      'ru':
+          'Бюджетные данные, введённые в Planora, хранятся локально на устройстве.',
     },
     'noSaleTitle': {
       'tr': 'Kişisel veriler satılmaz',
@@ -240,9 +252,12 @@ String _aboutText(String code, String key) {
       'ru': 'Персональные данные не продаются',
     },
     'noSaleDescription': {
-      'tr': 'Planora, kullanıcı verilerini satmak veya reklam verenlerle paylaşmak için tasarlanmamıştır.',
-      'en': 'Planora is not designed to sell user data or share it with advertisers.',
-      'ru': 'Planora не предназначена для продажи данных пользователей или передачи их рекламодателям.',
+      'tr':
+          'Planora, kullanıcı verilerini satmak veya reklam verenlerle paylaşmak için tasarlanmamıştır.',
+      'en':
+          'Planora is not designed to sell user data or share it with advertisers.',
+      'ru':
+          'Planora не предназначена для продажи данных пользователей или передачи их рекламодателям.',
     },
     'noBankTitle': {
       'tr': 'Banka bağlantısı gerekmez',
@@ -250,9 +265,12 @@ String _aboutText(String code, String key) {
       'ru': 'Подключение к банку не требуется',
     },
     'noBankDescription': {
-      'tr': 'Bütçeni takip etmek için banka hesabı, kart veya finansal kurum bağlantısı eklemen gerekmez.',
-      'en': 'You do not need to connect a bank account, card, or financial institution to track your budget.',
-      'ru': 'Для отслеживания бюджета не нужно подключать банковский счёт, карту или финансовое учреждение.',
+      'tr':
+          'Bütçeni takip etmek için banka hesabı, kart veya finansal kurum bağlantısı eklemen gerekmez.',
+      'en':
+          'You do not need to connect a bank account, card, or financial institution to track your budget.',
+      'ru':
+          'Для отслеживания бюджета не нужно подключать банковский счёт, карту или финансовое учреждение.',
     },
     'manualControlTitle': {
       'tr': 'Kontrol kullanıcıdadır',
@@ -275,9 +293,12 @@ String _aboutText(String code, String key) {
       'ru': 'Учёт бюджета',
     },
     'budgetTrackingDescription': {
-      'tr': 'Aylık gelir, ek gelir, harcama ve serbest bakiyeni tek ekranda takip etmene yardımcı olur.',
-      'en': 'Helps you track monthly income, extra income, expenses, and free balance in one place.',
-      'ru': 'Помогает отслеживать месячный доход, доп. доходы, расходы и свободный баланс в одном месте.',
+      'tr':
+          'Aylık gelir, ek gelir, harcama ve serbest bakiyeni tek ekranda takip etmene yardımcı olur.',
+      'en':
+          'Helps you track monthly income, extra income, expenses, and free balance in one place.',
+      'ru':
+          'Помогает отслеживать месячный доход, доп. доходы, расходы и свободный баланс в одном месте.',
     },
     'paymentPlanTitle': {
       'tr': 'Ödeme planı',
@@ -285,9 +306,12 @@ String _aboutText(String code, String key) {
       'ru': 'План платежей',
     },
     'paymentPlanDescription': {
-      'tr': 'Sabit ödemelerini, ödeme durumlarını ve yaklaşan tarihleri ay bazında kontrol edebilirsin.',
-      'en': 'You can manage fixed payments, payment status, and upcoming dates by month.',
-      'ru': 'Можно управлять регулярными платежами, статусами и предстоящими датами по месяцам.',
+      'tr':
+          'Sabit ödemelerini, ödeme durumlarını ve yaklaşan tarihleri ay bazında kontrol edebilirsin.',
+      'en':
+          'You can manage fixed payments, payment status, and upcoming dates by month.',
+      'ru':
+          'Можно управлять регулярными платежами, статусами и предстоящими датами по месяцам.',
     },
     'analysisLimitsTitle': {
       'tr': 'Analiz ve limitler',
@@ -295,9 +319,12 @@ String _aboutText(String code, String key) {
       'ru': 'Анализ и лимиты',
     },
     'analysisLimitsDescription': {
-      'tr': 'Kategori dağılımı, bütçe sağlığı ve limit uyarıları ile finans durumunu daha net görürsün.',
-      'en': 'Category distribution, budget health, and limit alerts help you understand your finances more clearly.',
-      'ru': 'Распределение по категориям, состояние бюджета и лимиты помогают лучше понимать финансы.',
+      'tr':
+          'Kategori dağılımı, bütçe sağlığı ve limit uyarıları ile finans durumunu daha net görürsün.',
+      'en':
+          'Category distribution, budget health, and limit alerts help you understand your finances more clearly.',
+      'ru':
+          'Распределение по категориям, состояние бюджета и лимиты помогают лучше понимать финансы.',
     },
     'privacyTools': {
       'tr': 'Gizlilik araçları',
@@ -310,9 +337,11 @@ String _aboutText(String code, String key) {
       'ru': 'Резервное копирование под контролем пользователя',
     },
     'backupControlDescription': {
-      'tr': 'Yedek alma ve geri yükleme işlemlerini Profil bölümünden sen yönetirsin.',
+      'tr':
+          'Yedek alma ve geri yükleme işlemlerini Profil bölümünden sen yönetirsin.',
       'en': 'You manage backup and restore actions from the Profile section.',
-      'ru': 'Резервное копирование и восстановление управляются в разделе Профиль.',
+      'ru':
+          'Резервное копирование и восстановление управляются в разделе Профиль.',
     },
     'privacyModeTitle': {
       'tr': 'Tutarları gizleme',
@@ -320,7 +349,8 @@ String _aboutText(String code, String key) {
       'ru': 'Скрытие сумм',
     },
     'privacyModeDescription': {
-      'tr': 'Gizlilik moduyla ekrandaki finansal tutarları hızlıca gizleyebilirsin.',
+      'tr':
+          'Gizlilik moduyla ekrandaki finansal tutarları hızlıca gizleyebilirsin.',
       'en': 'Privacy mode lets you quickly hide financial amounts on screen.',
       'ru': 'Режим приватности позволяет быстро скрывать суммы на экране.',
     },
@@ -330,9 +360,12 @@ String _aboutText(String code, String key) {
       'ru': 'Важное примечание',
     },
     'disclaimer': {
-      'tr': 'Planora finansal danışmanlık hizmeti vermez. Uygulama, kişisel bütçe planlamanı takip etmen için hazırlanmış yardımcı bir araçtır.',
-      'en': 'Planora does not provide financial advisory services. The app is a helper tool for tracking your personal budget planning.',
-      'ru': 'Planora не предоставляет финансовые консультации. Приложение является вспомогательным инструментом для отслеживания личного бюджета.',
+      'tr':
+          'Planora finansal danışmanlık hizmeti vermez. Uygulama, kişisel bütçe planlamanı takip etmen için hazırlanmış yardımcı bir araçtır.',
+      'en':
+          'Planora does not provide financial advisory services. The app is a helper tool for tracking your personal budget planning.',
+      'ru':
+          'Planora не предоставляет финансовые консультации. Приложение является вспомогательным инструментом для отслеживания личного бюджета.',
     },
     'versionInfo': {
       'tr': 'Uygulama bilgisi',
@@ -407,7 +440,8 @@ class _InfoCard extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),
@@ -434,7 +468,7 @@ class _SafetyCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: PremiumCard(
-        color: const Color(0xFFF4FFFB),
+        color: AppThemeColors.card(context),
         borderColor: AppColors.brandGreen.withOpacity(0.20),
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -448,7 +482,8 @@ class _SafetyCard extends StatelessWidget {
                 children: [
                   Text(title, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 4),
-                  Text(description, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(description,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ),

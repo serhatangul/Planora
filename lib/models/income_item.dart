@@ -52,7 +52,8 @@ class IncomeItem {
 
   factory IncomeItem.fromJson(Map<String, dynamic> json) {
     return IncomeItem(
-      id: json['id'] as String? ?? DateTime.now().microsecondsSinceEpoch.toString(),
+      id: json['id'] as String? ??
+          DateTime.now().microsecondsSinceEpoch.toString(),
       title: json['title'] as String? ?? '',
       amount: (json['amount'] as num?)?.toDouble() ?? 0,
       day: ((json['day'] as num?)?.toInt() ?? 1).clamp(1, 31),

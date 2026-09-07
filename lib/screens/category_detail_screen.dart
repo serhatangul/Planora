@@ -10,7 +10,6 @@ import '../widgets/premium_widgets.dart';
 import 'edit_payment_screen.dart';
 import 'expenses_screen.dart';
 
-
 String _categoryDetailText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
 
@@ -59,7 +58,6 @@ String _categoryDetailText(String code, String key) {
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
-
 
 String _categoryDetailMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -208,7 +206,8 @@ class CategoryDetailScreen extends StatelessWidget {
     );
   }
 
-  String _movementPaymentSubtitle(String code, PaymentItem payment, bool isPaid, bool isLate) {
+  String _movementPaymentSubtitle(
+      String code, PaymentItem payment, bool isPaid, bool isLate) {
     if (isPaid) {
       switch (code) {
         case 'en':
@@ -256,7 +255,8 @@ class CategoryDetailScreen extends StatelessWidget {
     }
   }
 
-  List<_CategoryMovement> _movements(PlanoraController controller, String lang) {
+  List<_CategoryMovement> _movements(
+      PlanoraController controller, String lang) {
     final movements = <_CategoryMovement>[];
 
     for (final PaymentItem payment in controller.paymentsForSelectedMonth) {
@@ -326,7 +326,7 @@ class CategoryDetailScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -336,7 +336,8 @@ class CategoryDetailScreen extends StatelessWidget {
                 .where((category) => category.title == categoryName)
                 .toList();
 
-            final summary = matchingSummary.isEmpty ? null : matchingSummary.first;
+            final summary =
+                matchingSummary.isEmpty ? null : matchingSummary.first;
 
             final lang = controller.appLanguageCode;
             final movements = _movements(controller, lang);
@@ -349,11 +350,13 @@ class CategoryDetailScreen extends StatelessWidget {
                 .fold<double>(0, (sum, expense) => sum + expense.amount);
 
             final used = summary?.used ?? paymentTotal + expenseTotal;
-            final limit = summary?.limit ?? controller.categoryLimit(categoryName);
+            final limit =
+                summary?.limit ?? controller.categoryLimit(categoryName);
             final ratio = limit <= 0 ? 0.0 : (used / limit).clamp(0.0, 1.0);
             final color = summary?.color ?? AppColors.brandBlue;
             final isExceeded = limit > 0 && used > limit;
-            final isNearLimit = !isExceeded && limit > 0 && used / limit >= 0.85;
+            final isNearLimit =
+                !isExceeded && limit > 0 && used / limit >= 0.85;
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(24, 22, 24, 34),
@@ -375,7 +378,10 @@ class CategoryDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _categoryDetailMonthSubtitle(lang, _categoryDetailMonthYearLabel(lang, controller.selectedMonth)),
+                  _categoryDetailMonthSubtitle(
+                      lang,
+                      _categoryDetailMonthYearLabel(
+                          lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -406,7 +412,8 @@ class CategoryDetailScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   _categoryDetailText(lang, 'usedLimit'),
-                                  style: Theme.of(context).textTheme.labelMedium,
+                                  style:
+                                      Theme.of(context).textTheme.labelMedium,
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
@@ -459,7 +466,8 @@ class CategoryDetailScreen extends StatelessWidget {
                         label: _categoryDetailText(lang, 'payments'),
                         value: MoneyFormatter.format(paymentTotal),
                         count: controller.paymentsForSelectedMonth
-                            .where((payment) => payment.category == categoryName)
+                            .where(
+                                (payment) => payment.category == categoryName)
                             .length,
                         color: AppColors.brandBlue,
                       ),
@@ -470,7 +478,8 @@ class CategoryDetailScreen extends StatelessWidget {
                         label: _categoryDetailText(lang, 'expenses'),
                         value: MoneyFormatter.format(expenseTotal),
                         count: controller.expensesForSelectedMonth
-                            .where((expense) => expense.category == categoryName)
+                            .where(
+                                (expense) => expense.category == categoryName)
                             .length,
                         color: AppColors.warning,
                       ),
@@ -487,7 +496,8 @@ class CategoryDetailScreen extends StatelessWidget {
                   PremiumCard(
                     child: Column(
                       children: [
-                        const Icon(Icons.folder_off_rounded, color: AppColors.textSecondary, size: 38),
+                        const Icon(Icons.folder_off_rounded,
+                            color: AppColors.textSecondary, size: 38),
                         const SizedBox(height: 10),
                         Text(
                           _categoryDetailText(lang, 'noMovements'),
@@ -544,14 +554,20 @@ class _MetricCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_recordCountText(PlanoraScope.of(context).appLanguageCode, count), style: Theme.of(context).textTheme.labelMedium),
+            Text(
+                _recordCountText(
+                    PlanoraScope.of(context).appLanguageCode, count),
+                style: Theme.of(context).textTheme.labelMedium),
             const Spacer(),
             FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerLeft,
               child: Text(
                 value,
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(color: color),
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(color: color),
               ),
             ),
             const SizedBox(height: 4),
@@ -574,11 +590,14 @@ class _MovementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final amountColor = movement.isLate ? AppColors.danger : AppColors.textPrimary;
+    final amountColor =
+        movement.isLate ? AppColors.danger : AppColors.textPrimary;
 
     return PremiumCard(
       padding: const EdgeInsets.all(16),
-      borderColor: movement.isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+      borderColor: movement.isLate
+          ? AppColors.danger.withOpacity(0.45)
+          : AppColors.stroke,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -601,16 +620,24 @@ class _MovementCard extends StatelessWidget {
                   Text(
                     movement.title,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          decoration: movement.isPaid ? TextDecoration.lineThrough : null,
-                          color: movement.isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                          decoration: movement.isPaid
+                              ? TextDecoration.lineThrough
+                              : null,
+                          color: movement.isPaid
+                              ? AppColors.textSecondary
+                              : AppColors.textPrimary,
                         ),
                   ),
                   const SizedBox(height: 3),
                   Text(
                     movement.subtitle,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: movement.isLate ? AppColors.danger : AppColors.textSecondary,
-                          fontWeight: movement.isLate ? FontWeight.w800 : FontWeight.w500,
+                          color: movement.isLate
+                              ? AppColors.danger
+                              : AppColors.textSecondary,
+                          fontWeight: movement.isLate
+                              ? FontWeight.w800
+                              : FontWeight.w500,
                         ),
                   ),
                 ],
@@ -623,7 +650,8 @@ class _MovementCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(width: 6),
-            const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+            const Icon(Icons.chevron_right_rounded,
+                color: AppColors.textSecondary),
           ],
         ),
       ),

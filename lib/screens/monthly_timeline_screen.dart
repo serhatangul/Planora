@@ -150,10 +150,13 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
           id: payment.id,
           title: controller.defaultPaymentTitleLabel(payment.title),
           subtitle: isPaid
-              ? _paymentTimelineSubtitle(lang, 'paid', controller.categoryLabel(payment.category))
+              ? _paymentTimelineSubtitle(
+                  lang, 'paid', controller.categoryLabel(payment.category))
               : isLate
-                  ? _paymentTimelineSubtitle(lang, 'late', controller.categoryLabel(payment.category))
-                  : _paymentTimelineSubtitle(lang, 'waiting', controller.categoryLabel(payment.category)),
+                  ? _paymentTimelineSubtitle(
+                      lang, 'late', controller.categoryLabel(payment.category))
+                  : _paymentTimelineSubtitle(lang, 'waiting',
+                      controller.categoryLabel(payment.category)),
           amount: payment.amount,
           day: payment.dueDay,
           color: isPaid
@@ -198,13 +201,19 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
       case _TimelineFilter.all:
         break;
       case _TimelineFilter.income:
-        entries = entries.where((entry) => entry.type == _TimelineEntryType.income).toList();
+        entries = entries
+            .where((entry) => entry.type == _TimelineEntryType.income)
+            .toList();
         break;
       case _TimelineFilter.expense:
-        entries = entries.where((entry) => entry.type == _TimelineEntryType.expense).toList();
+        entries = entries
+            .where((entry) => entry.type == _TimelineEntryType.expense)
+            .toList();
         break;
       case _TimelineFilter.payment:
-        entries = entries.where((entry) => entry.type == _TimelineEntryType.payment).toList();
+        entries = entries
+            .where((entry) => entry.type == _TimelineEntryType.payment)
+            .toList();
         break;
       case _TimelineFilter.late:
         entries = entries.where((entry) => entry.isLate).toList();
@@ -239,7 +248,7 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -271,7 +280,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _timelineSubtitle(lang, _timelineMonthYearLabel(lang, controller.selectedMonth)),
+                  _timelineSubtitle(lang,
+                      _timelineMonthYearLabel(lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -295,7 +305,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                           Expanded(
                             child: _SummaryMini(
                               label: _timelineText(lang, 'extraIncome'),
-                              value: MoneyFormatter.format(controller.extraIncomeTotal),
+                              value: MoneyFormatter.format(
+                                  controller.extraIncomeTotal),
                               color: AppColors.brandGreen,
                             ),
                           ),
@@ -303,7 +314,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                           Expanded(
                             child: _SummaryMini(
                               label: _timelineText(lang, 'expense'),
-                              value: MoneyFormatter.format(controller.expensesTotal),
+                              value: MoneyFormatter.format(
+                                  controller.expensesTotal),
                               color: AppColors.warning,
                             ),
                           ),
@@ -311,7 +323,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                           Expanded(
                             child: _SummaryMini(
                               label: _timelineText(lang, 'payment'),
-                              value: MoneyFormatter.format(controller.plannedPayments),
+                              value: MoneyFormatter.format(
+                                  controller.plannedPayments),
                               color: AppColors.brandBlue,
                             ),
                           ),
@@ -340,14 +353,14 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 18),
                 TextField(
                   controller: _searchController,
                   onChanged: (_) => setState(() {}),
                   decoration: InputDecoration(
                     hintText: _timelineText(lang, 'searchHint'),
-                    prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+                    prefixIcon: const Icon(Icons.search_rounded,
+                        color: AppColors.textSecondary),
                     suffixIcon: _searchController.text.isEmpty
                         ? null
                         : IconButton(
@@ -359,7 +372,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                           ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18, vertical: 18),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
                       borderSide: const BorderSide(color: AppColors.stroke),
@@ -370,7 +384,8 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(22),
-                      borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
+                      borderSide: const BorderSide(
+                          color: AppColors.brandGreen, width: 1.4),
                     ),
                   ),
                   style: const TextStyle(
@@ -387,32 +402,36 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                       _TimelineFilterChip(
                         label: _timelineText(lang, 'all'),
                         active: _filter == _TimelineFilter.all,
-                        onTap: () => setState(() => _filter = _TimelineFilter.all),
+                        onTap: () =>
+                            setState(() => _filter = _TimelineFilter.all),
                       ),
                       _TimelineFilterChip(
                         label: _timelineText(lang, 'extraIncome'),
                         active: _filter == _TimelineFilter.income,
-                        onTap: () => setState(() => _filter = _TimelineFilter.income),
+                        onTap: () =>
+                            setState(() => _filter = _TimelineFilter.income),
                       ),
                       _TimelineFilterChip(
                         label: _timelineText(lang, 'expense'),
                         active: _filter == _TimelineFilter.expense,
-                        onTap: () => setState(() => _filter = _TimelineFilter.expense),
+                        onTap: () =>
+                            setState(() => _filter = _TimelineFilter.expense),
                       ),
                       _TimelineFilterChip(
                         label: _timelineText(lang, 'payment'),
                         active: _filter == _TimelineFilter.payment,
-                        onTap: () => setState(() => _filter = _TimelineFilter.payment),
+                        onTap: () =>
+                            setState(() => _filter = _TimelineFilter.payment),
                       ),
                       _TimelineFilterChip(
                         label: _timelineText(lang, 'lateFilter'),
                         active: _filter == _TimelineFilter.late,
-                        onTap: () => setState(() => _filter = _TimelineFilter.late),
+                        onTap: () =>
+                            setState(() => _filter = _TimelineFilter.late),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
                 SectionHeader(
                   title: _timelineText(lang, 'timeline'),
@@ -430,8 +449,12 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
                     description: allEntries.isEmpty
                         ? _timelineText(lang, 'emptyMonthDescription')
                         : _timelineText(lang, 'emptyFilterDescription'),
-                    actionLabel: allEntries.isEmpty ? _timelineText(lang, 'addExpense') : null,
-                    onActionTap: allEntries.isEmpty ? () => _openExpenses(context) : null,
+                    actionLabel: allEntries.isEmpty
+                        ? _timelineText(lang, 'addExpense')
+                        : null,
+                    onActionTap: allEntries.isEmpty
+                        ? () => _openExpenses(context)
+                        : null,
                     color: AppColors.brandBlue,
                   )
                 else
@@ -459,8 +482,6 @@ class _MonthlyTimelineScreenState extends State<MonthlyTimelineScreen> {
     );
   }
 }
-
-
 
 String _timelineMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -519,17 +540,53 @@ String _timelineText(String code, String key) {
     'extraIncome': {'tr': 'Ek gelir', 'en': 'Extra income', 'ru': 'Доп. доход'},
     'expense': {'tr': 'Harcama', 'en': 'Expense', 'ru': 'Расход'},
     'payment': {'tr': 'Ödeme', 'en': 'Payment', 'ru': 'Платёж'},
-    'title': {'tr': 'İşlem akışı', 'en': 'Transaction timeline', 'ru': 'Лента операций'},
-    'monthSummary': {'tr': 'Ay özeti', 'en': 'Month summary', 'ru': 'Итоги месяца'},
-    'searchHint': {'tr': 'İşlem, kategori, tutar veya gün ara', 'en': 'Search transaction, category, amount, or day', 'ru': 'Поиск по операции, категории, сумме или дню'},
+    'title': {
+      'tr': 'İşlem akışı',
+      'en': 'Transaction timeline',
+      'ru': 'Лента операций'
+    },
+    'monthSummary': {
+      'tr': 'Ay özeti',
+      'en': 'Month summary',
+      'ru': 'Итоги месяца'
+    },
+    'searchHint': {
+      'tr': 'İşlem, kategori, tutar veya gün ara',
+      'en': 'Search transaction, category, amount, or day',
+      'ru': 'Поиск по операции, категории, сумме или дню'
+    },
     'all': {'tr': 'Tümü', 'en': 'All', 'ru': 'Все'},
     'lateFilter': {'tr': 'Gecikmiş', 'en': 'Late', 'ru': 'Просрочено'},
     'timeline': {'tr': 'Zaman çizelgesi', 'en': 'Timeline', 'ru': 'Хронология'},
-    'emptyMonthTitle': {'tr': 'Bu ay henüz işlem yok', 'en': 'No transactions this month yet', 'ru': 'В этом месяце пока нет операций'},
-    'emptyFilterTitle': {'tr': 'Filtreye uygun işlem yok', 'en': 'No transactions match the filter', 'ru': 'Нет операций по фильтру'},
-    'emptyMonthDescription': {'tr': 'Ödeme, harcama veya ek gelir eklediğinde bu ayın akışı gün gün burada oluşur.', 'en': 'When you add payments, expenses, or extra income, this month’s daily flow appears here.', 'ru': 'Когда вы добавите платежи, расходы или доп. доходы, дневная лента месяца появится здесь.'},
-    'emptyFilterDescription': {'tr': 'Arama kelimesini veya üstteki filtreleri değiştirerek tekrar deneyebilirsin.', 'en': 'Try changing the search term or the filters above.', 'ru': 'Попробуйте изменить поисковый запрос или фильтры выше.'},
-    'addExpense': {'tr': 'Harcama Ekle', 'en': 'Add Expense', 'ru': 'Добавить расход'},
+    'emptyMonthTitle': {
+      'tr': 'Bu ay henüz işlem yok',
+      'en': 'No transactions this month yet',
+      'ru': 'В этом месяце пока нет операций'
+    },
+    'emptyFilterTitle': {
+      'tr': 'Filtreye uygun işlem yok',
+      'en': 'No transactions match the filter',
+      'ru': 'Нет операций по фильтру'
+    },
+    'emptyMonthDescription': {
+      'tr':
+          'Ödeme, harcama veya ek gelir eklediğinde bu ayın akışı gün gün burada oluşur.',
+      'en':
+          'When you add payments, expenses, or extra income, this month’s daily flow appears here.',
+      'ru':
+          'Когда вы добавите платежи, расходы или доп. доходы, дневная лента месяца появится здесь.'
+    },
+    'emptyFilterDescription': {
+      'tr':
+          'Arama kelimesini veya üstteki filtreleri değiştirerek tekrar deneyebilirsin.',
+      'en': 'Try changing the search term or the filters above.',
+      'ru': 'Попробуйте изменить поисковый запрос или фильтры выше.'
+    },
+    'addExpense': {
+      'tr': 'Harcama Ekle',
+      'en': 'Add Expense',
+      'ru': 'Добавить расход'
+    },
   };
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
@@ -731,16 +788,24 @@ class _TimelineEntryRow extends StatelessWidget {
                     Text(
                       entry.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            decoration: entry.isPaid ? TextDecoration.lineThrough : null,
-                            color: entry.isPaid ? AppColors.textSecondary : AppColors.textPrimary,
+                            decoration: entry.isPaid
+                                ? TextDecoration.lineThrough
+                                : null,
+                            color: entry.isPaid
+                                ? AppColors.textSecondary
+                                : AppColors.textPrimary,
                           ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       entry.subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: entry.isLate ? AppColors.danger : AppColors.textSecondary,
-                            fontWeight: entry.isLate ? FontWeight.w800 : FontWeight.w500,
+                            color: entry.isLate
+                                ? AppColors.danger
+                                : AppColors.textSecondary,
+                            fontWeight: entry.isLate
+                                ? FontWeight.w800
+                                : FontWeight.w500,
                           ),
                     ),
                   ],
@@ -759,7 +824,6 @@ class _TimelineEntryRow extends StatelessWidget {
     );
   }
 }
-
 
 class _TimelineFilterChip extends StatelessWidget {
   const _TimelineFilterChip({

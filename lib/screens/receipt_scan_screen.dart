@@ -94,7 +94,7 @@ class _ReceiptScanScreenState extends State<ReceiptScanScreen> {
     final lang = controller.appLanguageCode;
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: ListView(
@@ -345,7 +345,7 @@ class _ScanField extends StatelessWidget {
         prefixIcon: Icon(icon),
         prefixText: prefix == null ? null : '$prefix ',
         filled: true,
-        fillColor: AppColors.softBg,
+        fillColor: AppThemeColors.fieldBackground(context),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
           borderSide: const BorderSide(color: AppColors.stroke),

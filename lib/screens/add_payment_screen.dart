@@ -40,8 +40,7 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
 
     if (firstLetter == upperFirstLetter) return;
 
-    final updatedText =
-        text.substring(0, firstLetterIndex) +
+    final updatedText = text.substring(0, firstLetterIndex) +
         upperFirstLetter +
         text.substring(firstLetterIndex + 1);
 
@@ -49,7 +48,8 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     _titleController.value = _titleController.value.copyWith(
       text: updatedText,
       selection: TextSelection.collapsed(
-        offset: _titleController.selection.baseOffset.clamp(0, updatedText.length),
+        offset:
+            _titleController.selection.baseOffset.clamp(0, updatedText.length),
       ),
       composing: TextRange.empty,
     );
@@ -79,7 +79,10 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     final title = _titleController.text.trim();
     final amount = MoneyFormatter.parseAmount(_amountController.text);
     final dueDay = int.tryParse(_dayController.text.trim()) ?? 1;
-    final selectedCategory = _category ?? (categories.isNotEmpty ? categories.first : _addPaymentText(lang, 'otherCategory'));
+    final selectedCategory = _category ??
+        (categories.isNotEmpty
+            ? categories.first
+            : _addPaymentText(lang, 'otherCategory'));
 
     if (title.isEmpty || amount <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -136,8 +139,6 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     );
   }
 
-
-
   @override
   Widget build(BuildContext context) {
     final controller = PlanoraScope.of(context);
@@ -147,138 +148,147 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
       builder: (context, _) {
         final lang = controller.appLanguageCode;
         final categories = controller.categories;
-        final selectedCategory = _category ?? (categories.isNotEmpty ? categories.first : null);
+        final selectedCategory =
+            _category ?? (categories.isNotEmpty ? categories.first : null);
 
         return Scaffold(
-          backgroundColor: AppColors.softBg,
+          backgroundColor: AppThemeColors.background(context),
           body: SafeArea(
             bottom: false,
             child: Material(
               type: MaterialType.transparency,
               child: ListView(
-              padding: const EdgeInsets.fromLTRB(24, 22, 24, 132),
-              children: [
-              Row(
+                padding: const EdgeInsets.fromLTRB(24, 22, 24, 132),
                 children: [
-                  IconButton(
-                    onPressed: widget.onSaved,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    color: AppColors.textPrimary,
-                    tooltip: _addPaymentText(lang, 'back'),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      _addPaymentText(lang, 'title'),
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(_addPaymentText(lang, 'subtitle'), style: Theme.of(context).textTheme.bodyMedium),
-              const SizedBox(height: 24),
-              PremiumCard(
-                child: Column(
-                  children: [
-                    _InputField(
-                      label: _addPaymentText(lang, 'paymentName'),
-                      controller: _titleController,
-                      icon: Icons.edit_note_rounded,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      label: _addPaymentText(lang, 'amount'),
-                      controller: _amountController,
-                      icon: Icons.payments_rounded,
-                      keyboardType: TextInputType.number,
-                      prefix: controller.currencySymbol,
-                    ),
-                    const SizedBox(height: 16),
-                    _InputField(
-                      label: _addPaymentText(lang, 'dayOfMonth'),
-                      controller: _dayController,
-                      icon: Icons.calendar_today_rounded,
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
-                    DropdownButtonFormField<String>(
-                      value: selectedCategory,
-                      items: categories
-                          .map((category) => DropdownMenuItem(
-                                value: category,
-                                child: Text(controller.categoryLabel(category)),
-                              ))
-                          .toList(),
-                      decoration: _inputDecoration(
-                        label: _addPaymentText(lang, 'category'),
-                        icon: Icons.category_rounded,
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: widget.onSaved,
+                        icon: const Icon(Icons.arrow_back_rounded),
+                        color: AppThemeColors.textPrimary(context),
+                        tooltip: _addPaymentText(lang, 'back'),
                       ),
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _category = value);
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 28),
-              GradientButton(
-                label: _addPaymentText(lang, 'savePayment'),
-                icon: Icons.check_rounded,
-                onPressed: _save,
-              ),
-              const SizedBox(height: 22),
-              PremiumCard(
-                color: const Color(0xFFF9FBFF),
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 46,
-                      height: 46,
-                      decoration: BoxDecoration(
-                        color: AppColors.brandGreen.withOpacity(0.12),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(Icons.add_card_rounded, color: AppColors.brandGreen),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _addPaymentText(lang, 'oneTimeTitle'),
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _addPaymentText(lang, 'oneTimeSubtitle'),
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: _addOneTimePayment,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandGreen,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _addPaymentText(lang, 'title'),
+                          style: Theme.of(context).textTheme.headlineLarge,
                         ),
                       ),
-                      child: Text(
-                        _addPaymentText(lang, 'oneTimeAdd'),
-                        style: const TextStyle(fontWeight: FontWeight.w900),
-                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(_addPaymentText(lang, 'subtitle'),
+                      style: Theme.of(context).textTheme.bodyMedium),
+                  const SizedBox(height: 24),
+                  PremiumCard(
+                    child: Column(
+                      children: [
+                        _InputField(
+                          label: _addPaymentText(lang, 'paymentName'),
+                          controller: _titleController,
+                          icon: Icons.edit_note_rounded,
+                        ),
+                        const SizedBox(height: 16),
+                        _InputField(
+                          label: _addPaymentText(lang, 'amount'),
+                          controller: _amountController,
+                          icon: Icons.payments_rounded,
+                          keyboardType: TextInputType.number,
+                          prefix: controller.currencySymbol,
+                        ),
+                        const SizedBox(height: 16),
+                        _InputField(
+                          label: _addPaymentText(lang, 'dayOfMonth'),
+                          controller: _dayController,
+                          icon: Icons.calendar_today_rounded,
+                          keyboardType: TextInputType.number,
+                        ),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          items: categories
+                              .map((category) => DropdownMenuItem(
+                                    value: category,
+                                    child: Text(
+                                      controller.categoryLabel(category),
+                                      style: TextStyle(
+                                          color: AppThemeColors.textPrimary(
+                                              context)),
+                                    ),
+                                  ))
+                              .toList(),
+                          decoration: _inputDecoration(
+                            context: context,
+                            label: _addPaymentText(lang, 'category'),
+                            icon: Icons.category_rounded,
+                          ),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _category = value);
+                            }
+                          },
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
+                  ),
+                  const SizedBox(height: 28),
+                  GradientButton(
+                    label: _addPaymentText(lang, 'savePayment'),
+                    icon: Icons.check_rounded,
+                    onPressed: _save,
+                  ),
+                  const SizedBox(height: 22),
+                  PremiumCard(
+                    color: AppThemeColors.mutedSurface(context),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 46,
+                          height: 46,
+                          decoration: BoxDecoration(
+                            color: AppColors.brandGreen.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.add_card_rounded,
+                              color: AppColors.brandGreen),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                _addPaymentText(lang, 'oneTimeTitle'),
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _addPaymentText(lang, 'oneTimeSubtitle'),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        ElevatedButton(
+                          onPressed: _addOneTimePayment,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.brandGreen,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          child: Text(
+                            _addPaymentText(lang, 'oneTimeAdd'),
+                            style: const TextStyle(fontWeight: FontWeight.w900),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -288,7 +298,6 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
     );
   }
 }
-
 
 String _addPaymentText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';
@@ -351,13 +360,17 @@ String _addPaymentText(String code, String key) {
     },
     'monthlyInfo': {
       'tr': 'Aylık seçilirse ödeme her ay takvimde görünür.',
-      'en': 'If monthly is selected, the payment appears on the calendar every month.',
-      'ru': 'Если выбран ежемесячный платёж, он будет появляться в календаре каждый месяц.',
+      'en':
+          'If monthly is selected, the payment appears on the calendar every month.',
+      'ru':
+          'Если выбран ежемесячный платёж, он будет появляться в календаре каждый месяц.',
     },
     'oneTimeInfo': {
       'tr': 'Tek sefer seçilirse ödeme sadece seçili ayda görünür.',
-      'en': 'If one-time is selected, the payment appears only in the selected month.',
-      'ru': 'Если выбран разовый платёж, он появится только в выбранном месяце.',
+      'en':
+          'If one-time is selected, the payment appears only in the selected month.',
+      'ru':
+          'Если выбран разовый платёж, он появится только в выбранном месяце.',
     },
     'savePayment': {
       'tr': 'Ödemeyi Kaydet',
@@ -408,7 +421,6 @@ String _addPaymentText(String code, String key) {
 
   return values[key]?[language] ?? values[key]?['tr'] ?? key;
 }
-
 
 class _OneTimePaymentInput {
   const _OneTimePaymentInput({
@@ -505,7 +517,6 @@ class _OneTimePaymentDialogState extends State<_OneTimePaymentDialog> {
   }
 }
 
-
 class _InputField extends StatelessWidget {
   const _InputField({
     required this.label,
@@ -530,40 +541,46 @@ class _InputField extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: TextField(
-      controller: controller,
-      inputFormatters: inputFormatters,
-      keyboardType: keyboardType,
-      textCapitalization: textCapitalization,
-      decoration: _inputDecoration(label: label, icon: icon, prefix: prefix),
-      style: const TextStyle(
-        fontSize: 17,
-        fontWeight: FontWeight.w800,
-        color: AppColors.textPrimary,
-      ),
+        controller: controller,
+        inputFormatters: inputFormatters,
+        keyboardType: keyboardType,
+        textCapitalization: textCapitalization,
+        decoration: _inputDecoration(
+          context: context,
+          label: label,
+          icon: icon,
+          prefix: prefix,
+        ),
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w800,
+          color: AppThemeColors.textPrimary(context),
+        ),
       ),
     );
   }
 }
 
 InputDecoration _inputDecoration({
+  required BuildContext context,
   required String label,
   required IconData icon,
   String? prefix,
 }) {
   return InputDecoration(
     labelText: label,
-    prefixIcon: Icon(icon, color: AppColors.textSecondary),
+    prefixIcon: Icon(icon, color: AppThemeColors.textSecondary(context)),
     prefixText: prefix,
     filled: true,
-    fillColor: AppColors.softBg,
+    fillColor: AppThemeColors.fieldBackground(context),
     contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
-      borderSide: const BorderSide(color: AppColors.stroke),
+      borderSide: BorderSide(color: AppThemeColors.stroke(context)),
     ),
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
-      borderSide: const BorderSide(color: AppColors.stroke),
+      borderSide: BorderSide(color: AppThemeColors.stroke(context)),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(18),
@@ -587,13 +604,22 @@ class _ToggleOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       onTap: onTap,
-      color: active ? const Color(0xFFE8FFF6) : Colors.white,
-      borderColor: active ? AppColors.brandGreen : AppColors.stroke,
+      color: active
+          ? (AppThemeColors.isDark(context)
+              ? AppColors.brandGreen.withValues(alpha: 0.14)
+              : const Color(0xFFE8FFF6))
+          : AppThemeColors.card(context),
+      borderColor:
+          active ? AppColors.brandGreen : AppThemeColors.stroke(context),
       child: Center(
         child: Text(
           label,
           style: TextStyle(
-            color: active ? const Color(0xFF0A7A59) : AppColors.textSecondary,
+            color: active
+                ? (AppThemeColors.isDark(context)
+                    ? AppColors.brandGreen
+                    : const Color(0xFF0A7A59))
+                : AppThemeColors.textSecondary(context),
             fontSize: 15,
             fontWeight: FontWeight.w900,
           ),

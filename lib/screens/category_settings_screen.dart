@@ -329,7 +329,7 @@ class CategorySettingsScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -596,7 +596,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                       labelText: _categoryText(widget.lang, 'limit'),
                       prefixText: '${PlanoraScope.of(context).currencySymbol} ',
                       filled: true,
-                      fillColor: AppColors.softBg,
+                      fillColor: AppThemeColors.fieldBackground(context),
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 12),
                       border: OutlineInputBorder(

@@ -31,7 +31,7 @@ class MonthlyReportScreen extends StatelessWidget {
     final controller = PlanoraScope.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.softBg,
+      backgroundColor: AppThemeColors.background(context),
       body: SafeArea(
         bottom: false,
         child: AnimatedBuilder(
@@ -59,7 +59,10 @@ class MonthlyReportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  _monthlyReportSubtitle(lang, _monthlyReportMonthYearLabel(lang, controller.selectedMonth)),
+                  _monthlyReportSubtitle(
+                      lang,
+                      _monthlyReportMonthYearLabel(
+                          lang, controller.selectedMonth)),
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
                 const SizedBox(height: 18),
@@ -92,7 +95,10 @@ class MonthlyReportScreen extends StatelessWidget {
                           children: [
                             Text(
                               controller.budgetHealthLabel,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     color: controller.budgetHealthColor,
                                   ),
                             ),
@@ -113,7 +119,8 @@ class MonthlyReportScreen extends StatelessWidget {
                     Expanded(
                       child: _ReportMetricCard(
                         label: _monthlyReportText(lang, 'income'),
-                        value: MoneyFormatter.format(controller.totalMonthlyIncome),
+                        value: MoneyFormatter.format(
+                            controller.totalMonthlyIncome),
                         icon: Icons.account_balance_wallet_rounded,
                         color: AppColors.brandGreen,
                       ),
@@ -129,7 +136,6 @@ class MonthlyReportScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
                 PremiumCard(
                   color: const Color(0xFFF4FFFB),
@@ -137,27 +143,33 @@ class MonthlyReportScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
-                      const Icon(Icons.add_chart_rounded, color: AppColors.brandGreen),
+                      const Icon(Icons.add_chart_rounded,
+                          color: AppColors.brandGreen),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
-                          _incomeBreakdownText(lang, MoneyFormatter.format(controller.monthlyIncome), MoneyFormatter.format(controller.extraIncomeTotal)),
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
+                          _incomeBreakdownText(
+                              lang,
+                              MoneyFormatter.format(controller.monthlyIncome),
+                              MoneyFormatter.format(
+                                  controller.extraIncomeTotal)),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    fontWeight: FontWeight.w800,
+                                  ),
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
                       child: _ReportMetricCard(
                         label: _monthlyReportText(lang, 'payments'),
-                        value: MoneyFormatter.format(controller.plannedPayments),
+                        value:
+                            MoneyFormatter.format(controller.plannedPayments),
                         icon: Icons.receipt_long_rounded,
                         color: AppColors.warning,
                       ),
@@ -180,33 +192,45 @@ class MonthlyReportScreen extends StatelessWidget {
                     children: [
                       SectionHeader(
                         title: _monthlyReportText(lang, 'paymentSummary'),
-                        actionLabel: '${(controller.paidProgressRatio * 100).round()}%',
+                        actionLabel:
+                            '${(controller.paidProgressRatio * 100).round()}%',
                       ),
                       const SizedBox(height: 10),
                       ProgressLine(value: controller.paidProgressRatio),
                       const SizedBox(height: 16),
                       _ReportRow(
                         label: _monthlyReportText(lang, 'paid'),
-                        value: _paymentSummaryValue(lang, MoneyFormatter.format(controller.paidPaymentsTotal), controller.paidPaymentCount),
+                        value: _paymentSummaryValue(
+                            lang,
+                            MoneyFormatter.format(controller.paidPaymentsTotal),
+                            controller.paidPaymentCount),
                         color: AppColors.brandGreen,
                       ),
                       const SizedBox(height: 10),
                       _ReportRow(
                         label: _monthlyReportText(lang, 'waiting'),
-                        value: _paymentSummaryValue(lang, MoneyFormatter.format(controller.waitingPaymentsTotal), controller.waitingPaymentCount),
+                        value: _paymentSummaryValue(
+                            lang,
+                            MoneyFormatter.format(
+                                controller.waitingPaymentsTotal),
+                            controller.waitingPaymentCount),
                         color: AppColors.warning,
                       ),
                       const SizedBox(height: 10),
                       _ReportRow(
                         label: _monthlyReportText(lang, 'late'),
-                        value: _paymentSummaryValue(lang, MoneyFormatter.format(controller.latePaymentsTotal), controller.latePaymentCount),
+                        value: _paymentSummaryValue(
+                            lang,
+                            MoneyFormatter.format(controller.latePaymentsTotal),
+                            controller.latePaymentCount),
                         color: AppColors.danger,
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 24),
-                SectionHeader(title: _monthlyReportText(lang, 'categorySummary')),
+                SectionHeader(
+                    title: _monthlyReportText(lang, 'categorySummary')),
                 const SizedBox(height: 12),
                 if (controller.categorySummary.isEmpty)
                   PremiumCard(
@@ -233,13 +257,15 @@ class MonthlyReportScreen extends StatelessWidget {
                                     color: category.color.withOpacity(0.13),
                                     borderRadius: BorderRadius.circular(14),
                                   ),
-                                  child: Icon(Icons.folder_rounded, color: category.color, size: 20),
+                                  child: Icon(Icons.folder_rounded,
+                                      color: category.color, size: 20),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(
                                     controller.categoryLabel(category.title),
-                                    style: Theme.of(context).textTheme.titleMedium,
+                                    style:
+                                        Theme.of(context).textTheme.titleMedium,
                                   ),
                                 ),
                                 Text(
@@ -274,7 +300,8 @@ class MonthlyReportScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SectionHeader(title: _monthlyReportText(lang, 'recommendations')),
+                      SectionHeader(
+                          title: _monthlyReportText(lang, 'recommendations')),
                       const SizedBox(height: 12),
                       ...controller.budgetHealthTips.map(
                         (tip) => Padding(
@@ -339,8 +366,6 @@ class MonthlyReportScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 String _monthlyReportMonthYearLabel(String code, DateTime month) {
   final months = {
@@ -495,8 +520,8 @@ String _paymentSummaryValue(String code, String amount, int count) {
   }
 }
 
-
-String _incomeBreakdownText(String code, String fixedIncome, String extraIncome) {
+String _incomeBreakdownText(
+    String code, String fixedIncome, String extraIncome) {
   switch (code) {
     case 'en':
       return 'Fixed income $fixedIncome · Extra income $extraIncome';
