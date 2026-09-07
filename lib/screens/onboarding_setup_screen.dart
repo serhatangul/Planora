@@ -315,6 +315,11 @@ class _SetupPage extends StatelessWidget {
           title: '£ GBP',
           subtitle: 'British Pound',
           icon: Icons.payments_rounded),
+      _SetupOption(
+          value: '₫',
+          title: '₫ VND',
+          subtitle: 'Vietnamese Dong',
+          icon: Icons.payments_rounded),
     ];
 
     return ListView(
