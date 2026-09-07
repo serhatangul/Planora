@@ -7,16 +7,16 @@ class PremiumCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(20),
-    this.color = AppColors.card,
-    this.borderColor = AppColors.stroke,
+    this.color,
+    this.borderColor,
     this.radius = 26,
     this.onTap,
   });
 
   final Widget child;
   final EdgeInsets padding;
-  final Color color;
-  final Color borderColor;
+  final Color? color;
+  final Color? borderColor;
   final double radius;
   final VoidCallback? onTap;
 
@@ -26,9 +26,10 @@ class PremiumCard extends StatelessWidget {
       duration: const Duration(milliseconds: 180),
       padding: padding,
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? AppThemeColors.card(context),
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: borderColor),
+        border:
+            Border.all(color: borderColor ?? AppThemeColors.stroke(context)),
         boxShadow: [
           BoxShadow(
             color: AppColors.darkNavy.withOpacity(0.06),
@@ -269,7 +270,8 @@ class PlanoraLogo extends StatelessWidget {
         Text(
           'Planora',
           style: TextStyle(
-            color: lightText ? Colors.white : AppColors.textPrimary,
+            color:
+                lightText ? Colors.white : AppThemeColors.textPrimary(context),
             fontSize: 26,
             fontWeight: FontWeight.w900,
             letterSpacing: -0.6,

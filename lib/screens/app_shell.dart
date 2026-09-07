@@ -17,21 +17,7 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  late final PlanoraController _controller;
   int _selectedIndex = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = PlanoraController();
-    _controller.load();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
 
   void _onTap(int index) {
     setState(() => _selectedIndex = index);
@@ -43,6 +29,8 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
+    final controller = PlanoraScope.of(context);
+
     final screens = [
       const DashboardScreen(),
       AddPaymentScreen(onSaved: _goHome),
@@ -51,39 +39,36 @@ class _AppShellState extends State<AppShell> {
       const ProfileScreen(),
     ];
 
-    return PlanoraScope(
-      controller: _controller,
-      child: AnimatedBuilder(
-        animation: _controller,
-        builder: (context, _) {
-          if (!_controller.isLoaded) {
-            return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(
-                  color: AppColors.brandGreen,
-                ),
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        if (!controller.isLoaded) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(
+                color: AppColors.brandGreen,
               ),
-            );
-          }
-
-          if (!_controller.hasCompletedOnboarding) {
-            return const OnboardingSetupScreen();
-          }
-
-          return Scaffold(
-            extendBody: true,
-            body: AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              child: screens[_selectedIndex],
-            ),
-            bottomNavigationBar: _PlanoraBottomNav(
-              lang: _controller.appLanguageCode,
-              selectedIndex: _selectedIndex,
-              onTap: _onTap,
             ),
           );
-        },
-      ),
+        }
+
+        if (!controller.hasCompletedOnboarding) {
+          return const OnboardingSetupScreen();
+        }
+
+        return Scaffold(
+          extendBody: true,
+          body: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: screens[_selectedIndex],
+          ),
+          bottomNavigationBar: _PlanoraBottomNav(
+            lang: controller.appLanguageCode,
+            selectedIndex: _selectedIndex,
+            onTap: _onTap,
+          ),
+        );
+      },
     );
   }
 }
@@ -104,8 +89,11 @@ class _PlanoraBottomNav extends StatelessWidget {
     final items = [
       _NavItem(icon: Icons.home_rounded, label: _navText(lang, 'home')),
       _NavItem(icon: Icons.add_card_rounded, label: _navText(lang, 'payment')),
-      _NavItem(icon: Icons.calendar_month_rounded, label: _navText(lang, 'calendar')),
-      _NavItem(icon: Icons.pie_chart_rounded, label: _navText(lang, 'analysis')),
+      _NavItem(
+          icon: Icons.calendar_month_rounded,
+          label: _navText(lang, 'calendar')),
+      _NavItem(
+          icon: Icons.pie_chart_rounded, label: _navText(lang, 'analysis')),
       _NavItem(icon: Icons.person_rounded, label: _navText(lang, 'profile')),
     ];
 
@@ -115,9 +103,9 @@ class _PlanoraBottomNav extends StatelessWidget {
         height: 70,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.96),
+          color: AppThemeColors.card(context).withValues(alpha: 0.96),
           borderRadius: BorderRadius.circular(28),
-          border: Border.all(color: AppColors.stroke),
+          border: Border.all(color: AppThemeColors.stroke(context)),
           boxShadow: [
             BoxShadow(
               color: AppColors.darkNavy.withOpacity(0.10),
@@ -139,7 +127,11 @@ class _PlanoraBottomNav extends StatelessWidget {
                   duration: const Duration(milliseconds: 180),
                   margin: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: isActive ? const Color(0xFFE8FFF6) : Colors.transparent,
+                    color: isActive
+                        ? (AppThemeColors.isDark(context)
+                            ? AppColors.brandGreen.withValues(alpha: 0.16)
+                            : const Color(0xFFE8FFF6))
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Column(
@@ -148,7 +140,9 @@ class _PlanoraBottomNav extends StatelessWidget {
                       Icon(
                         item.icon,
                         size: 22,
-                        color: isActive ? AppColors.brandGreen : const Color(0xFF8B93A7),
+                        color: isActive
+                            ? AppColors.brandGreen
+                            : AppThemeColors.textSecondary(context),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -156,7 +150,9 @@ class _PlanoraBottomNav extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
-                          color: isActive ? AppColors.brandGreen : const Color(0xFF8B93A7),
+                          color: isActive
+                              ? AppColors.brandGreen
+                              : AppThemeColors.textSecondary(context),
                         ),
                       ),
                     ],
@@ -170,7 +166,6 @@ class _PlanoraBottomNav extends StatelessWidget {
     );
   }
 }
-
 
 String _navText(String code, String key) {
   final language = code == 'en' || code == 'ru' ? code : 'tr';

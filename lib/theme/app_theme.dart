@@ -20,6 +20,36 @@ class AppColors {
   static const Color danger = Color(0xFFFF4D4F);
 }
 
+class AppThemeColors {
+  static bool isDark(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark;
+  }
+
+  static Color background(BuildContext context) {
+    return isDark(context) ? const Color(0xFF050816) : AppColors.softBg;
+  }
+
+  static Color card(BuildContext context) {
+    return isDark(context) ? const Color(0xFF0B1024) : AppColors.card;
+  }
+
+  static Color stroke(BuildContext context) {
+    return isDark(context) ? const Color(0xFF202943) : AppColors.stroke;
+  }
+
+  static Color textPrimary(BuildContext context) {
+    return isDark(context) ? const Color(0xFFF4F7FF) : AppColors.textPrimary;
+  }
+
+  static Color textSecondary(BuildContext context) {
+    return isDark(context) ? const Color(0xFFAAB3C8) : AppColors.textSecondary;
+  }
+
+  static Color fieldBackground(BuildContext context) {
+    return isDark(context) ? const Color(0xFF11172C) : AppColors.softBg;
+  }
+}
+
 class AppGradients {
   static const LinearGradient brand = LinearGradient(
     begin: Alignment.topLeft,
@@ -102,6 +132,7 @@ class AppTheme {
       ),
     );
   }
+
   static ThemeData get dark {
     return ThemeData(
       useMaterial3: true,
@@ -170,5 +201,4 @@ class AppTheme {
       dividerColor: const Color(0xFF202943),
     );
   }
-
 }
