@@ -37,8 +37,220 @@ class _MonthSnapshot {
   final int healthScore;
 }
 
-class MonthComparisonScreen extends StatelessWidget {
+class MonthComparisonScreen extends StatefulWidget {
   const MonthComparisonScreen({super.key});
+
+  @override
+  State<MonthComparisonScreen> createState() => _MonthComparisonScreenState();
+}
+
+class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
+  DateTime? _leftMonth;
+  DateTime? _rightMonth;
+
+  DateTime _monthOnly(DateTime value) {
+    return DateTime(value.year, value.month, 1);
+  }
+
+  DateTime _shiftMonth(DateTime value, int delta) {
+    return DateTime(value.year, value.month + delta, 1);
+  }
+
+  bool _canMoveForward(DateTime value) {
+    final current = _monthOnly(DateTime.now());
+    final next = _shiftMonth(value, 1);
+    return !next.isAfter(current);
+  }
+
+  Widget _monthSelector(
+    BuildContext context, {
+    required DateTime month,
+    required String lang,
+    required VoidCallback onPrevious,
+    required VoidCallback onNext,
+    required bool canMoveForward,
+    required ValueChanged<DateTime> onSelected,
+  }) {
+    return Expanded(
+      child: PremiumCard(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+        child: Row(
+          children: [
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: onPrevious,
+              icon: const Icon(Icons.chevron_left_rounded),
+            ),
+            Expanded(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () async {
+                  final selected = await _showMonthYearPicker(
+                    context,
+                    initialMonth: month,
+                    lang: lang,
+                  );
+
+                  if (selected != null) {
+                    onSelected(selected);
+                  }
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        PlanoraDateUtils.monthYearLabel(
+                          month,
+                          languageCode: lang,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w800,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Icon(
+                        Icons.keyboard_arrow_down_rounded,
+                        size: 16,
+                        color: Theme.of(context).textTheme.bodySmall?.color,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            IconButton(
+              visualDensity: VisualDensity.compact,
+              onPressed: canMoveForward ? onNext : null,
+              icon: const Icon(Icons.chevron_right_rounded),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<DateTime?> _showMonthYearPicker(
+    BuildContext context, {
+    required DateTime initialMonth,
+    required String lang,
+  }) async {
+    int selectedMonth = initialMonth.month;
+    int selectedYear = initialMonth.year;
+
+    final now = DateTime.now();
+    final years = List<int>.generate(
+      21,
+      (index) => now.year - 20 + index,
+    );
+
+    String text(String tr, String en, String ru) {
+      switch (lang) {
+        case 'en':
+          return en;
+        case 'ru':
+          return ru;
+        default:
+          return tr;
+      }
+    }
+
+    return showDialog<DateTime>(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            final monthNames = PlanoraDateUtils.monthNamesFor(lang);
+
+            return AlertDialog(
+              title: Text(
+                text(
+                  'Ay ve yıl seç',
+                  'Select month and year',
+                  'Выберите месяц и год',
+                ),
+              ),
+              content: SizedBox(
+                width: 320,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    DropdownButtonFormField<int>(
+                      value: selectedMonth,
+                      decoration: InputDecoration(
+                        labelText: text('Ay', 'Month', 'Месяц'),
+                      ),
+                      items: List.generate(
+                        12,
+                        (index) => DropdownMenuItem<int>(
+                          value: index + 1,
+                          child: Text(monthNames[index]),
+                        ),
+                      ),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() {
+                          selectedMonth = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    DropdownButtonFormField<int>(
+                      value: selectedYear,
+                      decoration: InputDecoration(
+                        labelText: text('Yıl', 'Year', 'Год'),
+                      ),
+                      items: years
+                          .map(
+                            (year) => DropdownMenuItem<int>(
+                              value: year,
+                              child: Text('$year'),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (value) {
+                        if (value == null) return;
+                        setDialogState(() {
+                          selectedYear = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    text('Vazgeç', 'Cancel', 'Отмена'),
+                  ),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final selected = DateTime(selectedYear, selectedMonth, 1);
+
+                    if (selected.isAfter(
+                      DateTime(now.year, now.month, 1),
+                    )) {
+                      return;
+                    }
+
+                    Navigator.of(dialogContext).pop(selected);
+                  },
+                  child: Text(
+                    text('Seç', 'Select', 'Выбрать'),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   String _monthKey(DateTime month) {
     return '${month.year}-${month.month.toString().padLeft(2, '0')}';
@@ -180,9 +392,12 @@ class MonthComparisonScreen extends StatelessWidget {
           animation: controller,
           builder: (context, _) {
             final lang = controller.appLanguageCode;
-            final currentMonth = controller.selectedMonth;
-            final previousMonth =
-                DateTime(currentMonth.year, currentMonth.month - 1, 1);
+
+            _rightMonth ??= _monthOnly(controller.selectedMonth);
+            _leftMonth ??= _shiftMonth(_rightMonth!, -1);
+
+            final currentMonth = _rightMonth!;
+            final previousMonth = _leftMonth!;
 
             final current = _snapshotFor(controller, currentMonth);
             final previous = _snapshotFor(controller, previousMonth);
@@ -213,8 +428,56 @@ class MonthComparisonScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  '${PlanoraDateUtils.monthYearLabel(currentMonth)} / ${PlanoraDateUtils.monthYearLabel(previousMonth)}',
+                  '${PlanoraDateUtils.monthYearLabel(previousMonth, languageCode: lang)} / ${PlanoraDateUtils.monthYearLabel(currentMonth, languageCode: lang)}',
                   style: Theme.of(context).textTheme.bodyMedium,
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    _monthSelector(
+                      context,
+                      month: previousMonth,
+                      lang: lang,
+                      onPrevious: () {
+                        setState(() {
+                          _leftMonth = _shiftMonth(previousMonth, -1);
+                        });
+                      },
+                      onNext: () {
+                        setState(() {
+                          _leftMonth = _shiftMonth(previousMonth, 1);
+                        });
+                      },
+                      canMoveForward: _canMoveForward(previousMonth),
+                      onSelected: (selected) {
+                        setState(() {
+                          _leftMonth = selected;
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 10),
+                    _monthSelector(
+                      context,
+                      month: currentMonth,
+                      lang: lang,
+                      onPrevious: () {
+                        setState(() {
+                          _rightMonth = _shiftMonth(currentMonth, -1);
+                        });
+                      },
+                      onNext: () {
+                        setState(() {
+                          _rightMonth = _shiftMonth(currentMonth, 1);
+                        });
+                      },
+                      canMoveForward: _canMoveForward(currentMonth),
+                      onSelected: (selected) {
+                        setState(() {
+                          _rightMonth = selected;
+                        });
+                      },
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
@@ -253,7 +516,8 @@ class MonthComparisonScreen extends StatelessWidget {
                     Expanded(
                       child: _ScoreCard(
                         lang: lang,
-                        title: PlanoraDateUtils.monthYearLabel(previousMonth),
+                        title: PlanoraDateUtils.monthYearLabel(previousMonth,
+                            languageCode: lang),
                         score: previous.healthScore,
                         muted: true,
                       ),
@@ -262,7 +526,8 @@ class MonthComparisonScreen extends StatelessWidget {
                     Expanded(
                       child: _ScoreCard(
                         lang: lang,
-                        title: PlanoraDateUtils.monthYearLabel(currentMonth),
+                        title: PlanoraDateUtils.monthYearLabel(currentMonth,
+                            languageCode: lang),
                         score: current.healthScore,
                         muted: false,
                       ),

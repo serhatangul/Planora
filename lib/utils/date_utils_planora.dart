@@ -1,23 +1,61 @@
 class PlanoraDateUtils {
   const PlanoraDateUtils._();
 
-  static const List<String> monthNamesTr = [
-    'Ocak',
-    'Şubat',
-    'Mart',
-    'Nisan',
-    'Mayıs',
-    'Haziran',
-    'Temmuz',
-    'Ağustos',
-    'Eylül',
-    'Ekim',
-    'Kasım',
-    'Aralık',
-  ];
+  static const Map<String, List<String>> _monthNames = {
+    'tr': [
+      'Ocak',
+      'Şubat',
+      'Mart',
+      'Nisan',
+      'Mayıs',
+      'Haziran',
+      'Temmuz',
+      'Ağustos',
+      'Eylül',
+      'Ekim',
+      'Kasım',
+      'Aralık',
+    ],
+    'en': [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ],
+    'ru': [
+      'Январь',
+      'Февраль',
+      'Март',
+      'Апрель',
+      'Май',
+      'Июнь',
+      'Июль',
+      'Август',
+      'Сентябрь',
+      'Октябрь',
+      'Ноябрь',
+      'Декабрь',
+    ],
+  };
 
-  static String monthYearLabel(DateTime date) {
-    return '${monthNamesTr[date.month - 1]} ${date.year}';
+  static List<String> monthNamesFor(String languageCode) {
+    return _monthNames[languageCode] ?? _monthNames['tr']!;
+  }
+
+  static String monthYearLabel(
+    DateTime date, {
+    String languageCode = 'tr',
+  }) {
+    final months = monthNamesFor(languageCode);
+    return '${months[date.month - 1]} ${date.year}';
   }
 
   static DateTime monthOnly(DateTime date) {
@@ -29,8 +67,6 @@ class PlanoraDateUtils {
     return nextMonth.subtract(const Duration(days: 1)).day;
   }
 
-  /// Flutter DateTime weekday: Monday 1 ... Sunday 7.
-  /// App calendar starts with Monday, so offset is 0 for Monday.
   static int firstWeekdayOffset(DateTime date) {
     final firstDay = DateTime(date.year, date.month, 1);
     return firstDay.weekday - 1;
