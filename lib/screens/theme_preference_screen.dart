@@ -86,7 +86,7 @@ class ThemePreferenceScreen extends StatelessWidget {
                                   ? _themeText(lang, 'darkSubtitle')
                                   : _themeText(lang, 'lightSubtitle'),
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.72),
+                                color: Colors.white.withValues(alpha: 0.72),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 height: 1.30,
@@ -97,7 +97,7 @@ class ThemePreferenceScreen extends StatelessWidget {
                       ),
                       Switch.adaptive(
                         value: controller.preferDarkMode,
-                        activeColor: AppColors.brandGreen,
+                        activeThumbColor: AppColors.brandGreen,
                         onChanged: (value) =>
                             controller.updateThemePreference(value),
                       ),

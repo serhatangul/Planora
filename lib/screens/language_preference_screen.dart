@@ -10,7 +10,6 @@ class LanguagePreferenceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = PlanoraScope.of(context);
-    final lang = controller.appLanguageCode;
 
     return Scaffold(
       backgroundColor: AppThemeColors.background(context),
@@ -79,7 +78,7 @@ class LanguagePreferenceScreen extends StatelessWidget {
                             Text(
                               _languageSubtitle(currentLang),
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.72),
+                                color: Colors.white.withValues(alpha: 0.72),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 height: 1.30,
@@ -279,7 +278,7 @@ class _LanguageOption extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.70),
+                color: Colors.white.withValues(alpha: 0.70),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Center(

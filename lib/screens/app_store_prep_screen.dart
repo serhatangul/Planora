@@ -482,7 +482,7 @@ class _PrepItem extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: _color.withOpacity(0.12),
+                color: _color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(icon, color: _color),
@@ -502,7 +502,7 @@ class _PrepItem extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 9, vertical: 5),
                         decoration: BoxDecoration(
-                          color: _color.withOpacity(0.10),
+                          color: _color.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(999),
                         ),
                         child: Row(

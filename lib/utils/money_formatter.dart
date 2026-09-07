@@ -19,20 +19,36 @@ class MoneyFormatter {
       return '$selectedSymbol••••';
     }
 
-    final rounded = value.round();
-    final isNegative = rounded < 0;
-    final raw = rounded.abs().toString();
-    final buffer = StringBuffer();
+    final numericValue = value.toDouble();
+    final isNegative = numericValue < 0;
+    final absoluteValue = numericValue.abs();
 
-    for (int i = 0; i < raw.length; i++) {
-      final reverseIndex = raw.length - i;
-      buffer.write(raw[i]);
-      if (reverseIndex > 1 && reverseIndex % 3 == 1) {
-        buffer.write('.');
+    String formatted;
+
+    if (absoluteValue > 0 && absoluteValue < 1) {
+      formatted = absoluteValue < 0.01
+          ? absoluteValue.toStringAsFixed(4)
+          : absoluteValue.toStringAsFixed(2);
+
+      formatted = formatted
+          .replaceFirst(RegExp(r'0+$'), '')
+          .replaceFirst(RegExp(r'\.$'), '');
+    } else {
+      final rounded = absoluteValue.round();
+      final raw = rounded.toString();
+      final buffer = StringBuffer();
+
+      for (int i = 0; i < raw.length; i++) {
+        final reverseIndex = raw.length - i;
+        buffer.write(raw[i]);
+
+        if (reverseIndex > 1 && reverseIndex % 3 == 1) {
+          buffer.write('.');
+        }
       }
-    }
 
-    final formatted = buffer.toString();
+      formatted = buffer.toString();
+    }
 
     if (selectedSymbol == '₫') {
       return '${isNegative ? '-' : ''}$formatted ₫';

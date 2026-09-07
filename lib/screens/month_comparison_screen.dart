@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../models/expense_item.dart';
-import '../models/income_item.dart';
 import '../models/payment_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
@@ -179,7 +177,7 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     DropdownButtonFormField<int>(
-                      value: selectedMonth,
+                      initialValue: selectedMonth,
                       decoration: InputDecoration(
                         labelText: text('Ay', 'Month', 'Месяц'),
                       ),
@@ -199,7 +197,7 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<int>(
-                      value: selectedYear,
+                      initialValue: selectedYear,
                       decoration: InputDecoration(
                         labelText: text('Yıl', 'Year', 'Год'),
                       ),
@@ -489,7 +487,7 @@ class _MonthComparisonScreenState extends State<MonthComparisonScreen> {
                         width: 58,
                         height: 58,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(22),
                         ),
                         child: const Icon(Icons.compare_arrows_rounded,
@@ -789,7 +787,7 @@ class _ScoreCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PremiumCard(
-      borderColor: _scoreColor.withOpacity(muted ? 0.12 : 0.30),
+      borderColor: _scoreColor.withValues(alpha: muted ? 0.12 : 0.30),
       child: SizedBox(
         height: 118,
         child: Column(

@@ -10,6 +10,7 @@ import '../models/income_item.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
+import '../services/exchange_rate_service.dart';
 
 enum PlanoraAlertType {
   late,
@@ -77,6 +78,19 @@ class PlanoraController extends ChangeNotifier {
   double currentSaving = 5000;
   int salaryDay = 1;
   String currencySymbol = '₺';
+
+  /// İkinci gösterim para birimi.
+  String secondaryCurrencySymbol = '₫';
+
+  /// 1 ana para biriminin ikinci para birimindeki karşılığı.
+  double secondaryCurrencyRate = 0;
+
+  /// Kurun en son başarıyla yenilendiği zaman.
+  DateTime? secondaryCurrencyUpdatedAt;
+
+  bool isSecondaryCurrencyRateLoading = false;
+  String? secondaryCurrencyRateError;
+
   bool hideAmounts = false;
   bool preferDarkMode = false;
   String appLanguageCode = 'tr';
@@ -109,6 +123,8 @@ class PlanoraController extends ChangeNotifier {
     await _loadExpenses();
     await _loadExtraIncomes();
     await _loadPaymentStatuses();
+
+    await refreshSecondaryCurrencyRate(notify: false);
 
     _isLoaded = true;
     notifyListeners();
@@ -143,20 +159,6 @@ class PlanoraController extends ChangeNotifier {
     return paymentMonthKey == monthKey();
   }
 
-  DateTime _safeMonthFromSettings({
-    required int? year,
-    required int? month,
-  }) {
-    final now = DateTime.now();
-
-    final safeYear =
-        year == null || year < 2000 || year > 2100 ? now.year : year;
-    final safeMonth =
-        month == null || month < 1 || month > 12 ? now.month : month;
-
-    return PlanoraDateUtils.monthOnly(DateTime(safeYear, safeMonth, 1));
-  }
-
   Future<void> _loadSettings() async {
     final rawSettings = await _getStringWithRetry(_settingsStorageKey);
     if (rawSettings == null || rawSettings.isEmpty) {
@@ -175,6 +177,18 @@ class PlanoraController extends ChangeNotifier {
       salaryDay =
           ((json['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
       currencySymbol = json['currencySymbol'] as String? ?? currencySymbol;
+      secondaryCurrencySymbol =
+          json['secondaryCurrencySymbol'] as String? ?? secondaryCurrencySymbol;
+      secondaryCurrencyRate =
+          (json['secondaryCurrencyRate'] as num?)?.toDouble() ??
+              secondaryCurrencyRate;
+
+      final secondaryUpdatedRaw = json['secondaryCurrencyUpdatedAt'] as String?;
+
+      if (secondaryUpdatedRaw != null && secondaryUpdatedRaw.isNotEmpty) {
+        secondaryCurrencyUpdatedAt = DateTime.tryParse(secondaryUpdatedRaw);
+      }
+
       hideAmounts = json['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = json['preferDarkMode'] as bool? ?? preferDarkMode;
       appLanguageCode = json['appLanguageCode'] as String? ?? appLanguageCode;
@@ -529,6 +543,10 @@ class PlanoraController extends ChangeNotifier {
       'currentSaving': currentSaving,
       'salaryDay': salaryDay,
       'currencySymbol': currencySymbol,
+      'secondaryCurrencySymbol': secondaryCurrencySymbol,
+      'secondaryCurrencyRate': secondaryCurrencyRate,
+      'secondaryCurrencyUpdatedAt':
+          secondaryCurrencyUpdatedAt?.toIso8601String(),
       'hideAmounts': hideAmounts,
       'preferDarkMode': preferDarkMode,
       'appLanguageCode': appLanguageCode,
@@ -827,12 +845,170 @@ class PlanoraController extends ChangeNotifier {
 
   Future<void> updateCurrencySymbol(String symbol) async {
     final cleanSymbol = symbol.trim().isEmpty ? '₺' : symbol.trim();
+    final oldSymbol = currencySymbol;
+
+    if (cleanSymbol == oldSymbol) {
+      MoneyFormatter.setCurrencySymbol(cleanSymbol);
+      await refreshSecondaryCurrencyRate();
+      return;
+    }
+
+    final conversionRate = await ExchangeRateService.getRate(
+      fromSymbol: oldSymbol,
+      toSymbol: cleanSymbol,
+    );
+
+    double convert(num value) => value.toDouble() * conversionRate;
+
+    monthlyIncome = convert(monthlyIncome);
+    savingTarget = convert(savingTarget);
+    currentSaving = convert(currentSaving);
+
+    for (int i = 0; i < _payments.length; i++) {
+      final payment = _payments[i];
+      _payments[i] = payment.copyWith(
+        amount: convert(payment.amount),
+      );
+    }
+
+    for (int i = 0; i < _expenses.length; i++) {
+      final expense = _expenses[i];
+      _expenses[i] = expense.copyWith(
+        amount: convert(expense.amount),
+      );
+    }
+
+    for (int i = 0; i < _extraIncomes.length; i++) {
+      final income = _extraIncomes[i];
+      _extraIncomes[i] = income.copyWith(
+        amount: convert(income.amount),
+      );
+    }
+
+    final convertedLimits = <String, double>{};
+
+    for (final entry in _categoryLimits.entries) {
+      convertedLimits[entry.key] = convert(entry.value);
+    }
+
+    _categoryLimits
+      ..clear()
+      ..addAll(convertedLimits);
 
     currencySymbol = cleanSymbol;
     MoneyFormatter.setCurrencySymbol(cleanSymbol);
 
+    secondaryCurrencyRate = 0;
+    secondaryCurrencyRateError = null;
+
+    await _saveSettings();
+    await _savePayments();
+    await _saveExpenses();
+    await _saveExtraIncomes();
+    await _saveCategoryLimits();
+
+    notifyListeners();
+
+    await refreshSecondaryCurrencyRate();
+  }
+
+  Future<void> updateSecondaryCurrencySymbol(String symbol) async {
+    final cleanSymbol = symbol.trim().isEmpty ? '₫' : symbol.trim();
+
+    secondaryCurrencySymbol = cleanSymbol;
+    secondaryCurrencyRate = 0;
+    secondaryCurrencyRateError = null;
+
     await _saveSettings();
     notifyListeners();
+
+    await refreshSecondaryCurrencyRate();
+  }
+
+  Future<void> refreshSecondaryCurrencyRate({
+    bool notify = true,
+  }) async {
+    if (isSecondaryCurrencyRateLoading) return;
+
+    if (currencySymbol == secondaryCurrencySymbol) {
+      secondaryCurrencyRate = 1;
+      secondaryCurrencyUpdatedAt = DateTime.now();
+      secondaryCurrencyRateError = null;
+
+      await _saveSettings();
+
+      if (notify) {
+        notifyListeners();
+      }
+      return;
+    }
+
+    isSecondaryCurrencyRateLoading = true;
+    secondaryCurrencyRateError = null;
+
+    if (notify) {
+      notifyListeners();
+    }
+
+    try {
+      final rate = await ExchangeRateService.getRate(
+        fromSymbol: currencySymbol,
+        toSymbol: secondaryCurrencySymbol,
+      );
+
+      secondaryCurrencyRate = rate;
+      secondaryCurrencyUpdatedAt = DateTime.now();
+      secondaryCurrencyRateError = null;
+
+      await _saveSettings();
+    } catch (error) {
+      secondaryCurrencyRateError = error.toString();
+    } finally {
+      isSecondaryCurrencyRateLoading = false;
+
+      if (notify) {
+        notifyListeners();
+      }
+    }
+  }
+
+  double convertToSecondaryCurrency(num value) {
+    if (secondaryCurrencyRate <= 0) {
+      return 0;
+    }
+
+    return value.toDouble() * secondaryCurrencyRate;
+  }
+
+  String formatSecondaryMoney(num value) {
+    final converted = convertToSecondaryCurrency(value);
+
+    if (secondaryCurrencyRate <= 0) {
+      return '—';
+    }
+
+    return MoneyFormatter.format(
+      converted,
+      symbol: secondaryCurrencySymbol,
+    );
+  }
+
+  String get secondaryExchangeRateText {
+    if (secondaryCurrencyRate <= 0) {
+      return '—';
+    }
+
+    final value = secondaryCurrencyRate;
+
+    if (value >= 1000) {
+      return value.round().toString();
+    }
+
+    if (value >= 10) {
+      return value.toStringAsFixed(2);
+    }
+
+    return value.toStringAsFixed(4);
   }
 
   Future<void> completeOnboarding({
@@ -897,6 +1073,10 @@ class PlanoraController extends ChangeNotifier {
     savingTarget = 0;
     currentSaving = 0;
     salaryDay = 1;
+    secondaryCurrencySymbol = '₫';
+    secondaryCurrencyRate = 0;
+    secondaryCurrencyUpdatedAt = null;
+    secondaryCurrencyRateError = null;
     hasCompletedOnboarding = false;
     selectedMonth = PlanoraDateUtils.monthOnly(DateTime.now());
 
@@ -1303,8 +1483,9 @@ class PlanoraController extends ChangeNotifier {
           .toList();
 
       if (waiting.isNotEmpty) return waiting.first;
-      if (paymentsForSelectedMonth.isNotEmpty)
+      if (paymentsForSelectedMonth.isNotEmpty) {
         return paymentsForSelectedMonth.first;
+      }
       return null;
     }
 
@@ -1801,6 +1982,10 @@ class PlanoraController extends ChangeNotifier {
         'currentSaving': currentSaving,
         'salaryDay': salaryDay,
         'currencySymbol': currencySymbol,
+        'secondaryCurrencySymbol': secondaryCurrencySymbol,
+        'secondaryCurrencyRate': secondaryCurrencyRate,
+        'secondaryCurrencyUpdatedAt':
+            secondaryCurrencyUpdatedAt?.toIso8601String(),
         'hideAmounts': hideAmounts,
         'preferDarkMode': preferDarkMode,
         'appLanguageCode': appLanguageCode,
@@ -1846,6 +2031,20 @@ class PlanoraController extends ChangeNotifier {
       salaryDay =
           ((settings['salaryDay'] as num?)?.toInt() ?? salaryDay).clamp(1, 31);
       currencySymbol = settings['currencySymbol'] as String? ?? currencySymbol;
+      secondaryCurrencySymbol =
+          settings['secondaryCurrencySymbol'] as String? ??
+              secondaryCurrencySymbol;
+      secondaryCurrencyRate =
+          (settings['secondaryCurrencyRate'] as num?)?.toDouble() ??
+              secondaryCurrencyRate;
+
+      final secondaryUpdatedRaw =
+          settings['secondaryCurrencyUpdatedAt'] as String?;
+
+      if (secondaryUpdatedRaw != null && secondaryUpdatedRaw.isNotEmpty) {
+        secondaryCurrencyUpdatedAt = DateTime.tryParse(secondaryUpdatedRaw);
+      }
+
       hideAmounts = settings['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = settings['preferDarkMode'] as bool? ?? preferDarkMode;
       appLanguageCode =
@@ -2131,8 +2330,9 @@ class PlanoraController extends ChangeNotifier {
         if (key == 'late') return '$name is late';
         if (key == 'today') return '$name is due today';
         if (key == 'upcoming') return '$name is coming up';
-        if (key == 'budgetNegative')
+        if (key == 'budgetNegative') {
           return 'Planned payments exceed your income';
+        }
         if (key == 'lowFreeBalance') return 'Your free balance is low';
         if (key == 'allClear') return 'Everything is under control';
         return name;
@@ -2149,8 +2349,9 @@ class PlanoraController extends ChangeNotifier {
         if (key == 'late') return '$name gecikti';
         if (key == 'today') return '$name bugün ödenmeli';
         if (key == 'upcoming') return '$name yaklaşıyor';
-        if (key == 'budgetNegative')
+        if (key == 'budgetNegative') {
           return 'Planlanan ödemeler gelirini aşıyor';
+        }
         if (key == 'lowFreeBalance') return 'Serbest bakiyen düşük';
         if (key == 'allClear') return 'Her şey kontrol altında';
         return name;
@@ -2160,47 +2361,65 @@ class PlanoraController extends ChangeNotifier {
   String _alertMessageText(String code, String key, {int? day}) {
     switch (code) {
       case 'en':
-        if (key == 'late')
+        if (key == 'late') {
           return 'The payment due on day $day is still waiting.';
-        if (key == 'today')
+        }
+        if (key == 'today') {
           return 'Today is the due date. Mark it if you have paid.';
-        if (key == 'upcoming')
+        }
+        if (key == 'upcoming') {
           return 'It appears in your payment plan for day $day.';
-        if (key == 'budgetNegative')
+        }
+        if (key == 'budgetNegative') {
           return 'This month’s payment plan is higher than your monthly income. Review your income or payment plan.';
-        if (key == 'lowFreeBalance')
+        }
+        if (key == 'lowFreeBalance') {
           return 'It may be better to spend more carefully until the end of the month.';
-        if (key == 'allClear')
+        }
+        if (key == 'allClear') {
           return 'There are no late or upcoming critical payments for this month.';
+        }
         return '';
       case 'ru':
-        if (key == 'late')
+        if (key == 'late') {
           return 'Платёж на $day-й день всё ещё ожидает оплаты.';
-        if (key == 'today')
+        }
+        if (key == 'today') {
           return 'Сегодня срок оплаты. Отметьте платёж, если он уже оплачен.';
-        if (key == 'upcoming')
+        }
+        if (key == 'upcoming') {
           return 'Он указан в плане платежей на $day-й день.';
-        if (key == 'budgetNegative')
+        }
+        if (key == 'budgetNegative') {
           return 'План платежей на этот месяц выше месячного дохода. Проверьте доход или план платежей.';
-        if (key == 'lowFreeBalance')
+        }
+        if (key == 'lowFreeBalance') {
           return 'До конца месяца лучше тратить более осторожно.';
-        if (key == 'allClear')
+        }
+        if (key == 'allClear') {
           return 'В этом месяце нет просроченных или приближающихся критических платежей.';
+        }
         return '';
       case 'tr':
       default:
-        if (key == 'late')
+        if (key == 'late') {
           return '$day. gün ödenmesi gereken ödeme hâlâ bekliyor.';
-        if (key == 'today')
+        }
+        if (key == 'today') {
           return 'Bugün son ödeme günü. Ödediysen durumunu işaretleyebilirsin.';
-        if (key == 'upcoming')
+        }
+        if (key == 'upcoming') {
           return '$day. gün için ödeme planında görünüyor.';
-        if (key == 'budgetNegative')
+        }
+        if (key == 'budgetNegative') {
           return 'Bu ayki ödeme planı aylık gelirinden yüksek. Gelir veya ödeme planını kontrol et.';
-        if (key == 'lowFreeBalance')
+        }
+        if (key == 'lowFreeBalance') {
           return 'Ay sonuna kadar daha kontrollü harcama yapmak iyi olabilir.';
-        if (key == 'allClear')
+        }
+        if (key == 'allClear') {
           return 'Bu ay için geciken veya yaklaşan kritik ödeme görünmüyor.';
+        }
         return '';
     }
   }
@@ -2227,17 +2446,20 @@ class PlanoraController extends ChangeNotifier {
       String code, String key, int primaryValue, int limit) {
     switch (code) {
       case 'en':
-        if (key == 'exceeded')
+        if (key == 'exceeded') {
           return 'Payment and expense total in this category reached ${formatMoney(primaryValue)}. Limit is ${formatMoney(limit)}.';
+        }
         return 'This category reached about $primaryValue% of its limit.';
       case 'ru':
-        if (key == 'exceeded')
+        if (key == 'exceeded') {
           return 'Сумма платежей и расходов в этой категории достигла ${formatMoney(primaryValue)}. Лимит: ${formatMoney(limit)}.';
+        }
         return 'Эта категория достигла примерно $primaryValue% лимита.';
       case 'tr':
       default:
-        if (key == 'exceeded')
+        if (key == 'exceeded') {
           return 'Bu kategoride ödeme ve harcama toplamı ${formatMoney(primaryValue)} oldu. Limit ${formatMoney(limit)}.';
+        }
         return 'Bu kategoride limitin yaklaşık %$primaryValue seviyesine ulaşıldı.';
     }
   }
@@ -2246,55 +2468,75 @@ class PlanoraController extends ChangeNotifier {
       {int? count, String? category}) {
     switch (code) {
       case 'en':
-        if (key == 'latePayments')
+        if (key == 'latePayments') {
           return '$count late payments. Close the late payments first.';
-        if (key == 'noFreeBalance')
+        }
+        if (key == 'noFreeBalance') {
           return 'Free balance has reached zero. Review the plan before adding new expenses this month.';
+        }
         if (key == 'categoryExceeded') return '$category exceeded its limit.';
         if (key == 'categoryNear') return '$category is approaching its limit.';
-        if (key == 'expensesHigh')
+        if (key == 'expensesHigh') {
           return 'Variable expenses increased this month. Review groceries, food, and transport spending.';
-        if (key == 'dailySafeLow')
+        }
+        if (key == 'dailySafeLow') {
           return 'The daily safe limit is low. Reduce spending until the next salary.';
-        if (key == 'goodPlan')
+        }
+        if (key == 'goodPlan') {
           return 'Your budget looks good this month. Keep the plan.';
-        if (key == 'checkLimits')
+        }
+        if (key == 'checkLimits') {
           return 'You can maintain balance by checking category limits regularly.';
+        }
         return '';
       case 'ru':
-        if (key == 'latePayments')
+        if (key == 'latePayments') {
           return '$count просроченных платежей. Сначала закройте просрочки.';
-        if (key == 'noFreeBalance')
+        }
+        if (key == 'noFreeBalance') {
           return 'Свободный баланс достиг нуля. Проверьте план перед добавлением новых расходов.';
+        }
         if (key == 'categoryExceeded') return '$category превысила лимит.';
         if (key == 'categoryNear') return '$category приближается к лимиту.';
-        if (key == 'expensesHigh')
+        if (key == 'expensesHigh') {
           return 'Переменные расходы выросли в этом месяце. Проверьте траты на продукты, еду и транспорт.';
-        if (key == 'dailySafeLow')
+        }
+        if (key == 'dailySafeLow') {
           return 'Дневной безопасный лимит низкий. Сократите расходы до следующей зарплаты.';
-        if (key == 'goodPlan')
+        }
+        if (key == 'goodPlan') {
           return 'В этом месяце бюджет выглядит хорошо. Продолжайте придерживаться плана.';
-        if (key == 'checkLimits')
+        }
+        if (key == 'checkLimits') {
           return 'Регулярная проверка лимитов категорий поможет сохранить баланс.';
+        }
         return '';
       case 'tr':
       default:
-        if (key == 'latePayments')
+        if (key == 'latePayments') {
           return '$count geciken ödeme var. Önce geciken ödemeleri kapat.';
-        if (key == 'noFreeBalance')
+        }
+        if (key == 'noFreeBalance') {
           return 'Serbest bakiye sıfıra indi. Bu ay yeni harcama eklemeden önce planı kontrol et.';
-        if (key == 'categoryExceeded')
+        }
+        if (key == 'categoryExceeded') {
           return '$category kategorisi limitini aştı.';
-        if (key == 'categoryNear')
+        }
+        if (key == 'categoryNear') {
           return '$category kategorisi limite yaklaştı.';
-        if (key == 'expensesHigh')
+        }
+        if (key == 'expensesHigh') {
           return 'Değişken harcamalar bu ay yükseldi. Market, yemek ve ulaşım giderlerini kontrol et.';
-        if (key == 'dailySafeLow')
+        }
+        if (key == 'dailySafeLow') {
           return 'Günlük güvenli limit düşük. Bir sonraki maaşa kadar harcamaları azalt.';
-        if (key == 'goodPlan')
+        }
+        if (key == 'goodPlan') {
           return 'Bu ay bütçen iyi görünüyor. Planı korumaya devam et.';
-        if (key == 'checkLimits')
+        }
+        if (key == 'checkLimits') {
           return 'Kategori limitlerini düzenli kontrol ederek dengeyi sürdürebilirsin.';
+        }
         return '';
     }
   }

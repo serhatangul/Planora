@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/income_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 
@@ -154,7 +153,7 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.add_chart_rounded,
@@ -167,7 +166,7 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                           children: [
                             Text(
                               _extraIncomeText(lang, 'thisMonthExtraIncome'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFFC8D3FF),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -281,7 +280,7 @@ class _ExtraIncomeScreenState extends State<ExtraIncomeScreen> {
                               const SizedBox(width: 8),
                               Text(
                                 _extraIncomeText(lang, 'addExtraIncome'),
-                                style: TextStyle(
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w900,
@@ -569,18 +568,6 @@ String _recordCountText(String code, int count) {
   }
 }
 
-String _incomeDayText(String code, int day) {
-  switch (code) {
-    case 'en':
-      return 'Day $day';
-    case 'ru':
-      return '$day-й день';
-    case 'tr':
-    default:
-      return '$day. gün';
-  }
-}
-
 class _IncomeCard extends StatelessWidget {
   const _IncomeCard({
     required this.income,
@@ -605,7 +592,7 @@ class _IncomeCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: income.color.withOpacity(0.13),
+                color: income.color.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(

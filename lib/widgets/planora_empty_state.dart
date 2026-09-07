@@ -41,7 +41,7 @@ class PlanoraEmptyState extends StatelessWidget {
             width: 66,
             height: 66,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(24),
             ),
             child: Icon(icon, color: color, size: 32),
@@ -77,7 +77,7 @@ class PlanoraEmptyState extends StatelessWidget {
               _EmptyStateActionButton(
                 label: secondaryActionLabel!,
                 onTap: onSecondaryActionTap!,
-                color: color.withOpacity(0.10),
+                color: color.withValues(alpha: 0.10),
                 textColor: color,
               ),
           ],

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/payment_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import '../widgets/planora_empty_state.dart';
@@ -202,7 +201,7 @@ class DashboardScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(32),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.darkNavy.withOpacity(0.24),
+                        color: AppColors.darkNavy.withValues(alpha: 0.24),
                         blurRadius: 34,
                         offset: const Offset(0, 18),
                       ),
@@ -215,14 +214,14 @@ class DashboardScreen extends StatelessWidget {
                         children: [
                           Text(
                             _dashboardText(lang, 'monthlyIncome'),
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: Color(0xFFC8D3FF),
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          Spacer(),
-                          Icon(Icons.edit_rounded,
+                          const Spacer(),
+                          const Icon(Icons.edit_rounded,
                               color: Colors.white70, size: 18),
                         ],
                       ),
@@ -236,6 +235,18 @@ class DashboardScreen extends StatelessWidget {
                           letterSpacing: -1.2,
                         ),
                       ),
+                      if (controller.secondaryCurrencyRate > 0) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          '≈ ${controller.formatSecondaryMoney(controller.totalMonthlyIncome)}',
+                          style: const TextStyle(
+                            color: Color(0xFF9AA9D6),
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 18),
                       ProgressLine(value: plannedRatio),
                       const SizedBox(height: 14),
@@ -279,14 +290,16 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               PremiumCard(
-                borderColor: controller.budgetHealthColor.withOpacity(0.30),
+                borderColor:
+                    controller.budgetHealthColor.withValues(alpha: 0.30),
                 child: Row(
                   children: [
                     Container(
                       width: 58,
                       height: 58,
                       decoration: BoxDecoration(
-                        color: controller.budgetHealthColor.withOpacity(0.12),
+                        color: controller.budgetHealthColor
+                            .withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(22),
                       ),
                       child: Center(
@@ -946,18 +959,6 @@ String _remainingText(String code, String amount) {
   }
 }
 
-String _budgetHealthTitle(String code, String label) {
-  switch (code) {
-    case 'en':
-      return 'Budget health: $label';
-    case 'ru':
-      return 'Состояние бюджета: $label';
-    case 'tr':
-    default:
-      return 'Bütçe sağlığı: $label';
-  }
-}
-
 String _paymentDueText(String code, int day, String amount) {
   switch (code) {
     case 'en':
@@ -1067,7 +1068,7 @@ class _StartGuideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       color: AppThemeColors.infoSurface(context),
-      borderColor: AppColors.brandBlue.withOpacity(0.14),
+      borderColor: AppColors.brandBlue.withValues(alpha: 0.14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1164,8 +1165,8 @@ class _StartGuideStep extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           border: Border.all(
             color: isDone
-                ? AppColors.brandGreen.withOpacity(0.28)
-                : AppColors.textSecondary.withOpacity(0.18),
+                ? AppColors.brandGreen.withValues(alpha: 0.28)
+                : AppColors.textSecondary.withValues(alpha: 0.18),
           ),
         ),
         child: Row(
@@ -1175,8 +1176,8 @@ class _StartGuideStep extends StatelessWidget {
               height: 30,
               decoration: BoxDecoration(
                 color: isDone
-                    ? AppColors.brandGreen.withOpacity(0.12)
-                    : AppColors.brandBlue.withOpacity(0.10),
+                    ? AppColors.brandGreen.withValues(alpha: 0.12)
+                    : AppColors.brandBlue.withValues(alpha: 0.10),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(
@@ -1287,7 +1288,7 @@ class _TrackingTile extends StatelessWidget {
       color: AppThemeColors.isDark(context)
           ? AppThemeColors.card(context)
           : backgroundColor,
-      borderColor: color.withOpacity(0.22),
+      borderColor: color.withValues(alpha: 0.22),
       padding: const EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1298,7 +1299,7 @@ class _TrackingTile extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.13),
+                  color: color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(icon, color: color, size: 21),
@@ -1362,7 +1363,7 @@ class _SmartLimitDashboardCard extends StatelessWidget {
       color: alert.isExceeded
           ? AppThemeColors.dangerSurface(context)
           : AppThemeColors.warningSurface(context),
-      borderColor: alertColor.withOpacity(0.28),
+      borderColor: alertColor.withValues(alpha: 0.28),
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -1373,7 +1374,7 @@ class _SmartLimitDashboardCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: alertColor.withOpacity(0.12),
+                  color: alertColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -1417,7 +1418,7 @@ class _SmartLimitDashboardCard extends StatelessWidget {
             width: double.infinity,
             height: 44,
             child: Material(
-              color: alertColor.withOpacity(0.10),
+              color: alertColor.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(16),
               child: InkWell(
                 onTap: onViewAnalysis,
@@ -1469,7 +1470,7 @@ class _AlertSummaryCard extends StatelessWidget {
     return PremiumCard(
       onTap: onTap,
       color: AppThemeColors.warningSurface(context),
-      borderColor: AppColors.warning.withOpacity(0.35),
+      borderColor: AppColors.warning.withValues(alpha: 0.35),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
@@ -1518,9 +1519,9 @@ class _SmallSummaryItem extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.18)),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1580,7 +1581,7 @@ class _PaymentListItem extends StatelessWidget {
 
     return PremiumCard(
       borderColor:
-          isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+          isLate ? AppColors.danger.withValues(alpha: 0.45) : AppColors.stroke,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -1593,7 +1594,7 @@ class _PaymentListItem extends StatelessWidget {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: payment.color.withOpacity(0.13),
+                    color: payment.color.withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: Icon(

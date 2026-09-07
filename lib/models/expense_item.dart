@@ -51,7 +51,7 @@ class ExpenseItem {
       'amount': amount,
       'day': day,
       'monthKey': monthKey,
-      'color': color.value,
+      'color': color.toARGB32(),
     };
   }
 

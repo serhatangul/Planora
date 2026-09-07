@@ -65,7 +65,7 @@ class PaymentItem {
       'amount': amount,
       'dueDay': dueDay,
       'status': status.name,
-      'color': color.value,
+      'color': color.toARGB32(),
       'isMonthly': isMonthly,
       'monthKey': monthKey,
     };

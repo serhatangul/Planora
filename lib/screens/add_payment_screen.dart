@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
@@ -206,7 +205,7 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
-                          value: selectedCategory,
+                          initialValue: selectedCategory,
                           items: categories
                               .map((category) => DropdownMenuItem(
                                     value: category,
@@ -248,7 +247,7 @@ class _AddPaymentScreenState extends State<AddPaymentScreen> {
                           width: 46,
                           height: 46,
                           decoration: BoxDecoration(
-                            color: AppColors.brandGreen.withOpacity(0.12),
+                            color: AppColors.brandGreen.withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: const Icon(Icons.add_card_rounded,
@@ -524,8 +523,6 @@ class _InputField extends StatelessWidget {
     required this.icon,
     this.keyboardType,
     this.prefix,
-    this.inputFormatters,
-    this.textCapitalization = TextCapitalization.none,
   });
 
   final String label;
@@ -533,8 +530,6 @@ class _InputField extends StatelessWidget {
   final IconData icon;
   final TextInputType? keyboardType;
   final String? prefix;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) {
@@ -542,9 +537,7 @@ class _InputField extends StatelessWidget {
       type: MaterialType.transparency,
       child: TextField(
         controller: controller,
-        inputFormatters: inputFormatters,
         keyboardType: keyboardType,
-        textCapitalization: textCapitalization,
         decoration: _inputDecoration(
           context: context,
           label: label,
@@ -587,44 +580,4 @@ InputDecoration _inputDecoration({
       borderSide: const BorderSide(color: AppColors.brandGreen, width: 1.4),
     ),
   );
-}
-
-class _ToggleOption extends StatelessWidget {
-  const _ToggleOption({
-    required this.label,
-    required this.active,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return PremiumCard(
-      onTap: onTap,
-      color: active
-          ? (AppThemeColors.isDark(context)
-              ? AppColors.brandGreen.withValues(alpha: 0.14)
-              : const Color(0xFFE8FFF6))
-          : AppThemeColors.card(context),
-      borderColor:
-          active ? AppColors.brandGreen : AppThemeColors.stroke(context),
-      child: Center(
-        child: Text(
-          label,
-          style: TextStyle(
-            color: active
-                ? (AppThemeColors.isDark(context)
-                    ? AppColors.brandGreen
-                    : const Color(0xFF0A7A59))
-                : AppThemeColors.textSecondary(context),
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-      ),
-    );
-  }
 }

@@ -269,19 +269,19 @@ class _SetupPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languages = [
-      _SetupOption(
+      const _SetupOption(
         value: 'tr',
         title: 'Türkçe',
         subtitle: 'Türkiye',
         icon: Icons.language_rounded,
       ),
-      _SetupOption(
+      const _SetupOption(
         value: 'en',
         title: 'English',
         subtitle: 'United States / Global',
         icon: Icons.language_rounded,
       ),
-      _SetupOption(
+      const _SetupOption(
         value: 'ru',
         title: 'Русский',
         subtitle: 'Россия / СНГ',
@@ -290,32 +290,32 @@ class _SetupPage extends StatelessWidget {
     ];
 
     final currencies = [
-      _SetupOption(
+      const _SetupOption(
           value: '₺',
           title: '₺ TRY',
           subtitle: 'Türk Lirası',
           icon: Icons.payments_rounded),
-      _SetupOption(
+      const _SetupOption(
           value: '₽',
           title: '₽ RUB',
           subtitle: 'Russian Ruble',
           icon: Icons.payments_rounded),
-      _SetupOption(
+      const _SetupOption(
           value: r'$',
           title: r'$ USD',
           subtitle: 'US Dollar',
           icon: Icons.payments_rounded),
-      _SetupOption(
+      const _SetupOption(
           value: '€',
           title: '€ EUR',
           subtitle: 'Euro',
           icon: Icons.payments_rounded),
-      _SetupOption(
+      const _SetupOption(
           value: '£',
           title: '£ GBP',
           subtitle: 'British Pound',
           icon: Icons.payments_rounded),
-      _SetupOption(
+      const _SetupOption(
           value: '₫',
           title: '₫ VND',
           subtitle: 'Vietnamese Dong',
@@ -402,7 +402,7 @@ class _SetupChoiceCard extends StatelessWidget {
       onTap: onTap,
       padding: const EdgeInsets.all(15),
       borderColor: isSelected
-          ? AppColors.brandGreen.withOpacity(0.45)
+          ? AppColors.brandGreen.withValues(alpha: 0.45)
           : AppColors.stroke,
       color: isSelected ? const Color(0xFFF2FFF8) : Colors.white,
       child: Row(
@@ -412,7 +412,7 @@ class _SetupChoiceCard extends StatelessWidget {
             height: 42,
             decoration: BoxDecoration(
               color: isSelected
-                  ? AppColors.brandGreen.withOpacity(0.14)
+                  ? AppColors.brandGreen.withValues(alpha: 0.14)
                   : AppColors.softBg,
               borderRadius: BorderRadius.circular(15),
             ),
@@ -460,7 +460,7 @@ class _IntroPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(34),
             boxShadow: [
               BoxShadow(
-                color: AppColors.darkNavy.withOpacity(0.20),
+                color: AppColors.darkNavy.withValues(alpha: 0.20),
                 blurRadius: 30,
                 offset: const Offset(0, 18),
               ),
@@ -475,7 +475,7 @@ class _IntroPage extends StatelessWidget {
                   width: 132,
                   height: 132,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.08),
+                    color: Colors.white.withValues(alpha: 0.08),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -835,7 +835,7 @@ class _ReadyPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: AppColors.darkNavy.withOpacity(0.22),
+                color: AppColors.darkNavy.withValues(alpha: 0.22),
                 blurRadius: 34,
                 offset: const Offset(0, 18),
               ),
@@ -848,7 +848,7 @@ class _ReadyPage extends StatelessWidget {
                 width: 62,
                 height: 62,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.14),
+                  color: Colors.white.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(24),
                 ),
                 child: const Icon(
@@ -965,7 +965,7 @@ class _ReadySummaryRow extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: AppColors.brandBlue.withOpacity(0.10),
+            color: AppColors.brandBlue.withValues(alpha: 0.10),
             borderRadius: BorderRadius.circular(15),
           ),
           child: Icon(icon, color: AppColors.brandBlue),

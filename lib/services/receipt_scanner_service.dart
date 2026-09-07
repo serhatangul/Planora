@@ -210,9 +210,14 @@ class ReceiptParser {
     final lower = text.toLowerCase();
     if (lower.contains('₫') ||
         lower.contains(' vnd') ||
-        RegExp(r'\d\s*đ\b').hasMatch(lower)) return '₫';
-    if (lower.contains('₺') || lower.contains(' try') || lower.contains(' tl'))
+        RegExp(r'\d\s*đ\b').hasMatch(lower)) {
+      return '₫';
+    }
+    if (lower.contains('₺') ||
+        lower.contains(' try') ||
+        lower.contains(' tl')) {
       return '₺';
+    }
     if (lower.contains('₽') || lower.contains(' rub')) return '₽';
     if (lower.contains('€') || lower.contains(' eur')) return '€';
     if (lower.contains('£') || lower.contains(' gbp')) return '£';

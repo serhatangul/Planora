@@ -107,6 +107,23 @@ class AnalysisScreen extends StatelessWidget {
                                         ),
                                   ),
                                 ),
+                                if (controller.secondaryCurrencyRate > 0) ...[
+                                  const SizedBox(height: 3),
+                                  FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      '≈ ${controller.formatSecondaryMoney(controller.plannedPayments)}',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            color: AppThemeColors.textSecondary(
+                                                context),
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                    ),
+                                  ),
+                                ],
                                 const SizedBox(height: 4),
                                 Text(
                                   _analysisText(lang, 'planned'),
@@ -127,15 +144,38 @@ class AnalysisScreen extends StatelessWidget {
                       const SizedBox(height: 18),
                       Align(
                         alignment: Alignment.centerLeft,
-                        child: Text(
-                          _monthEndRemainingText(lang,
-                              MoneyFormatter.format(controller.freeBalance)),
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _monthEndRemainingText(
+                                lang,
+                                MoneyFormatter.format(controller.freeBalance),
+                              ),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(
                                     color: AppColors.brandGreen,
                                     fontWeight: FontWeight.w900,
                                     height: 1.35,
                                   ),
+                            ),
+                            if (controller.secondaryCurrencyRate > 0) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                '≈ ${controller.formatSecondaryMoney(controller.freeBalance)}',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyMedium
+                                    ?.copyWith(
+                                      color:
+                                          AppThemeColors.textSecondary(context),
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
@@ -252,7 +292,7 @@ class _SmartLimitAnalysisCard extends StatelessWidget {
       color: alert.isExceeded
           ? AppThemeColors.dangerSurface(context)
           : AppThemeColors.warningSurface(context),
-      borderColor: alertColor.withOpacity(0.28),
+      borderColor: alertColor.withValues(alpha: 0.28),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +360,7 @@ class _SmartLimitEmptyCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       color: AppThemeColors.successSurface(context),
-      borderColor: AppColors.brandGreen.withOpacity(0.20),
+      borderColor: AppColors.brandGreen.withValues(alpha: 0.20),
       padding: const EdgeInsets.all(16),
       child: Row(
         children: [
@@ -328,7 +368,7 @@ class _SmartLimitEmptyCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppColors.brandGreen.withOpacity(0.12),
+              color: AppColors.brandGreen.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.check_circle_rounded,

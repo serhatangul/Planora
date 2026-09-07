@@ -5,7 +5,6 @@ import '../models/income_item.dart';
 import '../models/payment_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import '../widgets/planora_empty_state.dart';
@@ -775,7 +774,7 @@ class _TimelineEntryRow extends StatelessWidget {
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: entry.color.withOpacity(0.13),
+                  color: entry.color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Icon(entry.icon, color: entry.color, size: 19),
@@ -885,9 +884,9 @@ class _SummaryMini extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.10)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

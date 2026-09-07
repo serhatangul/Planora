@@ -54,7 +54,7 @@ class PrivacySettingsScreen extends StatelessWidget {
                         width: 58,
                         height: 58,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(22),
                         ),
                         child: Icon(
@@ -116,7 +116,7 @@ class PrivacySettingsScreen extends StatelessWidget {
                       ),
                       Switch.adaptive(
                         value: controller.hideAmounts,
-                        activeColor: AppColors.brandGreen,
+                        activeThumbColor: AppColors.brandGreen,
                         onChanged: controller.updateHideAmounts,
                       ),
                     ],
@@ -143,7 +143,7 @@ class PrivacySettingsScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 PremiumCard(
                   color: AppThemeColors.card(context),
-                  borderColor: AppColors.brandGreen.withOpacity(0.22),
+                  borderColor: AppColors.brandGreen.withValues(alpha: 0.22),
                   child: Row(
                     children: [
                       const Icon(Icons.remove_red_eye_rounded,

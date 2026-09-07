@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
@@ -197,7 +196,7 @@ class _EditPaymentScreenState extends State<EditPaymentScreen> {
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<String>(
-                        value: selectedCategory,
+                        initialValue: selectedCategory,
                         items: categories
                             .map((category) => DropdownMenuItem(
                                   value: category,
@@ -383,8 +382,6 @@ class _InputField extends StatelessWidget {
     required this.icon,
     this.keyboardType,
     this.prefix,
-    this.inputFormatters,
-    this.textCapitalization = TextCapitalization.none,
   });
 
   final String label;
@@ -392,16 +389,12 @@ class _InputField extends StatelessWidget {
   final IconData icon;
   final TextInputType? keyboardType;
   final String? prefix;
-  final List<TextInputFormatter>? inputFormatters;
-  final TextCapitalization textCapitalization;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
-      inputFormatters: inputFormatters,
       keyboardType: keyboardType,
-      textCapitalization: textCapitalization,
       decoration: _inputDecoration(
         context: context,
         label: label,

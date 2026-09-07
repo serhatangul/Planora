@@ -108,7 +108,7 @@ class _PlanoraBottomNav extends StatelessWidget {
           border: Border.all(color: AppThemeColors.stroke(context)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.darkNavy.withOpacity(0.10),
+              color: AppColors.darkNavy.withValues(alpha: 0.10),
               blurRadius: 28,
               offset: const Offset(0, 14),
             ),

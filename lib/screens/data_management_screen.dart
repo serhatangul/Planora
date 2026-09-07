@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 
@@ -97,7 +96,7 @@ class DataManagementScreen extends StatelessWidget {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.cleaning_services_rounded,
@@ -306,7 +305,7 @@ class DataManagementScreen extends StatelessWidget {
                 const SizedBox(height: 16),
                 PremiumCard(
                   color: const Color(0xFFFFFBF4),
-                  borderColor: AppColors.warning.withOpacity(0.24),
+                  borderColor: AppColors.warning.withValues(alpha: 0.24),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -723,8 +722,9 @@ class _ActionCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: PremiumCard(
         padding: const EdgeInsets.all(16),
-        borderColor:
-            danger ? AppColors.danger.withOpacity(0.35) : AppColors.stroke,
+        borderColor: danger
+            ? AppColors.danger.withValues(alpha: 0.35)
+            : AppColors.stroke,
         child: InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(18),
@@ -734,7 +734,7 @@ class _ActionCard extends StatelessWidget {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.13),
+                  color: color.withValues(alpha: 0.13),
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(icon, color: color),

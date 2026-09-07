@@ -365,7 +365,7 @@ class CategorySettingsScreen extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.category_rounded,
@@ -537,7 +537,7 @@ class _CategoryCardState extends State<_CategoryCard> {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: widget.color.withOpacity(0.14),
+                  color: widget.color.withValues(alpha: 0.14),
                   borderRadius: BorderRadius.circular(15),
                 ),
                 child: Icon(Icons.folder_rounded, color: widget.color),
@@ -613,10 +613,10 @@ class _CategoryCardState extends State<_CategoryCard> {
                             color: AppColors.brandGreen, width: 1.4),
                       ),
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
+                      color: AppThemeColors.textPrimary(context),
                     ),
                     onSubmitted: (_) => _saveLimit(),
                   ),

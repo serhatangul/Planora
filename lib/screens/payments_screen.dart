@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../models/payment_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import '../widgets/planora_empty_state.dart';
@@ -200,7 +199,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.receipt_long_rounded,
@@ -213,7 +212,7 @@ class _PaymentsScreenState extends State<PaymentsScreen> {
                           children: [
                             Text(
                               _paymentsTotalLabelText(lang),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFFC8D3FF),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -766,7 +765,7 @@ class _PaymentQuickActionCard extends StatelessWidget {
     return PremiumCard(
       onTap: onTap,
       padding: const EdgeInsets.all(14),
-      borderColor: color.withOpacity(0.22),
+      borderColor: color.withValues(alpha: 0.22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -902,7 +901,7 @@ class _PaymentMiniStat extends StatelessWidget {
     return PremiumCard(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 13),
       color: Colors.white,
-      borderColor: color.withOpacity(0.20),
+      borderColor: color.withValues(alpha: 0.20),
       child: Column(
         children: [
           Text(
@@ -998,7 +997,7 @@ class _PaymentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       borderColor:
-          isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+          isLate ? AppColors.danger.withValues(alpha: 0.45) : AppColors.stroke,
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
@@ -1011,7 +1010,7 @@ class _PaymentCard extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: payment.color.withOpacity(0.13),
+                    color: payment.color.withValues(alpha: 0.13),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(

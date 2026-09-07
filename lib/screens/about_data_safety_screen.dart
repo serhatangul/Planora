@@ -79,7 +79,7 @@ class AboutDataSafetyScreen extends StatelessWidget {
                             Text(
                               _aboutText(lang, 'appDescription'),
                               style: TextStyle(
-                                color: Colors.white.withOpacity(0.72),
+                                color: Colors.white.withValues(alpha: 0.72),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
                                 height: 1.30,
@@ -167,7 +167,7 @@ class AboutDataSafetyScreen extends StatelessWidget {
             const SizedBox(height: 12),
             PremiumCard(
               color: AppThemeColors.card(context),
-              borderColor: AppColors.warning.withOpacity(0.24),
+              borderColor: AppColors.warning.withValues(alpha: 0.24),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -428,7 +428,7 @@ class _InfoCard extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(icon, color: color),
@@ -469,7 +469,7 @@ class _SafetyCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: PremiumCard(
         color: AppThemeColors.card(context),
-        borderColor: AppColors.brandGreen.withOpacity(0.20),
+        borderColor: AppColors.brandGreen.withValues(alpha: 0.20),
         padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

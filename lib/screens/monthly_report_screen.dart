@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 
@@ -67,14 +66,16 @@ class MonthlyReportScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 18),
                 PremiumCard(
-                  borderColor: controller.budgetHealthColor.withOpacity(0.30),
+                  borderColor:
+                      controller.budgetHealthColor.withValues(alpha: 0.30),
                   child: Row(
                     children: [
                       Container(
                         width: 62,
                         height: 62,
                         decoration: BoxDecoration(
-                          color: controller.budgetHealthColor.withOpacity(0.12),
+                          color: controller.budgetHealthColor
+                              .withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(24),
                         ),
                         child: Center(
@@ -139,7 +140,7 @@ class MonthlyReportScreen extends StatelessWidget {
                 const SizedBox(height: 12),
                 PremiumCard(
                   color: const Color(0xFFF4FFFB),
-                  borderColor: AppColors.brandGreen.withOpacity(0.22),
+                  borderColor: AppColors.brandGreen.withValues(alpha: 0.22),
                   padding: const EdgeInsets.all(16),
                   child: Row(
                     children: [
@@ -254,7 +255,8 @@ class MonthlyReportScreen extends StatelessWidget {
                                   width: 36,
                                   height: 36,
                                   decoration: BoxDecoration(
-                                    color: category.color.withOpacity(0.13),
+                                    color:
+                                        category.color.withValues(alpha: 0.13),
                                     borderRadius: BorderRadius.circular(14),
                                   ),
                                   child: Icon(Icons.folder_rounded,

@@ -48,7 +48,7 @@ class HelpGuideScreen extends StatelessWidget {
                     width: 58,
                     height: 58,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.10),
+                      color: Colors.white.withValues(alpha: 0.10),
                       borderRadius: BorderRadius.circular(22),
                     ),
                     child: const Icon(Icons.auto_stories_rounded,
@@ -398,7 +398,7 @@ class _GuideStep extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Stack(
@@ -517,7 +517,7 @@ class _TipCard extends StatelessWidget {
         color: Theme.of(context).brightness == Brightness.dark
             ? const Color(0xFF0E2423)
             : const Color(0xFFF4FFFB),
-        borderColor: AppColors.brandGreen.withOpacity(0.20),
+        borderColor: AppColors.brandGreen.withValues(alpha: 0.20),
         padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,

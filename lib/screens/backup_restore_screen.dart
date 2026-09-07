@@ -267,7 +267,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.cloud_done_rounded,
@@ -277,7 +277,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                       Expanded(
                         child: Text(
                           _backupText(lang, 'info'),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 15,
                             fontWeight: FontWeight.w800,
@@ -365,7 +365,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                             const SizedBox(width: 8),
                             Text(
                               _backupText(lang, 'restoreBackup'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 15,
                                 fontWeight: FontWeight.w900,
@@ -380,7 +380,7 @@ class _BackupRestoreScreenState extends State<BackupRestoreScreen> {
                 const SizedBox(height: 16),
                 PremiumCard(
                   color: const Color(0xFFFFFBF4),
-                  borderColor: AppColors.warning.withOpacity(0.24),
+                  borderColor: AppColors.warning.withValues(alpha: 0.24),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

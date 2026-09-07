@@ -389,20 +389,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }
   }
 
-  String _expenseSubtitle(
-      String code, ExpenseItem expense, PlanoraController controller) {
-    final category = controller.categoryLabel(expense.category);
-    switch (code) {
-      case 'en':
-        return 'Expense · $category';
-      case 'ru':
-        return 'Расход · $category';
-      case 'tr':
-      default:
-        return 'Harcama · $category';
-    }
-  }
-
   List<_CalendarEvent> _eventsForMonth(
       PlanoraController controller, String lang) {
     final events = <_CalendarEvent>[];
@@ -749,8 +735,9 @@ class _CalendarEventCard extends StatelessWidget {
 
     return PremiumCard(
       padding: const EdgeInsets.all(16),
-      borderColor:
-          event.isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+      borderColor: event.isLate
+          ? AppColors.danger.withValues(alpha: 0.45)
+          : AppColors.stroke,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
@@ -760,7 +747,7 @@ class _CalendarEventCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: event.color.withOpacity(0.13),
+                color: event.color.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(event.icon, color: event.color),
@@ -838,8 +825,9 @@ class _CalendarPaymentItem extends StatelessWidget {
       onDismissed: (_) async => controller.removePayment(payment.id),
       child: PremiumCard(
         padding: const EdgeInsets.all(16),
-        borderColor:
-            isLate ? AppColors.danger.withOpacity(0.45) : AppColors.stroke,
+        borderColor: isLate
+            ? AppColors.danger.withValues(alpha: 0.45)
+            : AppColors.stroke,
         child: Column(
           children: [
             InkWell(
@@ -851,7 +839,7 @@ class _CalendarPaymentItem extends StatelessWidget {
                     width: 46,
                     height: 46,
                     decoration: BoxDecoration(
-                      color: payment.color.withOpacity(0.13),
+                      color: payment.color.withValues(alpha: 0.13),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Center(
@@ -1199,7 +1187,7 @@ class _CalendarSummaryPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.10),
+        color: color.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(

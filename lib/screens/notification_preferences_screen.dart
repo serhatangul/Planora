@@ -27,7 +27,7 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.of(context).pop(),
-                      icon: Icon(Icons.arrow_back_rounded),
+                      icon: const Icon(Icons.arrow_back_rounded),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
@@ -53,10 +53,10 @@ class NotificationPreferencesScreen extends StatelessWidget {
                         width: 58,
                         height: 58,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(22),
                         ),
-                        child: Icon(Icons.notifications_active_rounded,
+                        child: const Icon(Icons.notifications_active_rounded,
                             color: Colors.white),
                       ),
                       const SizedBox(width: 14),
@@ -64,7 +64,7 @@ class NotificationPreferencesScreen extends StatelessWidget {
                         child: Text(
                           _activeAlertTypeText(lang,
                               controller.activeNotificationPreferenceCount),
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             fontSize: 19,
                             fontWeight: FontWeight.w900,
@@ -198,7 +198,8 @@ class NotificationPreferencesScreen extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.info_rounded, color: AppColors.brandBlue),
+                      const Icon(Icons.info_rounded,
+                          color: AppColors.brandBlue),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -383,7 +384,7 @@ class _ExplanationCard extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: PremiumCard(
         color: Colors.white,
-        borderColor: color.withOpacity(0.18),
+        borderColor: color.withValues(alpha: 0.18),
         padding: const EdgeInsets.all(16),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +393,7 @@ class _ExplanationCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(17),
               ),
               child: Icon(icon, color: color),
@@ -447,7 +448,7 @@ class _PreferenceSwitch extends StatelessWidget {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.12),
+                color: color.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(18),
               ),
               child: Icon(icon, color: color),
@@ -465,7 +466,7 @@ class _PreferenceSwitch extends StatelessWidget {
             ),
             Switch.adaptive(
               value: value,
-              activeColor: AppColors.brandGreen,
+              activeThumbColor: AppColors.brandGreen,
               onChanged: onChanged,
             ),
           ],

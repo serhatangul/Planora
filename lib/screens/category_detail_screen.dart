@@ -4,7 +4,6 @@ import '../models/expense_item.dart';
 import '../models/payment_item.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import 'edit_payment_screen.dart';
@@ -387,10 +386,10 @@ class CategoryDetailScreen extends StatelessWidget {
                 const SizedBox(height: 18),
                 PremiumCard(
                   borderColor: isExceeded
-                      ? AppColors.danger.withOpacity(0.40)
+                      ? AppColors.danger.withValues(alpha: 0.40)
                       : isNearLimit
-                          ? AppColors.warning.withOpacity(0.35)
-                          : color.withOpacity(0.22),
+                          ? AppColors.warning.withValues(alpha: 0.35)
+                          : color.withValues(alpha: 0.22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -400,7 +399,7 @@ class CategoryDetailScreen extends StatelessWidget {
                             width: 58,
                             height: 58,
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.13),
+                              color: color.withValues(alpha: 0.13),
                               borderRadius: BorderRadius.circular(22),
                             ),
                             child: Icon(Icons.folder_rounded, color: color),
@@ -596,7 +595,7 @@ class _MovementCard extends StatelessWidget {
     return PremiumCard(
       padding: const EdgeInsets.all(16),
       borderColor: movement.isLate
-          ? AppColors.danger.withOpacity(0.45)
+          ? AppColors.danger.withValues(alpha: 0.45)
           : AppColors.stroke,
       child: InkWell(
         onTap: onTap,
@@ -607,7 +606,7 @@ class _MovementCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: movement.color.withOpacity(0.13),
+                color: movement.color.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(movement.icon, color: movement.color),

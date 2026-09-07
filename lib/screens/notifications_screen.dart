@@ -61,7 +61,7 @@ class NotificationsScreen extends StatelessWidget {
                         width: 48,
                         height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(
@@ -246,7 +246,7 @@ class _AlertVisualStyle {
           iconColor: AppColors.danger,
           iconBackgroundColor: const Color(0xFFFFECEC),
           backgroundColor: AppColors.darkCard,
-          borderColor: AppColors.danger.withOpacity(0.45),
+          borderColor: AppColors.danger.withValues(alpha: 0.45),
         );
       case PlanoraAlertType.today:
         return _AlertVisualStyle(
@@ -254,29 +254,29 @@ class _AlertVisualStyle {
           iconColor: AppColors.warning,
           iconBackgroundColor: const Color(0xFFFFF6E5),
           backgroundColor: AppColors.darkCard,
-          borderColor: AppColors.warning.withOpacity(0.35),
+          borderColor: AppColors.warning.withValues(alpha: 0.35),
         );
       case PlanoraAlertType.upcoming:
-        return _AlertVisualStyle(
+        return const _AlertVisualStyle(
           icon: Icons.schedule_rounded,
           iconColor: AppColors.brandBlue,
-          iconBackgroundColor: const Color(0xFFEAF1FF),
+          iconBackgroundColor: Color(0xFFEAF1FF),
           backgroundColor: AppColors.darkCard,
           borderColor: AppColors.stroke,
         );
       case PlanoraAlertType.budget:
-        return _AlertVisualStyle(
+        return const _AlertVisualStyle(
           icon: Icons.account_balance_wallet_rounded,
-          iconColor: const Color(0xFF8B5CF6),
-          iconBackgroundColor: const Color(0xFFF2EDFF),
+          iconColor: Color(0xFF8B5CF6),
+          iconBackgroundColor: Color(0xFFF2EDFF),
           backgroundColor: AppColors.darkCard,
-          borderColor: const Color(0xFFD9CCFF),
+          borderColor: Color(0xFFD9CCFF),
         );
       case PlanoraAlertType.info:
-        return _AlertVisualStyle(
+        return const _AlertVisualStyle(
           icon: Icons.check_circle_rounded,
           iconColor: AppColors.brandGreen,
-          iconBackgroundColor: const Color(0xFFE8FFF6),
+          iconBackgroundColor: Color(0xFFE8FFF6),
           backgroundColor: AppColors.darkCard,
           borderColor: AppColors.stroke,
         );

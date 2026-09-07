@@ -15,7 +15,6 @@ import 'privacy_settings_screen.dart';
 import 'theme_preference_screen.dart';
 import 'language_preference_screen.dart';
 import 'notification_preferences_screen.dart';
-import 'monthly_timeline_screen.dart';
 import 'expenses_screen.dart';
 import 'extra_income_screen.dart';
 
@@ -851,7 +850,7 @@ class _AdvancedActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: color.withOpacity(0.08),
+      color: color.withValues(alpha: 0.08),
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),

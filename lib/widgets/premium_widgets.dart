@@ -32,7 +32,7 @@ class PremiumCard extends StatelessWidget {
             Border.all(color: borderColor ?? AppThemeColors.stroke(context)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.darkNavy.withOpacity(0.06),
+            color: AppColors.darkNavy.withValues(alpha: 0.06),
             blurRadius: 26,
             offset: const Offset(0, 16),
           ),
@@ -71,7 +71,7 @@ class GradientButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brandGreen.withOpacity(0.28),
+            color: AppColors.brandGreen.withValues(alpha: 0.28),
             blurRadius: 22,
             offset: const Offset(0, 12),
           ),
@@ -212,7 +212,7 @@ class PlanoraLogo extends StatelessWidget {
         borderRadius: BorderRadius.circular(size * 0.28),
         boxShadow: [
           BoxShadow(
-            color: AppColors.brandBlue.withOpacity(0.18),
+            color: AppColors.brandBlue.withValues(alpha: 0.18),
             blurRadius: 24,
             offset: const Offset(0, 12),
           ),

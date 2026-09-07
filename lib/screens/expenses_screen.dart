@@ -4,7 +4,6 @@ import '../models/expense_item.dart';
 import 'receipt_scan_screen.dart';
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
-import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import '../widgets/planora_empty_state.dart';
@@ -131,17 +130,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(_expensesText(lang, 'receiptAdded'))),
     );
-  }
-
-  void _startEdit(ExpenseItem expense) {
-    setState(() {
-      _editingExpenseId = expense.id;
-      _titleController.text = expense.title;
-      _amountController.text = expense.amount.round().toString();
-      _dayController.text = expense.day.toString();
-      _selectedCategory = expense.category;
-      _showForm = true;
-    });
   }
 
   Future<void> _quickAddAmountToExpense(ExpenseItem expense) async {
@@ -276,7 +264,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.10),
+                          color: Colors.white.withValues(alpha: 0.10),
                           borderRadius: BorderRadius.circular(18),
                         ),
                         child: const Icon(Icons.shopping_bag_rounded,
@@ -289,7 +277,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                           children: [
                             Text(
                               _expensesText(lang, 'spentThisMonth'),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Color(0xFFC8D3FF),
                                 fontSize: 13,
                                 fontWeight: FontWeight.w700,
@@ -979,7 +967,7 @@ class _ExpenseCard extends StatelessWidget {
               width: 46,
               height: 46,
               decoration: BoxDecoration(
-                color: expense.color.withOpacity(0.13),
+                color: expense.color.withValues(alpha: 0.13),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Center(
