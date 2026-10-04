@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -204,70 +206,24 @@ class PlanoraLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final logo = Container(
+    final mark = Container(
       width: size,
       height: size,
       decoration: BoxDecoration(
-        gradient: AppGradients.brand,
+        color: AppColors.darkNavy,
         borderRadius: BorderRadius.circular(size * 0.28),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.brandBlue.withValues(alpha: 0.18),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
-          ),
-        ],
       ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Positioned(
-            left: size * 0.26,
-            bottom: size * 0.22,
-            child: _LogoBar(width: size * 0.12, height: size * 0.28),
-          ),
-          Positioned(
-            left: size * 0.45,
-            bottom: size * 0.22,
-            child: _LogoBar(width: size * 0.12, height: size * 0.42),
-          ),
-          Positioned(
-            left: size * 0.64,
-            bottom: size * 0.22,
-            child: _LogoBar(width: size * 0.12, height: size * 0.55),
-          ),
-          Positioned(
-            right: size * 0.16,
-            bottom: size * 0.15,
-            child: Container(
-              width: size * 0.22,
-              height: size * 0.22,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: Center(
-                child: Container(
-                  width: size * 0.1,
-                  height: size * 0.1,
-                  decoration: BoxDecoration(
-                    color: AppColors.brandGreen,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
+      child: const CustomPaint(
+        painter: _PlanoraMonthlyOrbitPainter(),
       ),
     );
 
-    if (!showText) return logo;
+    if (!showText) return mark;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        logo,
+        mark,
         const SizedBox(width: 12),
         Text(
           'Planora',
@@ -275,7 +231,7 @@ class PlanoraLogo extends StatelessWidget {
             color:
                 lightText ? Colors.white : AppThemeColors.textPrimary(context),
             fontSize: 26,
-            fontWeight: FontWeight.w900,
+            fontWeight: FontWeight.w800,
             letterSpacing: -0.6,
           ),
         ),
@@ -284,21 +240,72 @@ class PlanoraLogo extends StatelessWidget {
   }
 }
 
-class _LogoBar extends StatelessWidget {
-  const _LogoBar({required this.width, required this.height});
-
-  final double width;
-  final double height;
+class _PlanoraMonthlyOrbitPainter extends CustomPainter {
+  const _PlanoraMonthlyOrbitPainter();
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(999),
+  void paint(Canvas canvas, Size size) {
+    final diameter = size.shortestSide;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = diameter * 0.30;
+    final strokeWidth = diameter * 0.0273;
+    final ring = Rect.fromCircle(center: center, radius: radius);
+
+    canvas.drawCircle(
+      center,
+      radius,
+      Paint()
+        ..color = const Color(0xFFF7F8FC).withValues(alpha: 0.23)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth,
+    );
+
+    canvas.drawArc(
+      ring,
+      -math.pi / 2,
+      math.pi / 3,
+      false,
+      Paint()
+        ..color = AppColors.brandGreen
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.round,
+    );
+
+    const endpointAngle = -math.pi / 6;
+    final endpoint = Offset(
+      center.dx + radius * math.cos(endpointAngle),
+      center.dy + radius * math.sin(endpointAngle),
+    );
+    canvas.drawCircle(
+      endpoint,
+      diameter * 0.0205,
+      Paint()..color = AppColors.brandBlue,
+    );
+
+    final initial = TextPainter(
+      text: TextSpan(
+        text: 'P',
+        style: TextStyle(
+          color: const Color(0xFFF7F8FC),
+          fontFamily: 'SF Pro Display',
+          fontSize: diameter * 0.447,
+          fontWeight: FontWeight.w700,
+          height: 1,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    initial.paint(
+      canvas,
+      Offset(
+        center.dx - initial.width / 2,
+        center.dy - initial.height / 2 - diameter * 0.005,
       ),
     );
   }
+
+  @override
+  bool shouldRepaint(covariant _PlanoraMonthlyOrbitPainter oldDelegate) =>
+      false;
 }

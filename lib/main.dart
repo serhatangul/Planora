@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/app_shell.dart';
+import 'screens/planora_splash_screen.dart';
 import 'state/planora_controller.dart';
 import 'theme/app_theme.dart';
 
@@ -40,7 +40,7 @@ class _PlanoraAppState extends State<PlanoraApp> {
             darkTheme: AppTheme.dark,
             themeMode:
                 _controller.preferDarkMode ? ThemeMode.dark : ThemeMode.light,
-            home: const AppShell(),
+            home: const PlanoraSplashScreen(),
           ),
         );
       },
