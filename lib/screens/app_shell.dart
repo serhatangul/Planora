@@ -103,7 +103,7 @@ class _PlanoraBottomNav extends StatelessWidget {
         height: 70,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: AppThemeColors.card(context).withValues(alpha: 0.96),
+          color: AppThemeColors.card(context),
           borderRadius: BorderRadius.circular(28),
           border: Border.all(color: AppThemeColors.stroke(context)),
           boxShadow: [
