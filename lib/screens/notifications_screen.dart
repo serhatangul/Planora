@@ -141,11 +141,11 @@ String _smartAlertsText(String code, String key) {
     },
     'footerNote': {
       'tr':
-          'Bu ekran uygulama içi uyarı merkezidir. Gerçek telefon bildirimi sonraki fazda eklenecek.',
+          'Planora’nın akıllı uyarıları ödeme tarihlerini, kategori limitlerini ve bütçe durumunu takip etmene yardımcı olur.',
       'en':
-          'This screen is the in-app alert center. Real phone notifications will be added in a later phase.',
+          'Planora’s smart alerts help you keep track of payment dates, category limits, and your budget.',
       'ru':
-          'Этот экран — центр уведомлений внутри приложения. Реальные уведомления телефона будут добавлены позже.',
+          'Умные уведомления Planora помогают следить за датами платежей, лимитами категорий и бюджетом.',
     },
   };
 

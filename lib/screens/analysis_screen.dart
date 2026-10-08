@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../state/planora_controller.dart';
 import '../theme/app_theme.dart';
+import '../utils/date_utils_planora.dart';
 import '../utils/money_formatter.dart';
 import '../widgets/premium_widgets.dart';
 import '../widgets/planora_empty_state.dart';
 import 'add_payment_screen.dart';
 import 'expenses_screen.dart';
+import 'monthly_report_screen.dart';
 
 class AnalysisScreen extends StatelessWidget {
   const AnalysisScreen({super.key});
@@ -61,6 +63,32 @@ class AnalysisScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(_analysisText(lang, 'subtitle'),
                     style: Theme.of(context).textTheme.bodyMedium),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => controller.changeSelectedMonth(-1),
+                      icon: const Icon(Icons.chevron_left_rounded),
+                      tooltip: _analysisText(lang, 'previousMonth'),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: Text(
+                          PlanoraDateUtils.monthYearLabel(
+                            controller.selectedMonth,
+                            languageCode: lang,
+                          ),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => controller.changeSelectedMonth(1),
+                      icon: const Icon(Icons.chevron_right_rounded),
+                      tooltip: _analysisText(lang, 'nextMonth'),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 24),
                 PremiumCard(
                   padding: const EdgeInsets.fromLTRB(22, 24, 22, 22),
@@ -178,8 +206,40 @@ class AnalysisScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.shopping_bag_outlined,
+                            color: AppColors.danger,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _analysisText(lang, 'monthlyExpenses'),
+                            ),
+                          ),
+                          Text(
+                            MoneyFormatter.format(controller.expensesTotal),
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                        ],
+                      ),
                     ],
                   ),
+                ),
+                const SizedBox(height: 24),
+                OutlinedButton.icon(
+                  onPressed: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const MonthlyReportScreen(),
+                    ),
+                  ),
+                  icon: const Icon(Icons.summarize_outlined),
+                  label: Text(_analysisText(lang, 'monthlyReport')),
                 ),
                 const SizedBox(height: 24),
                 SectionHeader(title: _analysisText(lang, 'categories')),
@@ -405,6 +465,26 @@ String _analysisText(String code, String key) {
       'tr': 'Planlanan',
       'en': 'Planned',
       'ru': 'План',
+    },
+    'previousMonth': {
+      'tr': 'Önceki ay',
+      'en': 'Previous month',
+      'ru': 'Предыдущий месяц',
+    },
+    'nextMonth': {
+      'tr': 'Sonraki ay',
+      'en': 'Next month',
+      'ru': 'Следующий месяц',
+    },
+    'monthlyExpenses': {
+      'tr': 'Bu ayki harcamalar',
+      'en': 'Monthly expenses',
+      'ru': 'Расходы за месяц',
+    },
+    'monthlyReport': {
+      'tr': 'Aylık raporu görüntüle',
+      'en': 'View monthly report',
+      'ru': 'Открыть месячный отчёт',
     },
     'categories': {
       'tr': 'Kategoriler',

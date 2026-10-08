@@ -115,31 +115,6 @@ class LanguagePreferenceScreen extends StatelessWidget {
                   selectedCode: controller.appLanguageCode,
                   onTap: () => controller.updateLanguagePreference('ru'),
                 ),
-                _LanguageOption(
-                  title: _text(currentLang, 'vietnamese'),
-                  subtitle: _text(currentLang, 'vietnameseSubtitle'),
-                  flag: '🇻🇳',
-                  code: 'vi',
-                  selectedCode: controller.appLanguageCode,
-                  onTap: () => controller.updateLanguagePreference('vi'),
-                ),
-                const SizedBox(height: 18),
-                PremiumCard(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Icon(Icons.info_rounded,
-                          color: AppColors.brandBlue),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          _text(currentLang, 'note'),
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             );
           },
@@ -154,8 +129,6 @@ class LanguagePreferenceScreen extends StatelessWidget {
         return 'Selected language: English';
       case 'ru':
         return 'Выбранный язык: Русский';
-      case 'vi':
-        return 'Ngôn ngữ đã chọn: Tiếng Việt';
       case 'tr':
       default:
         return 'Seçili dil: Türkçe';
@@ -163,28 +136,23 @@ class LanguagePreferenceScreen extends StatelessWidget {
   }
 
   static String _text(String code, String key) {
-    final language = {'en', 'ru', 'vi'}.contains(code) ? code : 'tr';
+    final language = code == 'en' || code == 'ru' ? code : 'tr';
 
     const values = {
       'title': {
         'tr': 'Dil',
         'en': 'Language',
         'ru': 'Язык',
-        'vi': 'Ngôn ngữ',
       },
       'subtitle': {
-        'tr':
-            'Planora için kullanılacak dili seç. Bu adım çeviri altyapısının güvenli temelidir.',
-        'en':
-            'Choose the language used in Planora. This is the safe foundation for localization.',
-        'ru': 'Выберите язык Planora. Это безопасная основа для локализации.',
-        'vi': 'Chọn ngôn ngữ sử dụng trong Planora.',
+        'tr': 'Planora’da kullanmak istediğin dili seç.',
+        'en': 'Choose the language you want to use in Planora.',
+        'ru': 'Выберите язык, на котором вы хотите пользоваться Planora.',
       },
       'preferenceTitle': {
         'tr': 'Dil tercihi',
         'en': 'Language preference',
         'ru': 'Настройка языка',
-        'vi': 'Tùy chọn ngôn ngữ',
       },
       'turkish': {
         'tr': 'Türkçe',
@@ -215,26 +183,6 @@ class LanguagePreferenceScreen extends StatelessWidget {
         'tr': 'Rusça arayüz tercihi',
         'en': 'Russian interface preference',
         'ru': 'Предпочтение русского интерфейса',
-      },
-      'vietnamese': {
-        'tr': 'Tiếng Việt',
-        'en': 'Vietnamese',
-        'ru': 'Вьетнамский',
-        'vi': 'Tiếng Việt',
-      },
-      'vietnameseSubtitle': {
-        'tr': 'Vietnamca arayüz tercihi',
-        'en': 'Vietnamese interface preference',
-        'ru': 'Предпочтение вьетнамского интерфейса',
-        'vi': 'Giao diện tiếng Việt',
-      },
-      'note': {
-        'tr':
-            'Bu adım sadece Dil ekranındaki metinleri seçili dile göre değiştirir. Diğer ekranlar sonraki küçük patchlerde çevrilecek.',
-        'en':
-            'This step only changes the text on the Language screen. Other screens will be localized in later small patches.',
-        'ru':
-            'Этот шаг меняет только текст на экране языка. Другие экраны будут переведены небольшими патчами позже.',
       },
     };
 

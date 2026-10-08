@@ -73,6 +73,10 @@ class PlanoraController extends ChangeNotifier {
       'planora_payment_statuses_v1';
   static const MethodChannel _storageChannel = MethodChannel('planora/storage');
 
+  static String _supportedLanguageCode(String? code) {
+    return code == 'en' || code == 'ru' || code == 'tr' ? code! : 'tr';
+  }
+
   double monthlyIncome = 45000;
   double savingTarget = 10000;
   double currentSaving = 5000;
@@ -102,6 +106,7 @@ class PlanoraController extends ChangeNotifier {
   bool hasCompletedOnboarding = false;
 
   DateTime selectedMonth = PlanoraDateUtils.monthOnly(DateTime.now());
+  DateTime? _lastObservedCurrentMonth;
 
   bool _isLoaded = false;
   bool get isLoaded => _isLoaded;
@@ -115,6 +120,7 @@ class PlanoraController extends ChangeNotifier {
 
   Future<void> load() async {
     await _loadSettings();
+    await ensureCurrentMonthSelected(notify: false);
     MoneyFormatter.setCurrencySymbol(currencySymbol);
     MoneyFormatter.setHideAmounts(hideAmounts);
     await _loadCategories();
@@ -130,6 +136,17 @@ class PlanoraController extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> ensureCurrentMonthSelected({bool notify = true}) async {
+    final currentMonth = PlanoraDateUtils.monthOnly(DateTime.now());
+    final lastObserved = _lastObservedCurrentMonth;
+    if (lastObserved != null && !lastObserved.isBefore(currentMonth)) return;
+
+    selectedMonth = currentMonth;
+    _lastObservedCurrentMonth = currentMonth;
+    await _saveSettings();
+    if (notify) notifyListeners();
+  }
+
   String monthKey([DateTime? month]) {
     final target = month ?? selectedMonth;
     return '${target.year}-${target.month.toString().padLeft(2, '0')}';
@@ -140,7 +157,8 @@ class PlanoraController extends ChangeNotifier {
     DateTime? month,
   }) {
     final key = monthKey(month);
-    return _paymentStatusByMonth[payment.id]?[key] ?? payment.status;
+    return _paymentStatusByMonth[payment.id]?[key] ??
+        (payment.isMonthly ? PaymentStatus.waiting : payment.status);
   }
 
   bool isPaymentPaid(PaymentItem payment, {DateTime? month}) {
@@ -191,7 +209,9 @@ class PlanoraController extends ChangeNotifier {
 
       hideAmounts = json['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = json['preferDarkMode'] as bool? ?? preferDarkMode;
-      appLanguageCode = json['appLanguageCode'] as String? ?? appLanguageCode;
+      appLanguageCode = _supportedLanguageCode(
+        json['appLanguageCode'] as String? ?? appLanguageCode,
+      );
       notifyUpcomingPayments =
           json['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
       notifyLatePayments =
@@ -210,6 +230,13 @@ class PlanoraController extends ChangeNotifier {
 
       if (selectedYear != null && selectedMonthNumber != null) {
         selectedMonth = DateTime(selectedYear, selectedMonthNumber);
+      }
+
+      final lastObservedMonthRaw = json['lastObservedCurrentMonth'] as String?;
+      if (lastObservedMonthRaw != null && lastObservedMonthRaw.isNotEmpty) {
+        _lastObservedCurrentMonth = PlanoraDateUtils.monthOnly(
+          DateTime.tryParse(lastObservedMonthRaw) ?? DateTime.now(),
+        );
       }
     } catch (_) {
       await _saveSettings();
@@ -790,7 +817,7 @@ class PlanoraController extends ChangeNotifier {
   }
 
   Future<void> updateLanguagePreference(String code) async {
-    appLanguageCode = code;
+    appLanguageCode = _supportedLanguageCode(code);
 
     await _saveSettings();
     notifyListeners();
@@ -1996,6 +2023,8 @@ class PlanoraController extends ChangeNotifier {
         'notifySalaryDay': notifySalaryDay,
         'hasCompletedOnboarding': hasCompletedOnboarding,
         'selectedMonth': selectedMonth.toIso8601String(),
+        'lastObservedCurrentMonth':
+            _lastObservedCurrentMonth?.toIso8601String(),
       },
       'payments': _payments.map((payment) => payment.toJson()).toList(),
       'paymentStatuses': _paymentStatusByMonth.map(
@@ -2047,8 +2076,9 @@ class PlanoraController extends ChangeNotifier {
 
       hideAmounts = settings['hideAmounts'] as bool? ?? hideAmounts;
       preferDarkMode = settings['preferDarkMode'] as bool? ?? preferDarkMode;
-      appLanguageCode =
-          settings['appLanguageCode'] as String? ?? appLanguageCode;
+      appLanguageCode = _supportedLanguageCode(
+        settings['appLanguageCode'] as String? ?? appLanguageCode,
+      );
       notifyUpcomingPayments =
           settings['notifyUpcomingPayments'] as bool? ?? notifyUpcomingPayments;
       notifyLatePayments =

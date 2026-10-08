@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'screens/planora_splash_screen.dart';
@@ -16,14 +18,29 @@ class PlanoraApp extends StatefulWidget {
   State<PlanoraApp> createState() => _PlanoraAppState();
 }
 
-class _PlanoraAppState extends State<PlanoraApp> {
+class _PlanoraAppState extends State<PlanoraApp> with WidgetsBindingObserver {
   late final PlanoraController _controller;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _controller = PlanoraController();
     _controller.load();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _controller.isLoaded) {
+      unawaited(_controller.ensureCurrentMonthSelected());
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
