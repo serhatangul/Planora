@@ -15,6 +15,7 @@ import 'privacy_settings_screen.dart';
 import 'theme_preference_screen.dart';
 import 'language_preference_screen.dart';
 import 'notification_preferences_screen.dart';
+import 'notifications_screen.dart';
 import 'expenses_screen.dart';
 import 'extra_income_screen.dart';
 
@@ -82,6 +83,17 @@ class ProfileScreen extends StatelessWidget {
         builder: (_) => PlanoraScope(
           controller: PlanoraScope.of(context),
           child: const NotificationPreferencesScreen(),
+        ),
+      ),
+    );
+  }
+
+  void _openSmartAlerts(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PlanoraScope(
+          controller: PlanoraScope.of(context),
+          child: const NotificationsScreen(),
         ),
       ),
     );
@@ -307,6 +319,7 @@ class ProfileScreen extends StatelessWidget {
             title: _profileText(lang, 'smartAlerts'),
             subtitle: _profileText(lang, 'smartAlertsActive'),
             icon: Icons.notifications_active_rounded,
+            onTap: () => _openSmartAlerts(context),
           ),
           _ProfileItem(
             title: _profileText(lang, 'extraIncome'),
