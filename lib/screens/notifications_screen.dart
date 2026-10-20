@@ -110,7 +110,10 @@ class NotificationsScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           _smartAlertsText(lang, 'footerNote'),
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: const Color(0xFFD1D8E8),
+                                  ),
                         ),
                       ),
                     ],
@@ -197,12 +200,18 @@ class _AlertCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(alert.title,
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  alert.title,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: Colors.white,
+                      ),
+                ),
                 const SizedBox(height: 4),
                 Text(
                   alert.message,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFFD1D8E8),
+                      ),
                 ),
               ],
             ),
